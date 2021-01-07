@@ -1,14 +1,6 @@
 <template>
-    <head>
-        <link
-            rel="icon"
-            href="../assets/images/logo.png"
-            sizes="16x16 32x32"
-            type="image/png"
-        />
-    </head>
     <div class="home">
-        <img class="logo" alt="Z-S Logo" src="../assets/images/logo.png" />
+        <img alt="Z-S Logo" src="../assets/logo.png" />
         <HelloWorld msg="Z-S Overview Customizer" />
     </div>
 </template>
@@ -26,7 +18,7 @@ export default defineComponent({
 </script>
 
 <style scoped lang="scss">
-.logo {
+img {
     height: 256px;
     width: 256px;
 }
