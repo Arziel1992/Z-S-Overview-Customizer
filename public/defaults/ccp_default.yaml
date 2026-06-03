@@ -1,0 +1,170 @@
+alwaysShowBroadcasts: true
+applyToAllTabs: false
+
+columnOrder:
+  - icon
+  - distance
+  - name
+  - type
+  - velocity
+  - radialVelocity
+  - transversalVelocity
+
+overviewColumns:
+  - icon
+  - distance
+  - name
+  - type
+  - velocity
+
+backgroundOrder:
+  - warTarget
+  - outlaw
+  - criminal
+  - suspect
+  - fleetMember
+  - corpMember
+  - allianceMember
+  - neutral
+
+backgroundStates:
+  warTarget:
+    active: true
+    color: 0xffff0000
+    blink: true
+  outlaw:
+    active: true
+    color: 0xfffa4b00
+    blink: false
+  criminal:
+    active: true
+    color: 0xffb30000
+    blink: true
+  suspect:
+    active: true
+    color: 0xffe0a300
+    blink: false
+  fleetMember:
+    active: false
+    color: 0xffbf00ff
+    blink: false
+  corpMember:
+    active: false
+    color: 0xff00ff00
+    blink: false
+  allianceMember:
+    active: false
+    color: 0xff33ccff
+    blink: false
+  neutral:
+    active: false
+    color: 0xffcccccc
+    blink: false
+
+flagOrder:
+  - warTarget
+  - outlaw
+  - criminal
+  - suspect
+  - fleetMember
+  - corpMember
+  - allianceMember
+  - neutral
+
+flagStates:
+  warTarget:
+    active: true
+    color: 0xffff0000
+  outlaw:
+    active: true
+    color: 0xfffa4b00
+  criminal:
+    active: true
+    color: 0xffb30000
+  suspect:
+    active: true
+    color: 0xffe0a300
+  fleetMember:
+    active: true
+    color: 0xffbf00ff
+  corpMember:
+    active: true
+    color: 0xff00ff00
+  allianceMember:
+    active: true
+    color: 0xff33ccff
+  neutral:
+    active: true
+    color: 0xffffffff
+
+tabSetup:
+  - tabId: 0
+    tabName: "General"
+    overviewPreset:
+      name: "T1_Overview_Preset"
+      groups:
+        - 25
+        - 26
+        - 27
+        - 28
+        - 419
+    bracketPreset:
+      name: "T1_Brackets_Preset"
+      groups:
+        - 25
+        - 26
+        - 27
+        - 28
+        - 419
+  - tabId: 1
+    tabName: "Mining"
+    overviewPreset:
+      name: "T2_Overview_Preset"
+      groups:
+        - 9
+    bracketPreset:
+      name: "T2_Brackets_Preset"
+      groups:
+        - 9
+  - tabId: 2
+    tabName: "WarpTo"
+    overviewPreset:
+      name: "T3_Overview_Preset"
+      groups:
+        - 10
+    bracketPreset:
+      name: "T3_Brackets_Preset"
+      groups:
+        - 10
+
+shipLabelOrder:
+  - type
+  - name
+  - alliance
+  - corp
+
+shipLabels:
+  type:
+    state: true
+    prefix: "["
+    suffix: "]"
+    bold: false
+    italic: false
+  name:
+    state: true
+    prefix: ""
+    suffix: ""
+    bold: true
+    italic: false
+  corp:
+    state: true
+    prefix: "<"
+    suffix: ">"
+    bold: false
+    italic: true
+  alliance:
+    state: false
+    prefix: "{"
+    suffix: "}"
+    bold: false
+    italic: false
