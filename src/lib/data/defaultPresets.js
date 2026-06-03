@@ -2,8 +2,138 @@ export const defaultPresets = {
 	ccp_default: {
 		globalSettings: {
 			alwaysShowBroadcasts: true,
-			columnOrder: ["icon", "distance", "name", "type", "velocity"],
+			applyToAllTabs: false,
+			showBracketsInSpace: true,
+
+			// Core 1:1 Standing Priorities
+			backgroundOrder: [
+				"warTarget",
+				"outlaw",
+				"criminal",
+				"suspect",
+				"fleetMember",
+				"corpMember",
+				"allianceMember",
+				"neutral",
+			],
+			backgroundStates: {
+				warTarget: {
+					active: true,
+					color: "#ff3333",
+					blink: true,
+					name: "War Target",
+				},
+				outlaw: {
+					active: true,
+					color: "#ff6600",
+					blink: false,
+					name: "Outlaw",
+				},
+				criminal: {
+					active: true,
+					color: "#b30000",
+					blink: true,
+					name: "Criminal",
+				},
+				suspect: {
+					active: true,
+					color: "#e0a300",
+					blink: false,
+					name: "Suspect",
+				},
+				fleetMember: {
+					active: true,
+					color: "#bf00ff",
+					blink: false,
+					name: "Fleet Member",
+				},
+				corpMember: {
+					active: true,
+					color: "#00ff00",
+					blink: false,
+					name: "Corp Member",
+				},
+				allianceMember: {
+					active: true,
+					color: "#33ccff",
+					blink: false,
+					name: "Alliance Member",
+				},
+				neutral: {
+					active: false,
+					color: "#cccccc",
+					blink: false,
+					name: "Neutral",
+				},
+			},
+
+			flagOrder: [
+				"warTarget",
+				"outlaw",
+				"criminal",
+				"suspect",
+				"fleetMember",
+				"corpMember",
+				"allianceMember",
+				"neutral",
+			],
+			flagStates: {
+				warTarget: { active: true, color: "#ff3333", name: "War Target" },
+				outlaw: { active: true, color: "#ff6600", name: "Outlaw" },
+				criminal: { active: true, color: "#b30000", name: "Criminal" },
+				suspect: { active: true, color: "#e0a300", name: "Suspect" },
+				fleetMember: { active: true, color: "#bf00ff", name: "Fleet Member" },
+				corpMember: { active: true, color: "#00ff00", name: "Corp Member" },
+				allianceMember: {
+					active: true,
+					color: "#33ccff",
+					name: "Alliance Member",
+				},
+				neutral: { active: true, color: "#ffffff", name: "Neutral" },
+			},
+
+			columnOrder: [
+				"icon",
+				"distance",
+				"name",
+				"type",
+				"velocity",
+				"radialVelocity",
+				"transversalVelocity",
+			],
 			overviewColumns: ["icon", "distance", "name", "type", "velocity"],
+
+			shipLabelOrder: ["type", "name", "alliance", "corp"],
+			shipLabels: {
+				type: {
+					active: true,
+					prefix: "[",
+					suffix: "]",
+					bold: false,
+					italic: false,
+				},
+				name: {
+					active: true,
+					prefix: "",
+					suffix: "",
+					bold: true,
+					italic: false,
+				},
+				corp: {
+					active: true,
+					prefix: "<",
+					suffix: ">",
+					bold: false,
+					italic: true,
+				},
+				alliance: {
+					active: false,
+					prefix: "{",
+					suffix: "}",
+					bold: false,
+					italic: false,
+				},
+			},
 		},
 		tabs: [
 			{
@@ -29,12 +159,102 @@ export const defaultPresets = {
 	zs_core: {
 		globalSettings: {
 			alwaysShowBroadcasts: true,
+			applyToAllTabs: true,
+			showBracketsInSpace: true,
+
+			backgroundOrder: [
+				"warTarget",
+				"outlaw",
+				"criminal",
+				"suspect",
+				"fleetMember",
+				"corpMember",
+				"allianceMember",
+				"neutral",
+			],
+			backgroundStates: {
+				warTarget: {
+					active: true,
+					color: "#ff3333",
+					blink: true,
+					name: "War Target",
+				},
+				outlaw: {
+					active: true,
+					color: "#ff6600",
+					blink: false,
+					name: "Outlaw",
+				},
+				criminal: {
+					active: true,
+					color: "#b30000",
+					blink: true,
+					name: "Criminal",
+				},
+				suspect: {
+					active: true,
+					color: "#e0a300",
+					blink: false,
+					name: "Suspect",
+				},
+				fleetMember: {
+					active: true,
+					color: "#bf00ff",
+					blink: false,
+					name: "Fleet Member",
+				},
+				corpMember: {
+					active: true,
+					color: "#00ff00",
+					blink: false,
+					name: "Corp Member",
+				},
+				allianceMember: {
+					active: true,
+					color: "#33ccff",
+					blink: false,
+					name: "Alliance Member",
+				},
+				neutral: {
+					active: false,
+					color: "#cccccc",
+					blink: false,
+					name: "Neutral",
+				},
+			},
+
+			flagOrder: [
+				"warTarget",
+				"outlaw",
+				"criminal",
+				"suspect",
+				"fleetMember",
+				"corpMember",
+				"allianceMember",
+				"neutral",
+			],
+			flagStates: {
+				warTarget: { active: true, color: "#ff3333", name: "War Target" },
+				outlaw: { active: true, color: "#ff6600", name: "Outlaw" },
+				criminal: { active: true, color: "#b30000", name: "Criminal" },
+				suspect: { active: true, color: "#e0a300", name: "Suspect" },
+				fleetMember: { active: true, color: "#bf00ff", name: "Fleet Member" },
+				corpMember: { active: true, color: "#00ff00", name: "Corp Member" },
+				allianceMember: {
+					active: true,
+					color: "#33ccff",
+					name: "Alliance Member",
+				},
+				neutral: { active: true, color: "#ffffff", name: "Neutral" },
+			},
+
 			columnOrder: [
 				"icon",
 				"distance",
 				"name",
 				"type",
 				"velocity",
+				"radialVelocity",
 				"transversalVelocity",
 			],
 			overviewColumns: [
@@ -45,6 +265,38 @@ export const defaultPresets = {
 				"velocity",
 				"transversalVelocity",
 			],
+
+			shipLabelOrder: ["type", "name", "alliance", "corp"],
+			shipLabels: {
+				type: {
+					active: true,
+					prefix: "[",
+					suffix: "]",
+					bold: false,
+					italic: false,
+				},
+				name: {
+					active: true,
+					prefix: "",
+					suffix: "",
+					bold: true,
+					italic: false,
+				},
+				corp: {
+					active: true,
+					prefix: "<",
+					suffix: ">",
+					bold: false,
+					italic: true,
+				},
+				alliance: {
+					active: false,
+					prefix: "{",
+					suffix: "}",
+					bold: false,
+					italic: false,
+				},
+			},
 		},
 		tabs: [
 			{
