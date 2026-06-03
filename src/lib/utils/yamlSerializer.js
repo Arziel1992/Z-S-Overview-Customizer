@@ -1,5 +1,5 @@
 /**
- * Advanced 1:1 EVE Online YAML Parser & Serializer
+ * Advanced EVE Online 1:1 Client YAML Parser & Serializer
  * Built to recursively resolve nested lists of tuples, string formatting,
  * and standard key-value maps without standard library dependency bloat.
  */
@@ -27,10 +27,8 @@ export function parseCompliantYaml(yamlText) {
 		const trimmed = line.trim();
 		if (!trimmed || line.startsWith("#") || line.startsWith("---")) continue;
 
-		// Calculate current line indentation level
 		const indent = line.search(/\S/);
 
-		// Resolve structure nesting depth based on indent
 		while (
 			indentStack.length > 0 &&
 			indentStack[indentStack.length - 1].indent >= indent
@@ -42,7 +40,6 @@ export function parseCompliantYaml(yamlText) {
 				? indentStack[indentStack.length - 1].container
 				: root;
 
-		// Check if line represents a list item
 		if (trimmed.startsWith("-")) {
 			const listContent = trimmed.substring(1).trim();
 
@@ -51,7 +48,6 @@ export function parseCompliantYaml(yamlText) {
 			}
 
 			if (listContent.includes(":")) {
-				// List item is a key-value property
 				const parts = listContent.split(":");
 				const k = stripQuotes(parts[0]);
 				const v = stripQuotes(parts.slice(1).join(":"));
@@ -59,16 +55,13 @@ export function parseCompliantYaml(yamlText) {
 				parent[lastKey].push(obj);
 				indentStack.push({ indent, container: obj });
 			} else if (listContent !== "") {
-				// List item is a flat value
 				parent[lastKey].push(parseValue(listContent));
 			} else {
-				// List item is a nested block array
 				const newArr = [];
 				parent[lastKey].push(newArr);
 				indentStack.push({ indent, container: newArr });
 			}
 		} else if (trimmed.includes(":")) {
-			// Standard key-value assignment
 			const parts = trimmed.split(":");
 			const k = stripQuotes(parts[0]);
 			const v = stripQuotes(parts.slice(1).join(":"));
@@ -102,7 +95,6 @@ function parseValue(val) {
  */
 function normalizeEveTupleLayout(obj) {
 	if (Array.isArray(obj)) {
-		// If array represents a list of tuples, convert to object
 		const isTupleList = obj.every(
 			(item) =>
 				Array.isArray(item) && item.length === 2 && typeof item[0] === "string",
@@ -222,7 +214,7 @@ export function buildCompliantYaml(globalSettings, tabs) {
 	yaml.push("");
 
 	yaml.push("shipLabels:");
-	Object.entries(globalSettings.shipLabels).forEach(([key, value]) => {
+	Object.entries(globalSettings.labelConfigs).forEach(([key, value]) => {
 		yaml.push(`  - - ${key}`);
 		yaml.push("    - - - state");
 		yaml.push(`        - ${value.active ? 1 : 0}`);
@@ -239,7 +231,6 @@ export function buildCompliantYaml(globalSettings, tabs) {
 	return yaml.join("\n");
 }
 
-// Direct state to ID mappings
 const REVERSE_STATE_MAP = {
 	suspect: 9,
 	criminal: 10,

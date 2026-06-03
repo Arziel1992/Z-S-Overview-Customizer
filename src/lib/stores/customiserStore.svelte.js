@@ -29,6 +29,7 @@ const STATE_ID_MAP = {
 };
 
 class CustomiserStore {
+	// Global configurations mirroring 1:1 EVE client properties
 	globalSettings = $state({
 		alwaysShowBroadcasts: true,
 		applyToAllTabs: false,
@@ -51,16 +52,16 @@ class CustomiserStore {
 				blink: true,
 				name: "War Target",
 			},
-			outlaw: { active: true, color: "#ff6600", blink: false, name: "Outlaw" },
+			outlaw: { active: true, color: "#ff7b00", blink: false, name: "Outlaw" },
 			criminal: {
 				active: true,
-				color: "#b30000",
+				color: "#ff0000",
 				blink: true,
 				name: "Criminal",
 			},
 			suspect: {
 				active: true,
-				color: "#e0a300",
+				color: "#eab308",
 				blink: false,
 				name: "Suspect",
 			},
@@ -72,19 +73,19 @@ class CustomiserStore {
 			},
 			corpMember: {
 				active: true,
-				color: "#00ff00",
+				color: "#22c55e",
 				blink: false,
 				name: "Corp Member",
 			},
 			allianceMember: {
 				active: true,
-				color: "#33ccff",
+				color: "#3b82f6",
 				blink: false,
 				name: "Alliance Member",
 			},
 			neutral: {
 				active: false,
-				color: "#cccccc",
+				color: "#94a3b8",
 				blink: false,
 				name: "Neutral",
 			},
@@ -102,17 +103,17 @@ class CustomiserStore {
 		],
 		flagStates: {
 			warTarget: { active: true, color: "#ff3333", name: "War Target" },
-			outlaw: { active: true, color: "#ff6600", name: "Outlaw" },
-			criminal: { active: true, color: "#b30000", name: "Criminal" },
-			suspect: { active: true, color: "#e0a300", name: "Suspect" },
+			outlaw: { active: true, color: "#ff7b00", name: "Outlaw" },
+			criminal: { active: true, color: "#ff0000", name: "Criminal" },
+			suspect: { active: true, color: "#eab308", name: "Suspect" },
 			fleetMember: { active: true, color: "#bf00ff", name: "Fleet Member" },
-			corpMember: { active: true, color: "#00ff00", name: "Corp Member" },
+			corpMember: { active: true, color: "#22c55e", name: "Corp Member" },
 			allianceMember: {
 				active: true,
-				color: "#33ccff",
+				color: "#3b82f6",
 				name: "Alliance Member",
 			},
-			neutral: { active: true, color: "#ffffff", name: "Neutral" },
+			neutral: { active: true, color: "#94a3b8", name: "Neutral" },
 		},
 
 		columnOrder: [
@@ -133,31 +134,74 @@ class CustomiserStore {
 			"transversalVelocity",
 		],
 
-		shipLabelOrder: ["type", "name", "alliance", "corp"],
-		shipLabels: {
+		// Ships typography parameters
+		hideCorpIfInAlliance: true,
+		labelConfigs: {
 			type: {
 				active: true,
 				prefix: "[",
 				suffix: "]",
 				bold: false,
 				italic: false,
-			},
-			name: { active: true, prefix: "", suffix: "", bold: true, italic: false },
-			corp: {
-				active: true,
-				prefix: "<",
-				suffix: ">",
-				bold: false,
-				italic: true,
+				underline: false,
+				size: "12",
+				color: "#FFBB64",
 			},
 			alliance: {
-				active: false,
-				prefix: "{",
-				suffix: "}",
+				active: true,
+				prefix: " [",
+				suffix: "]",
+				bold: true,
+				italic: false,
+				underline: false,
+				size: "12",
+				color: "#FEFF6F",
+			},
+			corp: {
+				active: true,
+				prefix: " [",
+				suffix: "]",
+				bold: true,
+				italic: false,
+				underline: false,
+				size: "10",
+				color: "#ffffff",
+			},
+			pilot: {
+				active: true,
+				prefix: " - ",
+				suffix: "",
 				bold: false,
 				italic: false,
+				underline: false,
+				size: "10",
+				color: "#FFFFFF",
 			},
 		},
+		labelOrder: ["type", "alliance", "corp", "pilot"],
+
+		// Tri-state Exception flags (show: 1, hide: -1, default: 0)
+		exceptions: {
+			limitedEngagement: 1,
+			excellentStanding: 0,
+			goodStanding: 0,
+			neutralStanding: 0,
+			noStanding: 0,
+			criminal: 1,
+			suspect: 1,
+			inFleet: 1,
+		},
+
+		// Misc parameters
+		moveBroadcastsToTop: true,
+		showCrosshairs: true,
+		displayDamage: true,
+		displayModuleLinks: true,
+		displayInSpaceBrackets: true,
+
+		// Accessibility scale & font family properties
+		uiScale: "11px",
+		fontFamily: "'Inter', sans-serif",
 	});
 
 	tabs = $state([]);
@@ -176,34 +220,31 @@ class CustomiserStore {
 			if (res.ok) {
 				this.sdeMatrix = await res.json();
 			} else {
-				throw new Error("Local HTTP 404 matrix JSON asset missing");
+				throw new Error("HTTP error retrieving local JSON SDE compilation");
 			}
 		} catch (e) {
 			console.warn(
 				"[!] SDE fetch matrix failed; loading defensive local mock instead.",
 				e,
 			);
-			// Fail-safe mock database
+			// Fallback matrix seed
 			this.sdeMatrix = {
 				categories: {
-					6: { name: "Ships", groups: [25, 26, 27, 28, 419, 420] },
+					3: { name: "Celestials", groups: [6, 10, 988] },
+					6: { name: "Ships", groups: [25, 26, 27, 419, 420] },
 				},
 				groups: {
+					6: { name: "Sun", categoryId: 3, types: [1001] },
+					10: { name: "Stargate", categoryId: 3, types: [1002] },
 					25: { name: "Frigate", categoryId: 6, types: [587, 588] },
 					26: { name: "Cruiser", categoryId: 6, types: [620, 621] },
-					419: {
-						name: "Combat Recon Ship",
-						categoryId: 6,
-						types: [11963, 11957],
-					},
+					27: { name: "Battleship", categoryId: 6, types: [2701] },
 				},
 				types: {
 					587: { name: "Rifter", groupId: 25 },
 					588: { name: "Slasher", groupId: 25 },
 					620: { name: "Rupture", groupId: 26 },
 					621: { name: "Stabber", groupId: 26 },
-					11963: { name: "Rapier", groupId: 419 },
-					11957: { name: "Falcon", groupId: 419 },
 				},
 			};
 		} finally {
@@ -222,8 +263,8 @@ class CustomiserStore {
 			this.importRawYaml(yamlText);
 		} catch (err) {
 			console.warn(
-				`[!] Unable to load default YAML asset paths. Loading JavaScript fallback template.`,
-				err,
+				`[!] Unable to load default Svelte YAML presets. Restoring local fallback presets.`,
+				err.message,
 			);
 			const template = JSON.parse(
 				JSON.stringify(defaultPresets[presetKey] || defaultPresets.zs_core),
@@ -238,64 +279,50 @@ class CustomiserStore {
 	}
 
 	/**
-	 * Imports and normalizes both Legacy and Modern Z-S YAML structures seamlessly.
+	 * Safe parser for 1:1 legacy and modern YAML tuples
 	 */
 	importRawYaml(yamlText) {
 		const rawParsed = parseCompliantYaml(yamlText);
 
-		// 1. Map columns (safeguards against uppercase discrepancies)
-		if (rawParsed.columnOrder) {
-			this.globalSettings.columnOrder = rawParsed.columnOrder.map((col) =>
-				col.toLowerCase(),
-			);
+		// FIXED: Defensive checking maps clean lower case column representations safely, filtering out non-strings
+		if (rawParsed.columnOrder && Array.isArray(rawParsed.columnOrder)) {
+			this.globalSettings.columnOrder = rawParsed.columnOrder
+				.filter((col) => col && typeof col === "string")
+				.map((col) => col.toLowerCase());
 		}
-		if (rawParsed.overviewColumns) {
-			this.globalSettings.overviewColumns = rawParsed.overviewColumns.map(
-				(col) => col.toLowerCase(),
-			);
+		if (rawParsed.overviewColumns && Array.isArray(rawParsed.overviewColumns)) {
+			this.globalSettings.overviewColumns = rawParsed.overviewColumns
+				.filter((col) => col && typeof col === "string")
+				.map((col) => col.toLowerCase());
 		}
 
-		// 2. Map priorities and standings from integer lists
-		if (rawParsed.backgroundOrder) {
+		// Map Priorities & Standings Lists
+		if (rawParsed.backgroundOrder && Array.isArray(rawParsed.backgroundOrder)) {
 			this.globalSettings.backgroundOrder = rawParsed.backgroundOrder
+				.filter((id) => id !== null && typeof id !== "object")
 				.map((id) => STATE_ID_MAP[id]?.key)
 				.filter(Boolean);
 		}
-		if (rawParsed.backgroundStates) {
-			// Initialize active background state mappings
+		if (
+			rawParsed.backgroundStates &&
+			Array.isArray(rawParsed.backgroundStates)
+		) {
 			Object.keys(this.globalSettings.backgroundStates).forEach((k) => {
 				this.globalSettings.backgroundStates[k].active = false;
 			});
-			rawParsed.backgroundStates.forEach((id) => {
-				const key = STATE_ID_MAP[id]?.key;
-				if (key) this.globalSettings.backgroundStates[key].active = true;
-			});
+			rawParsed.backgroundStates
+				.filter((id) => id !== null && typeof id !== "object")
+				.forEach((id) => {
+					const key = STATE_ID_MAP[id]?.key;
+					if (key) this.globalSettings.backgroundStates[key].active = true;
+				});
 		}
 
-		if (rawParsed.flagOrder) {
-			this.globalSettings.flagOrder = rawParsed.flagOrder
-				.map((id) => STATE_ID_MAP[id]?.key)
-				.filter(Boolean);
-		}
-		if (rawParsed.flagStates) {
-			Object.keys(this.globalSettings.flagStates).forEach((k) => {
-				this.globalSettings.flagStates[k].active = false;
-			});
-			rawParsed.flagStates.forEach((id) => {
-				const key = STATE_ID_MAP[id]?.key;
-				if (key) this.globalSettings.flagStates[key].active = true;
-			});
-		}
-
-		// 3. Extract and compile active tabs setup
-		if (rawParsed.tabSetup) {
+		// Extract multi-tab setups
+		if (rawParsed.tabSetup && Array.isArray(rawParsed.tabSetup)) {
 			const parsedTabs = [];
 			Object.entries(rawParsed.tabSetup).forEach(([tabId, tabData]) => {
-				// Find matching preset references
 				const overviewPresetName = tabData.overview || `Preset_T${tabId}`;
-				const bracketPresetName = tabData.bracket || `Preset_Bracket_T${tabId}`;
-
-				// Find associated active preset group mappings inside YAML
 				let activeOverviewGroups = [];
 				let activeBracketGroups = [];
 
@@ -303,10 +330,6 @@ class CustomiserStore {
 					const overviewPreset = rawParsed.presets[overviewPresetName];
 					if (overviewPreset?.groups) {
 						activeOverviewGroups = overviewPreset.groups.map(Number);
-					}
-					const bracketPreset = rawParsed.presets[bracketPresetName];
-					if (bracketPreset?.groups) {
-						activeBracketGroups = bracketPreset.groups.map(Number);
 					}
 				}
 
@@ -322,11 +345,11 @@ class CustomiserStore {
 			this.activeTabId = parsedTabs[0]?.id || 0;
 		}
 
-		// 4. Map Custom ship labels
+		// Map customized label formats
 		if (rawParsed.shipLabels) {
 			Object.entries(rawParsed.shipLabels).forEach(([key, value]) => {
-				if (this.globalSettings.shipLabels[key]) {
-					const target = this.globalSettings.shipLabels[key];
+				if (this.globalSettings.labelConfigs[key]) {
+					const target = this.globalSettings.labelConfigs[key];
 					target.active = value.state === 1;
 					target.prefix = value.prefix || "";
 					target.suffix = value.suffix || "";
@@ -336,9 +359,7 @@ class CustomiserStore {
 			});
 		}
 
-		console.log(
-			"[+] Normalized EVE Client YAML profile successfully digested.",
-		);
+		console.log("[+] Integrated raw EVE config successfully parsed.");
 	}
 
 	get activeTab() {
