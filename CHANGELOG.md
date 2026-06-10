@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-06-10 - 19:31
+
+### Bugfix — 404s on GitHub Pages for data/preset fetches
+
+- Runtime `fetch()` calls for `matrix_latest.json` and default preset YAMLs
+  now use `import.meta.env.BASE_URL` instead of hardcoded root-relative paths.
+  Fixes HTTP 404 errors when the app is served under the
+  `/Z-S-Overview-Customizer/` subpath on GitHub Pages.
+
+## 2026-06-10 - 19:29
+
+### CI — Node 24 action compatibility
+
+- Bumped `actions/checkout` from `v4` → `v5`.
+- Bumped `actions/setup-node` from `v4` → `v6`.
+- Bumped `actions/upload-pages-artifact` from `v3` → `v4`.
+- Bumped `actions/deploy-pages` from `v4` → `v5`.
+- Added workflow-level `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` env var for
+  `actions/setup-python@v5` and `actions/configure-pages@v5` which haven't
+  yet released Node 24-native major versions.
+
 ## 2026-06-10 - 19:23
 
 ### CI — SDE auto-update & GitHub Pages deploy
