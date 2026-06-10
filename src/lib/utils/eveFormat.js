@@ -77,20 +77,21 @@ export function cssToFloatTriplet(css) {
 
 /**
  * Convert EVE inline markup to safe HTML for previews.
- * Supports `<color=0xAARRGGBB>…</color>`, `<b>`, `<i>`, `<u>`.
+ * Supports `<color=0xAARRGGBB>`, `<fontsize=NN>`, `<b>`, `<i>`, `<u>` and closes.
  *
  * EVE markup is stateful: tags often stay *open* within a single label segment
- * (e.g. a pilot-name suffix like `]<color=0xFFFFFFFF><b> -`) and are reset
- * elsewhere. We therefore balance the output ourselves — converting every tag,
- * tracking open spans, and auto-closing any that were left open — instead of
- * requiring matched pairs (which left unclosed tags showing as literal text).
+ * (e.g. a ship-type prefix `<fontsize=12><color=0x..><b> <u>` closed in a later
+ * segment) and stray closing tags appear on their own. We therefore balance the
+ * output ourselves — converting every tag, tracking open spans, and auto-closing
+ * any left open — instead of requiring matched pairs (which left unhandled tags
+ * such as `<fontsize=..>` showing as literal text).
  */
 export function renderEveMarkup(raw) {
 	if (raw == null) return "";
 	const escaped = escapeHtml(String(raw));
 	let open = 0; // count of open inline elements to auto-close at the end
 	const out = escaped.replace(
-		/&lt;(\/?)(color(?:=0x[0-9a-fA-F]+)?|b|i|u)&gt;/g,
+		/&lt;(\/?)(color(?:=0x[0-9a-fA-F]+)?|fontsize(?:=\d+)?|b|i|u)&gt;/g,
 		(_, slash, tag) => {
 			if (slash) {
 				if (open > 0) {
@@ -101,8 +102,10 @@ export function renderEveMarkup(raw) {
 			}
 			open++;
 			if (tag.startsWith("color=")) {
-				const hex = tag.slice("color=".length);
-				return `<span style="color:${argbHexToCss(hex)}">`;
+				return `<span style="color:${argbHexToCss(tag.slice(6))}">`;
+			}
+			if (tag.startsWith("fontsize=")) {
+				return `<span style="font-size:${tag.slice(9)}px">`;
 			}
 			const style =
 				tag === "b"
@@ -120,8 +123,7 @@ export function renderEveMarkup(raw) {
 export function stripEveMarkup(raw) {
 	if (raw == null) return "";
 	return String(raw)
-		.replace(/<color=0x[0-9a-fA-F]+>/g, "")
-		.replace(/<\/color>/g, "")
+		.replace(/<\/?(?:color(?:=0x[0-9a-fA-F]+)?|fontsize(?:=\d+)?)>/g, "")
 		.replace(/<\/?[biu]>/g, "")
 		.trim();
 }

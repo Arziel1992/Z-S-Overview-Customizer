@@ -15,16 +15,17 @@ export default {
 					accent: "rgb(var(--accent) / <alpha-value>)",
 					accentHover: "rgb(var(--accent-hover) / <alpha-value>)",
 				},
-				// Fixed, game-accurate EVE overview chrome (dark in every theme)
+				// Fixed, game-accurate EVE overview chrome (dark in every theme, but a
+				// softened space-blue rather than pure black)
 				eve: {
-					bg: "#06080b",
-					panel: "#0a0d13",
-					panel2: "#111621",
-					header: "#0b0e14",
-					border: "#1b2230",
-					accent: "#00d2ff",
+					bg: "#0c1018",
+					panel: "#11161f",
+					panel2: "#171d28",
+					header: "#10141c",
+					border: "#283242",
+					accent: "#3aa0ff",
 					text: "#c8d4e3",
-					muted: "#7c8fa6",
+					muted: "#8295ac",
 				},
 			},
 			fontFamily: {

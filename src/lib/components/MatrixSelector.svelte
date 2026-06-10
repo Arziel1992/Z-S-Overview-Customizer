@@ -5,6 +5,8 @@
   let activeCategory = $state('6'); // Ships by default
 
   const preset = $derived(customiser.activePreset);
+  // Stable, keyed category list so the nav doesn't re-render while typing.
+  const categories = $derived(customiser.sdeMatrix ? Object.entries(customiser.sdeMatrix.categories) : []);
 
   const filteredGroups = $derived.by(() => {
     const m = customiser.sdeMatrix;
@@ -44,7 +46,7 @@
 
   {#if customiser.sdeMatrix}
     <div class="flex gap-1 border-b border-app-border mb-2 overflow-x-auto">
-      {#each Object.entries(customiser.sdeMatrix.categories) as [cid, cat]}
+      {#each categories as [cid, cat] (cid)}
         <button
           onclick={() => activeCategory = cid}
           class="px-2.5 py-1 text-[11px] border-b-2 transition-colors shrink-0 {activeCategory === cid ? 'border-app-accent text-app-text' : 'border-transparent text-app-muted hover:text-app-text'}"

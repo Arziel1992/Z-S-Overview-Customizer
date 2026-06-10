@@ -1,8 +1,15 @@
 /**
  * Merge an incoming overview model "on top of" the current one — the behaviour
- * EVE uses when importing a partial pack (e.g. the Z-S add-on pieces) over a
- * core profile. A section is only overridden when the incoming profile actually
- * carries it (non-empty); presets/tabs are additive.
+ * EVE uses when importing a partial pack over a core profile (the Z-S workflow:
+ * load Core, then apply a preset pack and/or a layout pack).
+ *
+ *  - Presets are *additive* (replace same-named, append the rest) so preset
+ *    packs add tactical views to the core.
+ *  - Layout/appearance sections — tabs, columns, flag/background priorities &
+ *    states, blink/colour maps and the ship-label layout — are *overwritten*
+ *    wholesale whenever the incoming profile provides them (a layout pack like
+ *    "Standard 2BL" replaces the bracket labels and column/tab layout rather
+ *    than appending to them).
  */
 
 function deep(value) {
@@ -25,18 +32,18 @@ export function mergeModel(current, incoming) {
 		}
 	}
 
-	// Tabs: append incoming tabs, re-indexing sequentially, capped at 8.
+	// Tabs (layout): overwrite when the incoming profile defines any.
 	if (incoming.tabs?.length) {
-		const merged = [...out.tabs.map(deep)];
-		for (const t of incoming.tabs) merged.push(deep(t));
-		out.tabs = merged.slice(0, 8).map((t, i) => ({ ...t, index: i }));
+		out.tabs = incoming.tabs.map((t, i) => ({ ...deep(t), index: i }));
 	}
 
-	// Whole-section overrides only when the incoming profile provides them.
+	// Columns: overwrite when provided.
 	if (incoming.overviewColumns?.length) {
 		out.overviewColumns = deep(incoming.overviewColumns);
 		if (incoming.columnOrder?.length) out.columnOrder = deep(incoming.columnOrder);
 	}
+
+	// Priority orders / authorized states: overwrite when provided.
 	for (const key of [
 		"flagOrder",
 		"backgroundOrder",
@@ -46,11 +53,13 @@ export function mergeModel(current, incoming) {
 		if (incoming[key]?.length) out[key] = deep(incoming[key]);
 	}
 
-	// State blink/colour maps merge key-by-key (incoming wins).
-	out.stateBlinks = { ...out.stateBlinks, ...(incoming.stateBlinks ?? {}) };
-	out.stateColors = { ...out.stateColors, ...(incoming.stateColors ?? {}) };
+	// Blink/colour maps: overwrite when provided, else keep current.
+	if (incoming.stateBlinks && Object.keys(incoming.stateBlinks).length)
+		out.stateBlinks = deep(incoming.stateBlinks);
+	if (incoming.stateColors && Object.keys(incoming.stateColors).length)
+		out.stateColors = deep(incoming.stateColors);
 
-	// Ship labels: replace wholesale if the incoming profile defines an order.
+	// Ship-label layout: overwrite wholesale when the incoming defines an order.
 	if (incoming.shipLabelOrder?.length) {
 		out.shipLabelOrder = deep(incoming.shipLabelOrder);
 		out.shipLabels = deep(incoming.shipLabels);

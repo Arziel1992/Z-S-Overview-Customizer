@@ -26,7 +26,7 @@
     <p class="text-[11px] text-app-muted mt-0.5">{t('columns.help')}</p>
   </div>
 
-  <DragList values={ordered} onchange={commitOrder} handleSelector=".drag-handle" row={column} />
+  <DragList values={ordered} onchange={commitOrder} row={column} />
 </div>
 
 {#snippet column(col)}

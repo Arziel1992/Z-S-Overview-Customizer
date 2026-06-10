@@ -1,3 +1,4 @@
 node_modules/
 .mypy_cache/
 notes/
+.claude/

@@ -11,6 +11,9 @@ import { parseOverviewYaml, serializeOverviewYaml } from "$lib/utils/eveFormat";
 import { mergeModel } from "$lib/utils/merge";
 
 const THEME_KEY = "zs-overview-theme";
+const SCALE_KEY = "zs-overview-scale";
+const SESSION_KEY = "zs-overview-session";
+const BASE_KEY = "zs-overview-base";
 
 /** Reasonable preview roster so the renderer is populated on first load. */
 function seedRoster() {
@@ -141,14 +144,29 @@ class CustomiserStore {
 	uiScale = $state(1); // zoom factor applied to the whole app
 	fontFamily = $state("'Inter', sans-serif");
 	baseProfile = $state("zs_core");
+	showWelcome = $state(false);
 
 	constructor() {
-		if (typeof localStorage !== "undefined") {
-			this.theme = localStorage.getItem(THEME_KEY) || "dark";
-		}
+		const ls = typeof localStorage !== "undefined" ? localStorage : null;
+		if (ls) this.theme = ls.getItem(THEME_KEY) || "dark";
+		if (ls) this.uiScale = Number(ls.getItem(SCALE_KEY)) || 1;
 		this.applyTheme();
-		this.loadPreset("zs_core");
 		this.fetchSdeMatrix();
+
+		// Restore the last working session if present; otherwise greet the user.
+		const session = ls?.getItem(SESSION_KEY);
+		if (session) {
+			try {
+				this.applyModel(parseOverviewYaml(session));
+				this.baseProfile = ls.getItem(BASE_KEY) || "custom";
+			} catch (e) {
+				console.warn("[!] Could not restore session.", e);
+				this.loadPreset("zs_core");
+			}
+		} else {
+			this.loadPreset("zs_core");
+			this.showWelcome = true;
+		}
 	}
 
 	/* -------------------------- theme -------------------------- */
@@ -163,6 +181,50 @@ class CustomiserStore {
 		if (typeof localStorage !== "undefined")
 			localStorage.setItem(THEME_KEY, this.theme);
 		this.applyTheme();
+	}
+
+	setScale(value) {
+		this.uiScale = value;
+		if (typeof localStorage !== "undefined")
+			localStorage.setItem(SCALE_KEY, String(value));
+	}
+
+	/** Persist the current working profile so a reload resumes where it left off. */
+	saveSession() {
+		if (typeof localStorage === "undefined") return;
+		try {
+			localStorage.setItem(SESSION_KEY, this.exportYaml());
+			localStorage.setItem(BASE_KEY, this.baseProfile);
+		} catch (e) {
+			console.warn("[!] Session save failed.", e);
+		}
+	}
+
+	dismissWelcome() {
+		this.showWelcome = false;
+	}
+
+	/** Reset to a minimal blank profile (one empty preset + one tab). */
+	clearAll() {
+		this.applyModel({
+			presets: [{ name: "New Preset", alwaysShownStates: [], filteredStates: [], groups: [] }],
+			tabs: [{ index: 0, name: "Tab 1", color: null, overview: "New Preset", bracket: null }],
+			columnOrder: ["ICON", "DISTANCE", "NAME", "TYPE"],
+			overviewColumns: ["ICON", "DISTANCE", "NAME", "TYPE"],
+			flagOrder: [],
+			backgroundOrder: [],
+			flagStates: [],
+			backgroundStates: [],
+			stateBlinks: {},
+			stateColors: {},
+			shipLabelOrder: ["ship type", "pilot name"],
+			shipLabels: {
+				"ship type": this.defaultLabelConfig("ship type"),
+				"pilot name": { ...this.defaultLabelConfig("pilot name"), pre: " - " },
+			},
+			userSettings: [],
+		});
+		this.baseProfile = "blank";
 	}
 
 	/* -------------------------- loading -------------------------- */
@@ -348,6 +410,13 @@ class CustomiserStore {
 			this.tabs.splice(i, 1);
 			if (this.activeTabId === index) this.activeTabId = this.tabs[0].index;
 		}
+	}
+
+	/** Commit a reordered tab list, renumbering indexes and keeping the active tab. */
+	reorderTabs(newOrder) {
+		const activePos = newOrder.findIndex((t) => t.index === this.activeTabId);
+		this.tabs = newOrder.map((t, i) => ({ ...t, index: i }));
+		this.activeTabId = activePos >= 0 ? activePos : (this.tabs[0]?.index ?? 0);
 	}
 
 	/* -------------------------- ship labels -------------------------- */

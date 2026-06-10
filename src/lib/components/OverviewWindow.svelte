@@ -1,7 +1,7 @@
 <script>
-  import { customiser } from '$lib/stores/customiserStore.svelte';
-  import { renderEveMarkup, floatTripletToCss } from '$lib/utils/eveFormat';
   import { COLUMN_DEFS } from '$lib/data/stateMatrix';
+  import { customiser } from '$lib/stores/customiserStore.svelte';
+  import { floatTripletToCss, renderEveMarkup } from '$lib/utils/eveFormat';
 
   // Columns shown, in master order, filtered to the active set.
   const visibleColumns = $derived.by(() => {
@@ -47,7 +47,7 @@
   }
 </script>
 
-<div class="bg-eve-panel border border-eve-border rounded flex flex-col overflow-hidden font-mono text-[11px] text-eve-text h-full">
+<div class="bg-eve-panel border border-eve-border rounded-lg flex flex-col overflow-hidden font-mono text-[11px] text-eve-text h-full">
   <!-- Tab strip -->
   <div class="flex bg-eve-header border-b border-eve-border overflow-x-auto whitespace-nowrap shrink-0">
     {#each customiser.tabs as tab (tab.index)}
