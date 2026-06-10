@@ -8,6 +8,7 @@
 
 import { resolveStateColor, STATES } from "$lib/data/stateMatrix";
 import { parseOverviewYaml, serializeOverviewYaml } from "$lib/utils/eveFormat";
+import { mergeModel } from "$lib/utils/merge";
 
 const THEME_KEY = "zs-overview-theme";
 
@@ -137,7 +138,7 @@ class CustomiserStore {
 
 	// --- UI ---
 	theme = $state("dark");
-	uiScale = $state("12px");
+	uiScale = $state(1); // zoom factor applied to the whole app
 	fontFamily = $state("'Inter', sans-serif");
 	baseProfile = $state("zs_core");
 
@@ -227,8 +228,9 @@ class CustomiserStore {
 		this.activePresetName = this.presets[0]?.name ?? null;
 	}
 
-	exportYaml() {
-		return serializeOverviewYaml({
+	/** Snapshot of the current profile as a plain model object. */
+	get model() {
+		return {
 			presets: this.presets,
 			tabs: this.tabs,
 			columnOrder: this.columnOrder,
@@ -242,7 +244,25 @@ class CustomiserStore {
 			shipLabelOrder: this.shipLabelOrder,
 			shipLabels: this.shipLabels,
 			userSettings: this.userSettings,
-		});
+		};
+	}
+
+	exportYaml() {
+		return serializeOverviewYaml(this.model);
+	}
+
+	/**
+	 * Import a raw YAML profile. `mode` is "overwrite" (replace everything) or
+	 * "merge" (apply on top of the current config, EVE pack-piece style).
+	 */
+	importYaml(text, mode = "overwrite", label = "custom") {
+		const incoming = parseOverviewYaml(text);
+		if (mode === "merge") {
+			this.applyModel(mergeModel(this.model, incoming));
+		} else {
+			this.applyModel(incoming);
+		}
+		this.baseProfile = label;
 	}
 
 	/* -------------------------- selectors -------------------------- */
@@ -328,6 +348,47 @@ class CustomiserStore {
 			this.tabs.splice(i, 1);
 			if (this.activeTabId === index) this.activeTabId = this.tabs[0].index;
 		}
+	}
+
+	/* -------------------------- ship labels -------------------------- */
+	defaultLabelConfig(type) {
+		return {
+			type: type === "spacer" ? null : type,
+			pre: "",
+			post: "",
+			state: 1,
+			bold: false,
+			italic: false,
+			underline: false,
+			fontsize: null,
+			color: null,
+		};
+	}
+
+	/** Add a label segment (a field type, a 'linebreak', or a 'spacer'). */
+	addShipLabel(type) {
+		if (type === "spacer") {
+			this.shipLabelOrder.push(null);
+			if (!this.shipLabels.__null__)
+				this.shipLabels.__null__ = this.defaultLabelConfig("spacer");
+			return;
+		}
+		if (type === "linebreak") {
+			this.shipLabelOrder.push("linebreak");
+			if (!this.shipLabels.linebreak)
+				this.shipLabels.linebreak = {
+					...this.defaultLabelConfig("linebreak"),
+					state: null,
+				};
+			return;
+		}
+		// A field label — only one of each type may exist in the order.
+		if (!this.shipLabels[type]) this.shipLabels[type] = this.defaultLabelConfig(type);
+		this.shipLabelOrder.push(type);
+	}
+
+	removeShipLabelAt(index) {
+		this.shipLabelOrder.splice(index, 1);
 	}
 
 	/* -------------------------- roster -------------------------- */
