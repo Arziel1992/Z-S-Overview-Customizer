@@ -42,7 +42,7 @@
     <button onclick={() => customiser.addShipLabel('spacer')} class="text-xs border border-app-border hover:border-app-accent rounded px-2 py-1 transition-colors">+ {t('ships.addSpacer')}</button>
   </div>
 
-  <DragList values={customiser.shipLabelOrder} onchange={(v) => customiser.shipLabelOrder = v} handleSelector=".drag-handle" row={segment} />
+  <DragList values={customiser.shipLabelOrder} onchange={(v) => customiser.shipLabelOrder = v} row={segment} />
 </div>
 
 {#snippet segment(value, index)}

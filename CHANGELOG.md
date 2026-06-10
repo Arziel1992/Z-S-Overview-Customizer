@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-06-10 - 19:02
+
+### Iteration 3 — fixes & polish
+
+- **`<fontsize=NN>` markup now renders** — bracket labels and tab/preset names
+  from real Z-S exports no longer show raw `<fontsize=…>` / `<color=…>` text.
+- **Drag-and-drop fixed:** reordering now works repeatedly (the list rebuilt its
+  item ids on every commit, breaking the second drag) and uses a proper
+  **`.drag-handle`** via `dragDisabled` — clears the `dndzone will ignore unknown
+  options` console warning.
+- **Tab Setup is now reorderable** (drag-and-drop) with index renumbering.
+- **Import "Apply on top" semantics corrected:** presets are appended; tabs,
+  columns, priorities and **ship labels are overwritten** when the incoming pack
+  provides them (true Z-S core + layout-pack workflow).
+- **Group filter category nav no longer flickers** while searching (keyed list).
+- **Renderer:** entities are clamped inside the viewport (no more off-screen
+  brackets) and the background is a softer space-blue with a twinkling
+  **starfield** (respects `prefers-reduced-motion`).
+- **Softer dark chrome** for the overview/preview panels (was near-black);
+  unified **panel border radius** (`rounded-lg`) across settings, overview,
+  brackets and roster.
+- **First-run welcome modal** (Z-S Core / CCP / Import / Blank); the working
+  profile autosaves to `localStorage`, so return visits **resume where you left
+  off**.
+- **Base bar:** added **Clear all** (blank profile); header logo is now
+  **Z-SOC**; UI scale persists.
+- Preset **filtered / always-shown** chips were already labelled; entity-state
+  chips now show names too.
+
 ## 2026-06-10 - 18:27
 
 ### Iteration 2 — import/history, drag-and-drop, theming & docs

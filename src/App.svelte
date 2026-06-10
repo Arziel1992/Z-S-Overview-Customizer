@@ -10,6 +10,7 @@
   import ShipLabels from '$lib/components/ShipLabels.svelte';
   import SpaceBrackets from '$lib/components/SpaceBrackets.svelte';
   import TabManager from '$lib/components/TabManager.svelte';
+  import WelcomeModal from '$lib/components/WelcomeModal.svelte';
   import YamlExporter from '$lib/components/YamlExporter.svelte';
   import { t } from '$lib/i18n/strings';
   import { customiser } from '$lib/stores/customiserStore.svelte';
@@ -19,6 +20,15 @@
   let section = $state('tabs');
   let showImport = $state(false);
   let showHistory = $state(false);
+
+  // Autosave the working profile (debounced) so a reload resumes where it left off.
+  let saveTimer;
+  $effect(() => {
+    customiser.exportYaml(); // read the whole model so this effect tracks it
+    customiser.baseProfile;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => customiser.saveSession(), 500);
+  });
 
   const NAV = [
     ['tabs', t('tabsNav.tabs')],
@@ -38,10 +48,10 @@
   <!-- Header -->
   <header class="shrink-0 bg-app-panel border-b border-app-border px-3 sm:px-4 py-2 flex items-center justify-between gap-3 flex-wrap">
     <div class="flex items-center gap-3 min-w-0">
-      <div class="w-8 h-8 rounded bg-app-accent flex items-center justify-center font-bold text-white text-lg shrink-0">Z</div>
-      <div class="min-w-0">
+      <div class="h-8 px-2 rounded bg-app-accent flex items-center justify-center font-bold text-white text-sm tracking-wider shrink-0">Z-SOC</div>
+      <div class="min-w-0 hidden sm:block">
         <h1 class="text-sm font-bold leading-none truncate">{t('app.title')}</h1>
-        <span class="text-[10px] text-app-muted uppercase tracking-wider hidden sm:block">{t('app.subtitle')}</span>
+        <span class="text-[10px] text-app-muted uppercase tracking-wider">{t('app.subtitle')}</span>
       </div>
     </div>
 
@@ -51,11 +61,12 @@
         <button onclick={() => customiser.loadPreset('ccp_default')} class="border border-app-border hover:border-app-accent px-2 py-1 rounded transition-colors {customiser.baseProfile === 'ccp_default' ? 'text-app-text border-app-accent' : 'text-app-muted'}">{t('app.loadCcp')}</button>
         <button onclick={() => customiser.loadPreset('zs_core')} class="border border-app-border hover:border-app-accent px-2 py-1 rounded transition-colors {customiser.baseProfile === 'zs_core' ? 'text-app-text border-app-accent' : 'text-app-muted'}">{t('app.loadZs')}</button>
         <button onclick={() => showHistory = true} class="border border-app-border hover:border-app-accent px-2 py-1 rounded transition-colors text-app-muted hover:text-app-text">+ {t('app.custom')}</button>
+        <button onclick={() => customiser.clearAll()} class="border border-app-border hover:border-red-500/60 hover:text-red-400 px-2 py-1 rounded transition-colors text-app-muted">{t('app.clearAll')}</button>
       </div>
 
       <label class="hidden sm:flex items-center gap-1">
         <span class="text-[10px] uppercase text-app-muted">{t('app.uiScale')}</span>
-        <select bind:value={customiser.uiScale} class="bg-app-bg border border-app-border rounded px-1.5 py-1 focus:outline-none focus:border-app-accent">
+        <select value={customiser.uiScale} onchange={(e) => customiser.setScale(Number(e.currentTarget.value))} class="bg-app-bg border border-app-border rounded px-1.5 py-1 focus:outline-none focus:border-app-accent">
           {#each SCALES as [val, label]}
             <option value={Number(val)}>{label}</option>
           {/each}
@@ -110,6 +121,9 @@
   </div>
 </main>
 
+{#if customiser.showWelcome}
+  <WelcomeModal onclose={() => customiser.dismissWelcome()} onimport={() => { customiser.dismissWelcome(); showImport = true; }} />
+{/if}
 {#if showImport}
   <ImportDialog onclose={() => showImport = false} />
 {/if}

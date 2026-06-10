@@ -42,13 +42,13 @@
     <div class="flex flex-col min-h-0">
       <h4 class="text-[10px] uppercase tracking-wider text-app-muted mb-1.5 border-b border-app-border pb-1 shrink-0">{t('appearance.colortags')}</h4>
       <div class="flex-1 overflow-y-auto pr-1">
-        <DragList values={customiser.flagOrder} onchange={(v) => customiser.flagOrder = v} handleSelector=".drag-handle" getId={(v) => `flag-${v}`} listClass="space-y-1" row={flagRow} />
+        <DragList values={customiser.flagOrder} onchange={(v) => customiser.flagOrder = v} listClass="space-y-1" row={flagRow} />
       </div>
     </div>
     <div class="flex flex-col min-h-0">
       <h4 class="text-[10px] uppercase tracking-wider text-app-muted mb-1.5 border-b border-app-border pb-1 shrink-0">{t('appearance.backgrounds')}</h4>
       <div class="flex-1 overflow-y-auto pr-1">
-        <DragList values={customiser.backgroundOrder} onchange={(v) => customiser.backgroundOrder = v} handleSelector=".drag-handle" getId={(v) => `bg-${v}`} listClass="space-y-1" row={bgRow} />
+        <DragList values={customiser.backgroundOrder} onchange={(v) => customiser.backgroundOrder = v} listClass="space-y-1" row={bgRow} />
       </div>
     </div>
   </div>
