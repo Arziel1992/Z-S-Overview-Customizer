@@ -1,7 +1,7 @@
 {
 	"name": "z-s-overview-customiser",
 	"private": true,
-	"version": "1.0.0",
+	"version": "2026.6.10-1706",
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
@@ -10,6 +10,7 @@
 		"sde:build": "python scripts/build_sde_matrix.py"
 	},
 	"dependencies": {
+		"js-yaml": "^4.2.0",
 		"svelte": "^5.0.0"
 	},
 	"devDependencies": {

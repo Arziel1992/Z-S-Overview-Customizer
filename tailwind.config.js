@@ -4,21 +4,31 @@ export default {
 	theme: {
 		extend: {
 			colors: {
+				// Theme-aware app shell palette (driven by CSS vars, see tailwind.css)
+				app: {
+					bg: "rgb(var(--bg) / <alpha-value>)",
+					panel: "rgb(var(--panel) / <alpha-value>)",
+					panel2: "rgb(var(--panel-2) / <alpha-value>)",
+					border: "rgb(var(--border) / <alpha-value>)",
+					text: "rgb(var(--text) / <alpha-value>)",
+					muted: "rgb(var(--text-muted) / <alpha-value>)",
+					accent: "rgb(var(--accent) / <alpha-value>)",
+					accentHover: "rgb(var(--accent-hover) / <alpha-value>)",
+				},
+				// Fixed, game-accurate EVE overview chrome (dark in every theme)
 				eve: {
 					bg: "#06080b",
-					panel: "#10141d",
+					panel: "#0a0d13",
+					panel2: "#111621",
+					header: "#0b0e14",
 					border: "#1b2230",
-					accent: "#2a5eb2",
-					accentHover: "#3c7be6",
-					textMuted: "#7c8fa6",
-					standingPurple: "#bf00ff",
-					standingGreen: "#00ff00",
-					standingRed: "#ff3333",
-					standingBlue: "#33ccff",
+					accent: "#00d2ff",
+					text: "#c8d4e3",
+					muted: "#7c8fa6",
 				},
 			},
 			fontFamily: {
-				sans: ['"Inter"', "sans-serif"],
+				sans: ['"Inter"', "system-ui", "sans-serif"],
 				mono: ['"JetBrains Mono"', "monospace"],
 			},
 		},
