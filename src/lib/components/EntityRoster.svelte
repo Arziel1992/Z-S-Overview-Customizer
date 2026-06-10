@@ -1,105 +1,118 @@
 <script>
-  import { customiser } from '$lib/stores/customiserStore.svelte';
   import { STATES } from '$lib/data/stateMatrix';
   import { t } from '$lib/i18n/strings';
+  import { customiser } from '$lib/stores/customiserStore.svelte';
+  import Modal from './Modal.svelte';
 
-  // Curated groups that are meaningful to preview (id -> label).
   const GROUP_OPTIONS = [
     [25, 'Frigate'], [26, 'Cruiser'], [27, 'Battleship'], [28, 'Hauler'],
     [419, 'Combat Battlecruiser'], [540, 'Command Ship'], [547, 'Carrier'],
     [30, 'Titan'], [90, 'Capsule (Pod)'], [10, 'Stargate'], [15, 'Station'],
     [6, 'Sun'], [1657, 'Citadel'], [365, 'Control Tower'],
   ];
-
-  // The relationship states most useful for previewing colortags/backgrounds.
   const STATE_OPTIONS = [9, 10, 11, 12, 13, 14, 18, 19, 44, 45, 50, 51, 52];
 
-  let expanded = $state(null);
+  let editing = $state(null); // entity ref (edit) or draft (add)
+  let isNew = $state(false);
 
-  function toggleState(entity, id) {
-    const i = entity.states.indexOf(id);
-    if (i > -1) entity.states.splice(i, 1);
-    else entity.states.push(id);
+  function openAdd() {
+    isNew = true;
+    editing = {
+      pilotName: 'New Pilot', shipName: '', type: 'Rifter', typeId: 587, groupId: 25,
+      corp: '—', alliance: '—', faction: '—', militia: '—', size: 'S',
+      states: [], distance: 10000, velocity: 0, radial: 0, transversal: 0, angular: 0,
+    };
+  }
+  function openEdit(entity) {
+    isNew = false;
+    editing = entity;
+  }
+  function close() {
+    editing = null;
+  }
+  function confirmAdd() {
+    customiser.addEntity(editing);
+    close();
+  }
+  function toggleState(id) {
+    const i = editing.states.indexOf(id);
+    if (i > -1) editing.states.splice(i, 1);
+    else editing.states.push(id);
   }
 </script>
 
-<div class="flex flex-col h-full">
+<div class="flex flex-col h-full min-h-0">
   <div class="flex items-center justify-between mb-2 shrink-0">
     <h3 class="text-xs font-semibold uppercase tracking-wider text-app-muted">{t('preview.roster')}</h3>
-    <button
-      onclick={() => customiser.addEntity()}
-      class="text-[11px] font-semibold bg-app-accent hover:bg-app-accentHover text-white px-2.5 py-1 rounded transition-colors"
-    >+ {t('preview.addEntity')}</button>
+    <button onclick={openAdd} class="text-[11px] font-semibold bg-app-accent hover:bg-app-accentHover text-white px-2.5 py-1 rounded transition-colors">+ {t('preview.addEntity')}</button>
   </div>
-  <p class="text-[10px] text-app-muted mb-2 shrink-0">{t('preview.rosterHelp')}</p>
 
-  <div class="flex-1 overflow-y-auto space-y-1.5 pr-1">
+  <div class="flex-1 overflow-y-auto space-y-1 pr-1">
     {#each customiser.roster as entity (entity.id)}
-      <div class="bg-app-panel2 border border-app-border rounded text-xs">
-        <div class="flex items-center gap-2 p-2">
-          <input
-            type="text"
-            bind:value={entity.pilotName}
-            aria-label="Pilot name"
-            class="flex-1 min-w-0 bg-app-bg border border-app-border rounded px-2 py-1 text-app-text focus:outline-none focus:border-app-accent"
-          />
-          <button
-            onclick={() => expanded = expanded === entity.id ? null : entity.id}
-            class="text-app-muted hover:text-app-text px-1"
-            aria-expanded={expanded === entity.id}
-            aria-label="Edit entity"
-          >{expanded === entity.id ? '▴' : '▾'}</button>
-          <button
-            onclick={() => customiser.removeEntity(entity.id)}
-            class="text-red-400 hover:text-red-300 px-1"
-            aria-label={t('preview.remove')}
-          >✕</button>
+      <div class="flex items-center gap-2 bg-app-panel2 border border-app-border rounded px-2.5 py-1.5 text-xs">
+        <span class="flex-1 min-w-0 truncate text-app-text">{entity.pilotName} <span class="text-app-muted">· {entity.type}</span></span>
+        <div class="flex gap-1">
+          {#each entity.states.slice(0, 3) as s}
+            <span class="w-2 h-2 rounded-full" style="background:{customiser.stateColor('flag', s)}" title={STATES[s]?.name}></span>
+          {/each}
         </div>
-
-        {#if expanded === entity.id}
-          <div class="px-2 pb-2 space-y-2 border-t border-app-border/60 pt-2">
-            <div class="grid grid-cols-2 gap-2">
-              <label class="flex flex-col gap-1">
-                <span class="text-[9px] uppercase text-app-muted">Type</span>
-                <input type="text" bind:value={entity.type} class="bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent" />
-              </label>
-              <label class="flex flex-col gap-1">
-                <span class="text-[9px] uppercase text-app-muted">Group</span>
-                <select bind:value={entity.groupId} class="bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent">
-                  {#each GROUP_OPTIONS as [gid, label]}
-                    <option value={gid}>{label} ({gid})</option>
-                  {/each}
-                </select>
-              </label>
-              <label class="flex flex-col gap-1">
-                <span class="text-[9px] uppercase text-app-muted">{t('preview.distance')}</span>
-                <input type="number" bind:value={entity.distance} min="0" class="bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent" />
-              </label>
-              <label class="flex flex-col gap-1">
-                <span class="text-[9px] uppercase text-app-muted">Corp / Alliance</span>
-                <div class="flex gap-1">
-                  <input type="text" bind:value={entity.corp} aria-label="Corporation" class="w-1/2 bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent" />
-                  <input type="text" bind:value={entity.alliance} aria-label="Alliance" class="w-1/2 bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent" />
-                </div>
-              </label>
-            </div>
-
-            <div>
-              <span class="text-[9px] uppercase text-app-muted">{t('preview.states')}</span>
-              <div class="flex flex-wrap gap-1 mt-1">
-                {#each STATE_OPTIONS as id}
-                  {@const on = entity.states.includes(id)}
-                  <button
-                    onclick={() => toggleState(entity, id)}
-                    class="px-1.5 py-0.5 rounded text-[10px] border transition-colors {on ? 'bg-app-accent border-app-accent text-white' : 'border-app-border text-app-muted hover:text-app-text'}"
-                    title={`${id}: ${STATES[id]?.name}`}
-                  >{STATES[id]?.name ?? id}</button>
-                {/each}
-              </div>
-            </div>
-          </div>
-        {/if}
+        <button onclick={() => openEdit(entity)} class="text-app-muted hover:text-app-text px-1" aria-label="Edit">✎</button>
+        <button onclick={() => customiser.removeEntity(entity.id)} class="text-red-400 hover:text-red-300 px-1" aria-label={t('preview.remove')}>✕</button>
       </div>
     {/each}
   </div>
 </div>
+
+{#if editing}
+  <Modal title={isNew ? t('preview.addEntity') : editing.pilotName} onclose={close} maxWidth="max-w-md">
+    <div class="space-y-3 text-sm">
+      <div class="grid grid-cols-2 gap-2">
+        <label class="flex flex-col gap-1">
+          <span class="text-[9px] uppercase text-app-muted">Pilot</span>
+          <input type="text" bind:value={editing.pilotName} class="bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent" />
+        </label>
+        <label class="flex flex-col gap-1">
+          <span class="text-[9px] uppercase text-app-muted">Type</span>
+          <input type="text" bind:value={editing.type} class="bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent" />
+        </label>
+        <label class="flex flex-col gap-1">
+          <span class="text-[9px] uppercase text-app-muted">Group</span>
+          <select bind:value={editing.groupId} class="bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent">
+            {#each GROUP_OPTIONS as [gid, label]}
+              <option value={gid}>{label} ({gid})</option>
+            {/each}
+          </select>
+        </label>
+        <label class="flex flex-col gap-1">
+          <span class="text-[9px] uppercase text-app-muted">{t('preview.distance')}</span>
+          <input type="number" bind:value={editing.distance} min="0" class="bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent" />
+        </label>
+        <label class="flex flex-col gap-1">
+          <span class="text-[9px] uppercase text-app-muted">Corporation</span>
+          <input type="text" bind:value={editing.corp} class="bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent" />
+        </label>
+        <label class="flex flex-col gap-1">
+          <span class="text-[9px] uppercase text-app-muted">Alliance</span>
+          <input type="text" bind:value={editing.alliance} class="bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent" />
+        </label>
+      </div>
+
+      <div>
+        <span class="text-[9px] uppercase text-app-muted">{t('preview.states')}</span>
+        <div class="flex flex-wrap gap-1 mt-1">
+          {#each STATE_OPTIONS as id}
+            {@const on = editing.states.includes(id)}
+            <button onclick={() => toggleState(id)} class="px-1.5 py-0.5 rounded text-[10px] border transition-colors text-left {on ? 'bg-app-accent border-app-accent text-white' : 'border-app-border text-app-muted hover:text-app-text'}"><span class="font-mono opacity-70">{id}</span> {STATES[id]?.name ?? id}</button>
+          {/each}
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-1">
+        <button onclick={close} class="text-xs border border-app-border hover:border-app-accent px-3 py-1.5 rounded transition-colors">{isNew ? t('importer.cancel') : 'Done'}</button>
+        {#if isNew}
+          <button onclick={confirmAdd} class="text-xs bg-app-accent hover:bg-app-accentHover text-white font-semibold px-4 py-1.5 rounded transition-colors">+ {t('preview.addEntity')}</button>
+        {/if}
+      </div>
+    </div>
+  </Modal>
+{/if}

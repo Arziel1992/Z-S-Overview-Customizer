@@ -1,8 +1,8 @@
 <script>
-  import { customiser } from '$lib/stores/customiserStore.svelte';
   import { ALL_STATE_IDS, STATES } from '$lib/data/stateMatrix';
-  import { stripEveMarkup } from '$lib/utils/eveFormat';
   import { t } from '$lib/i18n/strings';
+  import { customiser } from '$lib/stores/customiserStore.svelte';
+  import { stripEveMarkup } from '$lib/utils/eveFormat';
   import MatrixSelector from './MatrixSelector.svelte';
 
   const preset = $derived(customiser.activePreset);
@@ -41,8 +41,8 @@
         <div class="flex flex-wrap gap-1">
           {#each ALL_STATE_IDS as id}
             {@const on = preset.filteredStates.includes(id)}
-            <button onclick={() => toggle(preset.filteredStates, id)} title={`${id}: ${STATES[id]?.name}`}
-              class="px-1.5 py-0.5 rounded text-[10px] border transition-colors {on ? 'bg-red-500/80 border-red-500 text-white' : 'border-app-border text-app-muted hover:text-app-text'}">{id}</button>
+            <button onclick={() => toggle(preset.filteredStates, id)}
+              class="px-1.5 py-0.5 rounded text-[10px] border transition-colors text-left {on ? 'bg-red-500/80 border-red-500 text-white' : 'border-app-border text-app-muted hover:text-app-text'}"><span class="font-mono opacity-70">{id}</span> {STATES[id]?.name ?? `State ${id}`}</button>
           {/each}
         </div>
       </div>
@@ -52,8 +52,8 @@
         <div class="flex flex-wrap gap-1">
           {#each ALL_STATE_IDS as id}
             {@const on = preset.alwaysShownStates.includes(id)}
-            <button onclick={() => toggle(preset.alwaysShownStates, id)} title={`${id}: ${STATES[id]?.name}`}
-              class="px-1.5 py-0.5 rounded text-[10px] border transition-colors {on ? 'bg-emerald-500/80 border-emerald-500 text-white' : 'border-app-border text-app-muted hover:text-app-text'}">{id}</button>
+            <button onclick={() => toggle(preset.alwaysShownStates, id)}
+              class="px-1.5 py-0.5 rounded text-[10px] border transition-colors text-left {on ? 'bg-emerald-500/80 border-emerald-500 text-white' : 'border-app-border text-app-muted hover:text-app-text'}"><span class="font-mono opacity-70">{id}</span> {STATES[id]?.name ?? `State ${id}`}</button>
           {/each}
         </div>
       </div>

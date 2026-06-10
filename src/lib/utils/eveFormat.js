@@ -78,22 +78,42 @@ export function cssToFloatTriplet(css) {
 /**
  * Convert EVE inline markup to safe HTML for previews.
  * Supports `<color=0xAARRGGBB>…</color>`, `<b>`, `<i>`, `<u>`.
+ *
+ * EVE markup is stateful: tags often stay *open* within a single label segment
+ * (e.g. a pilot-name suffix like `]<color=0xFFFFFFFF><b> -`) and are reset
+ * elsewhere. We therefore balance the output ourselves — converting every tag,
+ * tracking open spans, and auto-closing any that were left open — instead of
+ * requiring matched pairs (which left unclosed tags showing as literal text).
  */
 export function renderEveMarkup(raw) {
 	if (raw == null) return "";
-	let text = escapeHtml(String(raw));
-	text = text.replace(
-		/&lt;color=(0x[0-9a-fA-F]+)&gt;([\s\S]*?)&lt;\/color&gt;/g,
-		(_, hex, content) => `<span style="color:${argbHexToCss(hex)}">${content}</span>`,
+	const escaped = escapeHtml(String(raw));
+	let open = 0; // count of open inline elements to auto-close at the end
+	const out = escaped.replace(
+		/&lt;(\/?)(color(?:=0x[0-9a-fA-F]+)?|b|i|u)&gt;/g,
+		(_, slash, tag) => {
+			if (slash) {
+				if (open > 0) {
+					open--;
+					return "</span>";
+				}
+				return ""; // stray close tag — drop it
+			}
+			open++;
+			if (tag.startsWith("color=")) {
+				const hex = tag.slice("color=".length);
+				return `<span style="color:${argbHexToCss(hex)}">`;
+			}
+			const style =
+				tag === "b"
+					? "font-weight:700"
+					: tag === "i"
+						? "font-style:italic"
+						: "text-decoration:underline";
+			return `<span style="${style}">`;
+		},
 	);
-	text = text
-		.replace(/&lt;b&gt;/g, "<b>")
-		.replace(/&lt;\/b&gt;/g, "</b>")
-		.replace(/&lt;i&gt;/g, "<i>")
-		.replace(/&lt;\/i&gt;/g, "</i>")
-		.replace(/&lt;u&gt;/g, "<u>")
-		.replace(/&lt;\/u&gt;/g, "</u>");
-	return text;
+	return out + "</span>".repeat(open);
 }
 
 /** Strip all markup to plain text (for aria-labels, dropdowns). */
