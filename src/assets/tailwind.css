@@ -2,24 +2,75 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  background-color: #06080b;
-  color: #e2e8f0;
-  overflow-x: hidden;
+/* ----------------------------------------------------------------- */
+/* Theme tokens — channels are space-separated RGB for alpha support. */
+/* ----------------------------------------------------------------- */
+:root,
+[data-theme="dark"] {
+  --bg: 6 8 11;
+  --panel: 14 17 24;
+  --panel-2: 17 22 33;
+  --border: 27 34 48;
+  --text: 226 232 240;
+  --text-muted: 124 143 166;
+  --accent: 56 132 255;
+  --accent-hover: 96 165 250;
 }
 
-/* Scrollbar styling for a native client UI look */
+[data-theme="light"] {
+  --bg: 238 242 247;
+  --panel: 255 255 255;
+  --panel-2: 248 250 252;
+  --border: 209 217 228;
+  --text: 17 24 39;
+  --text-muted: 90 105 128;
+  --accent: 37 99 235;
+  --accent-hover: 29 78 216;
+}
+
+html {
+  background-color: rgb(var(--bg));
+}
+
+body {
+  background-color: rgb(var(--bg));
+  color: rgb(var(--text));
+  overflow-x: hidden;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Native-client scrollbars, theme-aware */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #0a0c10;
+  background: rgb(var(--bg));
 }
 ::-webkit-scrollbar-thumb {
-  background: #1b2230;
-  border-radius: 3px;
+  background: rgb(var(--border));
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2a5eb2;
+  background: rgb(var(--accent));
+}
+
+/* Rhythmic blink used by overview rows / colortags (EVE oscillation). */
+@keyframes eve-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+.eve-blink {
+  animation: eve-blink 0.9s steps(1, end) infinite;
+}
+
+/* Focus visibility for a11y across themes. */
+:focus-visible {
+  outline: 2px solid rgb(var(--accent));
+  outline-offset: 1px;
 }
