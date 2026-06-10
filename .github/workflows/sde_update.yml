@@ -1,0 +1,113 @@
+# -----------------------------------------------------------
+# Z-S Overview Customiser — SDE Auto-Update & Deploy
+# -----------------------------------------------------------
+# Runs the SDE matrix builder on a weekly schedule and on
+# manual dispatch.  When CCP's Static Data Export changes,
+# the refreshed lookup matrix is committed directly to main,
+# the site is rebuilt with Vite, and deployed to GitHub Pages.
+# -----------------------------------------------------------
+
+name: SDE Update
+
+on:
+  schedule:
+    # Every Monday at 06:00 UTC
+    - cron: "0 6 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: sde-update
+  cancel-in-progress: true
+
+jobs:
+  update-sde:
+    name: Rebuild SDE matrix
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+
+    steps:
+      # ── Checkout ──────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      # ── Python ────────────────────────────────────────────
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python dependencies
+        run: pip install pyyaml requests
+
+      # ── Build SDE ─────────────────────────────────────────
+      - name: Run SDE matrix builder
+        run: python scripts/build_sde_matrix.py
+
+      # ── Commit & Push ─────────────────────────────────────
+      - name: Commit updated matrix (if changed)
+        id: commit
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/data/matrix_latest.json
+          if git diff --cached --quiet; then
+            echo "✓ No SDE changes detected — nothing to commit."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "chore(sde): refresh matrix_latest.json [skip ci]"
+            git push
+            echo "✓ Updated matrix_latest.json committed to main."
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  # ── Deploy to GitHub Pages ──────────────────────────────
+  deploy:
+    name: Build & deploy to Pages
+    needs: update-sde
+    # Always deploy on manual dispatch; on schedule only when data changed
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      needs.update-sde.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
