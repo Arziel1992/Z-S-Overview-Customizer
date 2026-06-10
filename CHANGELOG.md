@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-06-10 - 19:23
+
+### CI — SDE auto-update & GitHub Pages deploy
+
+- **New workflow:** `.github/workflows/sde_update.yml` runs the SDE matrix
+  builder weekly (Monday 06:00 UTC) and on manual `workflow_dispatch`.
+- **Auto-commit:** when CCP's Static Data Export changes, the refreshed
+  `matrix_latest.json` is committed directly to `main`.
+- **GitHub Pages deploy:** after the SDE update, the site is built with Vite
+  and deployed via `actions/deploy-pages`. On schedule, deploy only runs when
+  new data is detected; on manual dispatch it always deploys.
+- **Vite `base` path:** set to `/Z-S-Overview-Customizer/` so assets resolve
+  correctly under the GitHub Pages subpath.
+
 ## 2026-06-10 - 19:02
 
 ### Iteration 3 — fixes & polish
