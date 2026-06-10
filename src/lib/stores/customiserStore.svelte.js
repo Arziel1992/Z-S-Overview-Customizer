@@ -230,7 +230,7 @@ class CustomiserStore {
 	/* -------------------------- loading -------------------------- */
 	async fetchSdeMatrix() {
 		try {
-			const res = await fetch("/data/matrix_latest.json");
+			const res = await fetch(`${import.meta.env.BASE_URL}data/matrix_latest.json`);
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
 			this.sdeMatrix = await res.json();
 		} catch (e) {
@@ -261,7 +261,7 @@ class CustomiserStore {
 
 	async loadPreset(presetKey) {
 		try {
-			const res = await fetch(`/defaults/${presetKey}.yaml`);
+			const res = await fetch(`${import.meta.env.BASE_URL}defaults/${presetKey}.yaml`);
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
 			const text = await res.text();
 			this.applyModel(parseOverviewYaml(text));

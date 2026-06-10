@@ -1,7 +1,7 @@
 {
 	"name": "z-s-overview-customiser",
 	"private": true,
-	"version": "2026.6.10-1923",
+	"version": "2026.6.10-1931",
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
