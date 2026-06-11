@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-06-11 - 22:20
+
+### Iteration 5 — theme-aware YAML panel, clipboard-only sharing, README polish
+
+- **Export Profile panel is now theme-aware** (was stuck dark in light mode) and
+  shows **line numbers** in a sticky, non-copyable gutter.
+- **Removed the dpaste.org integration** — the history "Share" button now copies
+  the YAML straight to the clipboard; no third-party APIs remain.
+- **README:** embedded the eight rendered flow diagrams from `images/` (replacing
+  references to the gitignored `notes/` files), marked `notes/` as a local-only
+  workspace in the project tree, updated sharing wording, and added the standard
+  **Fenris hf. copyright notice** (adapted from the Z-S pack) at the end.
+
 ## 2026-06-11 - 21:39
 
 ### Iteration 4 — drag-and-drop UX, version display, documentation

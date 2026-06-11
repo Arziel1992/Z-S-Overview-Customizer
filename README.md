@@ -50,7 +50,8 @@ behind a Z-S overview. Fly safe. o7
   appended, and layout sections (tabs, columns, appearance, labels) are
   overwritten when the pack provides them.
 - **Version history** saved in your browser (IndexedDB): name, reload, rename,
-  delete, re-export, or **share to a public paste** link.
+  delete, re-export, or **share** (copies the YAML to your clipboard — no
+  third-party services).
 - **Drag-and-drop reordering** (mouse and touch) with a ghost drop-slot and live
   reflow, plus up/down arrows as a mobile-friendly fallback — for columns, state
   priorities, tabs and bracket-label segments.
@@ -64,8 +65,7 @@ behind a Z-S overview. Fly safe. o7
 The Overview is not a passive list — it is a real-time **boolean filtering
 engine** that evaluates every entity on your spatial grid against your profile,
 dozens of times per second. Understanding four building blocks explains every
-key in the YAML. (For the full research, see
-[notes/EVE_Online_Overview_System_Deep_Dive.md](./notes/EVE_Online_Overview_System_Deep_Dive.md).)
+key in the YAML.
 
 ### 1. The data foundation: typeID → groupID → categoryID
 
@@ -117,8 +117,7 @@ makes a state flash; `stateColorsNameList` maps each state to a named colour or
 
 ## YAML config key legend
 
-The complete reference of every key the client parses in an overview `.yaml`
-(full notes: [notes/config_keys.md](./notes/config_keys.md)).
+The complete reference of every key the client parses in an overview `.yaml`.
 
 ### Root keys
 
@@ -245,7 +244,8 @@ Z-S-Overview-Customizer/
 │   └── defaults/
 │       ├── fenris_default.yaml        # stock base (real EVE format)
 │       └── zs_core.yaml            # Z-S Core base (real EVE format)
-├── notes/                          # research: deep dive, key legend, samples
+├── images/                         # flow-diagram renders used in this README
+├── notes/                          # local research workspace (gitignored)
 └── src/
     ├── main.js                     # Svelte 5 mount
     ├── App.svelte                  # shell: header, nav, layout, dialogs, autosave
@@ -258,7 +258,7 @@ Z-S-Overview-Customizer/
         ├── utils/
         │   ├── eveFormat.js        # YAML codec: parse/serialize, markup, colours
         │   ├── merge.js            # "apply on top" pack-merge semantics
-        │   ├── history.js          # IndexedDB snapshots + paste sharing
+        │   ├── history.js          # IndexedDB snapshots (clipboard sharing)
         │   └── labels.js           # shipLabels → styled bracket-label HTML
         └── components/
             ├── TabManager.svelte        # tab setup (names, presets, colours)
@@ -279,10 +279,67 @@ Z-S-Overview-Customizer/
             └── Modal.svelte             # shared dialog chrome
 ```
 
-### Architecture at a glance
+### Architecture & flow diagrams
 
-TODO
-- Add images and descriptions.
+#### 1. Startup & session lifecycle
+
+Theme and scale come from `localStorage`; a saved session resumes exactly where
+you left off, otherwise the first-run welcome offers a starting point. Every
+model change autosaves (debounced) back to the session.
+
+![Startup & session lifecycle](./images/1_startup-session-lifecycle.png)
+
+#### 2. YAML import pipeline
+
+File, paste, or a history snapshot all flow through the same codec; *Apply on
+top* runs the pack-merge rules (same-named presets replaced, new ones appended,
+layout sections overwritten when provided), *Overwrite* replaces the model.
+
+![YAML import pipeline](./images/2_yaml-import-pipeline.png)
+
+#### 3. The normalized profile model
+
+The store holds the profile as plain reactive state keyed by the client's
+integer state IDs; serialisation back to game-importable YAML is lossless.
+
+![Normalized profile model](./images/3_normalized-profile-model.png)
+
+#### 4. Live preview render pipeline
+
+Each roster entity is resolved against the active tab's presets — always-shown
+overrides veto, veto overrides group membership — then the first matching state
+in the priority orders picks the colortag and background.
+
+![Live preview render pipeline](./images/4_live-preview-render-pipeline.png)
+
+#### 5. Appearance & label styling
+
+Bracket-label segments carry stateful EVE markup (`<fontsize=…>`, `<color=…>`,
+`<b>`…) that can open in one segment and close in another; the renderer
+balances it into safe styled HTML.
+
+![Appearance & label styling pipeline](./images/5_appearance-label-styling-pipeline.png)
+
+#### 6. Reordering UX
+
+One reusable DragList drives columns, priorities, tabs and label segments:
+drag by the handle (ghost drop-slot + live reflow) or use the arrow buttons.
+
+![Reordering UX](./images/6_reordering-ux.png)
+
+#### 7. History, export & sharing
+
+Named snapshots live in IndexedDB; sharing copies the YAML straight to your
+clipboard.
+
+![History, export & sharing](./images/7_history-export-sharing.png)
+
+#### 8. SDE data pipeline
+
+A scheduled GitHub Action rebuilds the ship/group/category lookup from the
+official Static Data Export.
+
+![SDE data pipeline](./images/8_sde-data-pipeline.png)
 
 ---
 
@@ -308,7 +365,7 @@ For full disclosure, the libraries and tooling this project depends on:
 ### Browser platform APIs
 
 - **IndexedDB** — local, named version history (no backend).
-- **Clipboard API** — copy YAML / share links.
+- **Clipboard API** — copy / share YAML.
 - **localStorage** — theme, UI scale, and session restore.
 
 ### Data pipeline (`npm run sde:build`)
@@ -320,12 +377,10 @@ For full disclosure, the libraries and tooling this project depends on:
 ### External services
 
 - Fenris' [Static Data Export](https://developers.eveonline.com/) — ship / group /
-  category data.
-- [dpaste.org](https://dpaste.org/) — best-effort public paste target for the
-  "Share" button (falls back to clipboard if unavailable).
+  category data (fetched at build time only, never from the browser).
 
-> No analytics, accounts, or backend — everything runs client-side in your
-> browser.
+> No analytics, accounts, backend, or third-party APIs — everything runs
+> client-side in your browser.
 
 ---
 
@@ -380,3 +435,20 @@ npm run preview  # preview the production build
 - **Changelog:** [CHANGELOG.md](./CHANGELOG.md)
 - Issues and PRs welcome on the
   [customiser repository](https://github.com/Arziel1992/Z-S-Overview-Customizer/).
+
+---
+
+## Copyright notice
+
+EVE Online and the EVE logo are the registered trademarks of Fenris hf. All
+rights are reserved worldwide. All other trademarks are the property of their
+respective owners. EVE Online, the EVE logo, EVE and all associated logos and
+designs are the intellectual property of Fenris hf. All artwork, screenshots,
+characters, vehicles, storylines, world facts or other recognizable features of
+the intellectual property relating to these trademarks are likewise the
+intellectual property of Fenris hf. Fenris hf. has granted permission to
+Z-S-Overview-Customizer to use EVE Online and all associated logos and designs
+for promotional and information purposes on its website but does not endorse,
+and is not in any way affiliated with, Z-S-Overview-Customizer. Fenris is in no
+way responsible for the content on or functioning of this website, nor can it
+be liable for any damage arising from the use of this website.
