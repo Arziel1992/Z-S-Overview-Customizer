@@ -1,5 +1,12 @@
+<!--
+  @component
+  Saved-versions manager backed by IndexedDB (utils/history.js). Save the
+  current profile under a name; load a snapshot (overwrite or apply-on-top),
+  rename, delete, re-export as .yaml, or "share" — which copies the YAML to
+  the clipboard (no third-party paste services by design).
+-->
 <script>
-  import { t } from '$lib/i18n/strings';
+  import { t } from '$lib/i18n/strings.svelte.js';
   import { customiser } from '$lib/stores/customiserStore.svelte';
   import { deleteSnapshot, listSnapshots, renameSnapshot, saveSnapshot } from '$lib/utils/history';
   import Modal from './Modal.svelte';
@@ -76,7 +83,7 @@
     <div class="flex flex-wrap items-center gap-2">
       <input bind:value={newName} placeholder={t('history.saveName')} class="flex-1 min-w-[140px] bg-app-bg border border-app-border rounded px-2.5 py-1.5 text-xs focus:outline-none focus:border-app-accent" />
       <button onclick={saveCurrent} class="text-xs bg-app-accent hover:bg-app-accentHover text-white font-semibold px-3 py-1.5 rounded transition-colors">💾 {t('app.save')}</button>
-      <button onclick={() => onimport?.()} class="text-xs border border-app-border hover:border-app-accent px-3 py-1.5 rounded transition-colors">⬆ Import…</button>
+      <button onclick={() => onimport?.()} class="text-xs border border-app-border hover:border-app-accent px-3 py-1.5 rounded transition-colors">⬆ {t('app.customShort')}…</button>
     </div>
 
     {#if toast}<p class="text-[11px] text-emerald-400 break-all">{toast}</p>{/if}

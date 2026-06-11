@@ -1,5 +1,13 @@
+<!--
+  @component
+  Tactical 3D-space preview: roster entities that pass the active tab's
+  *bracket* preset render as bracket icons over an animated starfield, with
+  their fully styled shipLabels text. Placement is deterministic per entity
+  (pseudo-angle from id) with radius ~ log(distance), clamped so labels stay
+  inside the viewport.
+-->
 <script>
-  import { t } from '$lib/i18n/strings';
+  import { t } from '$lib/i18n/strings.svelte.js';
   import { customiser } from '$lib/stores/customiserStore.svelte';
   import { buildShipLabelHtml } from '$lib/utils/labels';
 
@@ -47,7 +55,7 @@
   <div class="absolute top-2 left-3 text-[10px] uppercase tracking-wider text-eve-muted z-10">{t('preview.spaceView')}</div>
 
   {#if !customiser.activeTab?.bracket}
-    <div class="absolute inset-0 flex items-center justify-center text-eve-muted text-[10px]">Brackets disabled for this tab.</div>
+    <div class="absolute inset-0 flex items-center justify-center text-eve-muted text-[10px]">{t('preview.bracketsDisabled')}</div>
   {/if}
 
   <!-- centre marker -->

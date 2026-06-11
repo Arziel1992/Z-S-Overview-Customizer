@@ -4,7 +4,9 @@ export default {
 	theme: {
 		extend: {
 			colors: {
-				// Theme-aware app shell palette (driven by CSS vars, see tailwind.css)
+				// Theme-aware app-shell palette. Each entry reads a CSS custom
+				// property declared per-theme in tailwind.css; channels are
+				// space-separated RGB so Tailwind's <alpha-value> opacity works.
 				app: {
 					bg: "rgb(var(--bg) / <alpha-value>)",
 					panel: "rgb(var(--panel) / <alpha-value>)",

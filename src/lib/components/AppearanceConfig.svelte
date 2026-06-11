@@ -1,6 +1,14 @@
+<!--
+  @component
+  Colortag + background priority editor — two DragLists over flagOrder and
+  backgroundOrder. Per state: an authorise checkbox (flagStates /
+  backgroundStates whitelists), a colour picker writing 0xAARRGGBB into
+  stateColorsNameList, and a blink toggle. Top-to-bottom order is the
+  evaluation priority (first match wins).
+-->
 <script>
   import { STATES } from '$lib/data/stateMatrix';
-  import { t } from '$lib/i18n/strings';
+  import { t } from '$lib/i18n/strings.svelte.js';
   import { customiser } from '$lib/stores/customiserStore.svelte';
   import DragList from './DragList.svelte';
 </script>

@@ -56,7 +56,10 @@ behind a Z-S overview. Fly safe. o7
   reflow, plus up/down arrows as a mobile-friendly fallback — for columns, state
   priorities, tabs and bracket-label segments.
 - **Dark / light theme**, S/M/L/XL UI scale, session restore (resume where you
-  left off), first-run welcome, mobile-responsive layout, i18n-ready copy.
+  left off), first-run welcome, mobile-responsive layout.
+- **Multilingual UI** (English and Español so far) with a language selector in
+  the header — switching applies instantly, no reload. See
+  [Contributing translations](#contributing-translations).
 
 ---
 
@@ -428,6 +431,32 @@ npm run preview  # preview the production build
 
 ---
 
+## Contributing translations
+
+All UI copy lives in one file:
+[src/lib/i18n/strings.svelte.js](./src/lib/i18n/strings.svelte.js). The app
+falls back to English for any key a translation hasn't covered yet, so partial
+translations are safe to ship.
+
+To add a language (say, German):
+
+1. Open `src/lib/i18n/strings.svelte.js`.
+2. Copy the entire `en` object, rename the copy `de`, and translate the
+   **values only** — keep every key name and `{placeholder}` token exactly as
+   they are (e.g. `"{n}/8 tabs"` → `"{n}/8 Registerkarten"`).
+3. Register it in the `locales` map: `const locales = { en, es, de };`
+4. Add its native name to the selector list:
+   `export const LOCALE_NAMES = { en: "English", es: "Español", de: "Deutsch" };`
+5. Run `npm run dev`, pick the new language from the header dropdown, and click
+   through every panel and dialog to sanity-check lengths and encoding.
+6. Open a pull request — one file changed, nothing else needed.
+
+Guidelines: keep EVE-specific terms players know from the client (Overview,
+preset, bracket, colortag) untranslated where the localized client does the
+same; keep strings concise — several render inside compact controls.
+
+---
+
 ## Community & support
 
 - **Z-S Overview Pack:** <https://github.com/Arziel1992/Z-S-Overview-Pack/>
@@ -435,6 +464,16 @@ npm run preview  # preview the production build
 - **Changelog:** [CHANGELOG.md](./CHANGELOG.md)
 - Issues and PRs welcome on the
   [customiser repository](https://github.com/Arziel1992/Z-S-Overview-Customizer/).
+
+---
+
+## License
+
+This project is free software, released under the
+**GNU Affero General Public License v3.0** — see the [LICENSE](./LICENSE) file
+for the full text. In short: you may use, study, modify and redistribute it,
+provided derivative works (including network-hosted ones) remain open under the
+same license.
 
 ---
 

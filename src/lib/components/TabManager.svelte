@@ -1,5 +1,12 @@
+<!--
+  @component
+  Tab Setup editor (up to 8 client tabs). Each card binds a tab's markup name,
+  its list (overview) preset, its 3D bracket preset (or none), and an optional
+  [r,g,b] tab-text colour. Cards reorder via DragList; indexes renumber on
+  commit through the store so tab order matches the in-game strip.
+-->
 <script>
-  import { t } from '$lib/i18n/strings';
+  import { t } from '$lib/i18n/strings.svelte.js';
   import { customiser } from '$lib/stores/customiserStore.svelte';
   import { cssToFloatTriplet, floatTripletToCss, renderEveMarkup, stripEveMarkup } from '$lib/utils/eveFormat';
   import DragList from './DragList.svelte';
@@ -69,7 +76,7 @@
         aria-label={t('tabs.tabColor')}
       />
       {#if Array.isArray(tab.color)}
-        <button onclick={() => tab.color = null} class="text-[10px] text-app-muted hover:text-app-text underline">clear</button>
+        <button onclick={() => tab.color = null} class="text-[10px] text-app-muted hover:text-app-text underline">{t('common.clear')}</button>
       {/if}
     </div>
   </div>

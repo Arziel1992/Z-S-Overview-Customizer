@@ -139,14 +139,28 @@ function escapeHtml(s) {
 /* Parse                                                               */
 /* ------------------------------------------------------------------ */
 
-const NULL_LABEL_KEY = "__null__"; // shipLabels can be keyed by literal null
+// Real exports key one shipLabels entry by a literal YAML `null` (a spacer
+// segment). JS objects can't have a null key, so it is stored under this
+// sentinel and translated back to null on serialize.
+const NULL_LABEL_KEY = "__null__";
 
+/** Coerce a YAML array to clean integers, dropping nulls (empty `- ` lines). */
 function intList(arr) {
 	return Array.isArray(arr) ? arr.filter((x) => x != null).map(Number) : [];
 }
 
 /**
  * Parse a raw EVE overview .yaml string into the app's normalized model.
+ *
+ * The game serialises several sections as ordered maps encoded as lists of
+ * [key, value] pairs (presets, tabSetup, shipLabels, stateBlinks,
+ * stateColorsNameList); each is unwrapped via pairsToObject so the rest of the
+ * app deals with plain objects. Missing sections come back as empty arrays /
+ * objects, which lets partial pack pieces parse cleanly.
+ *
+ * @param {string} text raw YAML
+ * @returns the normalized model consumed by customiserStore.applyModel()
+ * @throws {YAMLException} when the input isn't valid YAML
  */
 export function parseOverviewYaml(text) {
 	const raw = yaml.load(text) ?? {};
@@ -210,6 +224,8 @@ export function parseOverviewYaml(text) {
 /* Serialize                                                           */
 /* ------------------------------------------------------------------ */
 
+// Attribute order inside each serialized shipLabels entry. Fixed so exports
+// are deterministic and diff cleanly between versions.
 const LABEL_PAIR_ORDER = [
 	"type",
 	"pre",
@@ -224,7 +240,13 @@ const LABEL_PAIR_ORDER = [
 
 /**
  * Serialize the normalized model back into a genuine, in-game-importable
- * EVE overview .yaml string. Top-level key order mirrors the real export.
+ * EVE overview .yaml string.
+ *
+ * Faithfulness rules (verified by round-tripping real Z-S exports):
+ *  - top-level keys are emitted in the same order the client exports them;
+ *  - ordered-map sections are rebuilt as lists of [key, value] pairs;
+ *  - bold/italic/underline are written as 1/0 (the client's convention),
+ *    everything missing as explicit `null`.
  */
 export function serializeOverviewYaml(model) {
 	const out = {};

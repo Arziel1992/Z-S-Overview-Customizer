@@ -1,5 +1,15 @@
+<!--
+  @component
+  Game-accurate overview list preview. Renders the profile's tab strip (EVE
+  markup + optional tab colours), the active column set in columnOrder order,
+  and one row per roster entity that the active tab's *overview* preset lets
+  through — with the winning colortag stripe, row background tint and blink
+  resolved by customiserStore.resolveEntity(). Deliberately keeps the game's
+  dark chrome in both app themes.
+-->
 <script>
   import { COLUMN_DEFS } from '$lib/data/stateMatrix';
+  import { t } from '$lib/i18n/strings.svelte.js';
   import { customiser } from '$lib/stores/customiserStore.svelte';
   import { floatTripletToCss, renderEveMarkup } from '$lib/utils/eveFormat';
 
@@ -91,7 +101,7 @@
         {/each}
       </div>
     {:else}
-      <div class="text-center text-eve-muted text-[10px] py-8">No entities match this tab's preset.</div>
+      <div class="text-center text-eve-muted text-[10px] py-8">{t('preview.noEntities')}</div>
     {/each}
   </div>
 </div>

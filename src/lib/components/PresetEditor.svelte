@@ -1,6 +1,13 @@
+<!--
+  @component
+  Preset filter-logic editor. Pick a preset, then toggle its filteredStates
+  (red veto chips), alwaysShownStates (green override chips) and authorised
+  SDE groups (via MatrixSelector). Chips show "id · name" so the numeric ids
+  stay visible alongside their meaning.
+-->
 <script>
   import { ALL_STATE_IDS, STATES } from '$lib/data/stateMatrix';
-  import { t } from '$lib/i18n/strings';
+  import { t } from '$lib/i18n/strings.svelte.js';
   import { customiser } from '$lib/stores/customiserStore.svelte';
   import { stripEveMarkup } from '$lib/utils/eveFormat';
   import MatrixSelector from './MatrixSelector.svelte';

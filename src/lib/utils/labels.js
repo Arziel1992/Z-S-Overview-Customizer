@@ -1,12 +1,19 @@
 /**
  * Builds the floating "bracket" label HTML for a preview entity from the
- * profile's shipLabelOrder + shipLabels, honouring per-segment prefix/suffix,
- * bold/italic/underline, font size and (float-triplet) colour — i.e. the
- * styling the old renderer dropped.
+ * profile's shipLabelOrder + shipLabels.
+ *
+ * Each ordered segment contributes `pre + fieldValue + post`, where pre/post
+ * may themselves contain EVE inline markup (renderEveMarkup handles the
+ * stateful open/close balancing), plus segment-level styling: bold / italic /
+ * underline flags, a pixel font size, and an [r,g,b] float-triplet colour.
+ * `linebreak` segments emit <br/>; `null` entries are spacers and contribute
+ * nothing visible; segments whose field resolves to an empty value are skipped
+ * entirely (so their pre/post brackets don't render around nothing).
  */
 
 import { floatTripletToCss, renderEveMarkup } from "$lib/utils/eveFormat";
 
+/** Maps a shipLabels segment key/type to the roster-entity field it displays. */
 const FIELD = {
 	"ship type": (e) => e.type,
 	"ship name": (e) => e.shipName,
@@ -17,6 +24,7 @@ const FIELD = {
 	militia: (e) => e.militia,
 };
 
+/** Inline CSS for a segment's own styling flags (markup styling is separate). */
 function segmentStyle(cfg) {
 	const s = [];
 	if (cfg.bold) s.push("font-weight:700");
