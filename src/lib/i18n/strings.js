@@ -5,6 +5,11 @@
  */
 
 const en = {
+	common: {
+		moveUp: "Move up",
+		moveDown: "Move down",
+		dragHandle: "Drag to reorder",
+	},
 	app: {
 		title: "Z-S Overview Customiser",
 		subtitle: "EVE Online Overview Profile Editor",
@@ -14,7 +19,7 @@ const en = {
 		uiScale: "Scale",
 		font: "Font",
 		base: "Base",
-		loadCcp: "CCP Default",
+		loadFenris: "Fenris Default",
 		loadZs: "Z-S Core",
 		custom: "Custom / Import",
 		github: "View on GitHub",
@@ -26,8 +31,8 @@ const en = {
 		intro: "What would you like to start from? You can change this any time — your work is saved in your browser and you'll resume right here next visit.",
 		zs: "Z-S Core",
 		zsDesc: "Load the Z-S Core base profile.",
-		ccp: "CCP Default",
-		ccpDesc: "Start from CCP's stock overview.",
+		fenris: "Fenris Default",
+		fenrisDesc: "Start from Fenris' stock overview.",
 		import: "Import a .yaml",
 		importDesc: "Bring in an existing profile (file or paste).",
 		blank: "Start blank",

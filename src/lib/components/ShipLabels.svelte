@@ -49,7 +49,6 @@
   {@const cfg = customiser.shipLabels[configKey(value)]}
   <div class="bg-app-panel2 border border-app-border rounded p-2.5">
     <div class="flex items-center gap-2">
-      <button class="drag-handle cursor-grab active:cursor-grabbing text-app-muted hover:text-app-text px-0.5 touch-none" aria-label="Drag to reorder">⠿</button>
       <span class="text-xs font-semibold text-app-text capitalize flex-1 truncate">{title(value)}</span>
       <button onclick={() => customiser.removeShipLabelAt(index)} class="text-red-400 hover:text-red-300 px-1" aria-label={t('ships.remove')}>✕</button>
     </div>

@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-06-11 - 21:39
+
+### Iteration 4 — drag-and-drop UX, version display, documentation
+
+- **Drag-and-drop reworked** on the library's purpose-built
+  `dragHandleZone`/`dragHandle` API: grabs are captured reliably every time
+  (the old `dragDisabled` gating missed gestures, and a resync effect was
+  stomping in-flight drags), a **dashed ghost placeholder** marks the drop slot,
+  and other rows **reflow live** (`animate:flip`). DragList now renders its own
+  handle, so row snippets are simpler.
+- **Up/down arrow buttons** added to every reorderable row as a mobile-friendly
+  fallback to drag-and-drop.
+- **App version is displayed in the header** (read from `package.json`), linking
+  to the changelog.
+- **README overhaul:** how the Overview engine works (presets, tabs, state
+  matrix), the complete YAML config-key legend incl. the full state-ID table,
+  cross-platform **out-of-game import instructions** (Windows/macOS/Linux
+  Overview folders), a detailed project layout, an architecture flowchart
+  (Mermaid), and links to the
+  [Z-S Overview Pack](https://github.com/Arziel1992/Z-S-Overview-Pack/),
+  Discord, and this changelog.
+- **Renamed CCP to Fenris**
+- **Mermaid Diagrams** added: eight detailed Mermaid diagrams covering startup/
+  session lifecycle, import pipeline, data model, preview render pipeline,
+  label styling, reorder UX, history/sharing, and the SDE CI pipeline.
+
 ## 2026-06-10 - 19:31
 
 ### Bugfix — 404s on GitHub Pages for data/preset fetches
