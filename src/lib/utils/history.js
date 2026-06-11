@@ -1,9 +1,10 @@
 /**
- * Browser-persisted YAML history (IndexedDB) plus paste-sharing.
+ * Browser-persisted YAML history (IndexedDB).
  *
  * Each snapshot is a named, timestamped copy of an exported profile so users can
  * keep, reload, rename, export and share previous versions. No dependencies —
- * a thin promise wrapper over IndexedDB.
+ * a thin promise wrapper over IndexedDB. Sharing is clipboard-only by design
+ * (no third-party paste APIs).
  */
 
 const DB_NAME = "zs-overview";
@@ -78,24 +79,4 @@ export async function deleteSnapshot(id) {
 	const db = await openDb();
 	await wrap(tx(db, "readwrite").delete(id));
 	db.close();
-}
-
-/**
- * Best-effort public paste. Uses dpaste.org (keyless). If the network/CORS
- * blocks it, the caller should fall back to clipboard.
- */
-export async function sharePaste(yaml) {
-	const body = new URLSearchParams({
-		content: yaml,
-		lexer: "yaml",
-		expires: "604800", // 7 days
-		format: "url",
-	});
-	const res = await fetch("https://dpaste.org/api/", {
-		method: "POST",
-		headers: { "Content-Type": "application/x-www-form-urlencoded" },
-		body,
-	});
-	if (!res.ok) throw new Error(`Paste failed (${res.status})`);
-	return (await res.text()).trim().replace(/^"|"$/g, "");
 }

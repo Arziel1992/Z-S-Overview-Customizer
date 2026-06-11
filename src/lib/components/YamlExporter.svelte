@@ -3,6 +3,8 @@
   import { t } from '$lib/i18n/strings';
 
   const yamlText = $derived(customiser.exportYaml());
+  const lines = $derived(yamlText.split('\n'));
+  const gutterCh = $derived(String(lines.length).length);
   let copied = $state(false);
 
   function download() {
@@ -40,5 +42,16 @@
     </div>
   </div>
 
-  <pre class="flex-1 overflow-auto bg-eve-bg border border-app-border rounded p-3 text-[10px] leading-relaxed font-mono text-eve-text min-h-0">{yamlText}</pre>
+  <div class="flex-1 overflow-auto bg-app-bg border border-app-border rounded py-2 text-[10px] leading-relaxed font-mono text-app-text min-h-0">
+    {#each lines as line, i (i)}
+      <div class="flex hover:bg-app-panel2/60">
+        <span
+          class="select-none text-right pr-3 pl-2 text-app-muted/70 shrink-0 sticky left-0 bg-app-bg"
+          style="min-width: {gutterCh + 2}ch;"
+          aria-hidden="true"
+        >{i + 1}</span>
+        <span class="whitespace-pre pr-3">{line}</span>
+      </div>
+    {/each}
+  </div>
 </div>

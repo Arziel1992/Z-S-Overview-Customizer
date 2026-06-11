@@ -1,7 +1,7 @@
 <script>
   import { t } from '$lib/i18n/strings';
   import { customiser } from '$lib/stores/customiserStore.svelte';
-  import { deleteSnapshot, listSnapshots, renameSnapshot, saveSnapshot, sharePaste } from '$lib/utils/history';
+  import { deleteSnapshot, listSnapshots, renameSnapshot, saveSnapshot } from '$lib/utils/history';
   import Modal from './Modal.svelte';
 
   let { onclose, onimport } = $props();
@@ -61,14 +61,10 @@
 
   async function share(rec) {
     try {
-      const url = await sharePaste(rec.yaml);
-      await navigator.clipboard.writeText(url);
-      flash(`${t('history.shared')}: ${url}`);
+      await navigator.clipboard.writeText(rec.yaml);
+      flash(t('history.shared'));
     } catch (e) {
-      console.warn('share failed', e);
-      try {
-        await navigator.clipboard.writeText(rec.yaml);
-      } catch {}
+      console.warn('clipboard write failed', e);
       flash(t('history.shareFail'));
     }
   }
