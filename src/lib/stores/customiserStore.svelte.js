@@ -1,21 +1,42 @@
 /**
- * Central reactive store for the Z-S Overview Customiser.
+ * Central reactive store for the Z-S Overview Customiser (singleton).
  *
- * Holds the EVE overview profile as a native, normalized model (states keyed by
- * the client's integer ids), the loaded SDE matrix, the live-preview entity
- * roster, and UI/theme preferences. All YAML I/O goes through eveFormat.js.
+ * This is the single source of truth the whole app reads and mutates:
+ *
+ *  - The **profile model** — a 1:1 normalized mirror of an EVE overview .yaml
+ *    (presets, tabs, columns, flag/background priorities, blink/colour maps,
+ *    ship labels, userSettings). All states are keyed by the client's *integer*
+ *    state ids (see stateMatrix.js); nothing here invents its own taxonomy.
+ *  - The **SDE matrix** — the categories→groups→types lookup fetched at
+ *    startup, used by the group browser.
+ *  - The **preview roster** — user-defined mock entities that the live
+ *    OverviewWindow / SpaceBrackets render through `resolveEntity()`.
+ *  - **UI preferences** — theme, zoom scale, base-profile name, first-run flag
+ *    — persisted to localStorage alongside the working-session YAML.
+ *
+ * All YAML I/O goes through eveFormat.js; "apply on top" imports go through
+ * merge.js. Every field is Svelte 5 `$state`, so components mutate the store
+ * directly (e.g. `customiser.flagOrder = …`) and the UI follows.
  */
 
 import { resolveStateColor, STATES } from "$lib/data/stateMatrix";
 import { parseOverviewYaml, serializeOverviewYaml } from "$lib/utils/eveFormat";
 import { mergeModel } from "$lib/utils/merge";
 
+// localStorage keys. SESSION_KEY holds the full working profile as YAML —
+// reusing the export format means session restore exercises the same codec
+// path as a user import (one format, no second serialisation scheme).
 const THEME_KEY = "zs-overview-theme";
 const SCALE_KEY = "zs-overview-scale";
 const SESSION_KEY = "zs-overview-session";
 const BASE_KEY = "zs-overview-base";
 
-/** Reasonable preview roster so the renderer is populated on first load. */
+/**
+ * Default preview roster so the renderer is populated on first load.
+ * Covers the interesting cases out of the box: a fleet/corp friendly (11+18),
+ * a war target (52), a neutral NPC (9), a criminal outlaw (13+44), and a
+ * stateless celestial (stargate) that only group filters can show/hide.
+ */
 function seedRoster() {
 	return [
 		{
@@ -117,19 +138,26 @@ function seedRoster() {
 }
 
 class CustomiserStore {
-	// --- profile model ---
+	// --- profile model (mirrors the YAML root keys 1:1) ---
+	/** [{ name, alwaysShownStates:[int], filteredStates:[int], groups:[int] }] */
 	presets = $state([]);
+	/** [{ index:0–7, name (EVE markup), color:[r,g,b]|null, overview, bracket|null }] */
 	tabs = $state([]);
 	activeTabId = $state(0);
+	/** Master left-to-right column order (superset of the active set). */
 	columnOrder = $state([]);
+	/** Columns actually displayed (subset of columnOrder). */
 	overviewColumns = $state([]);
+	/** Top-to-bottom priority: first matching id wins. */
 	flagOrder = $state([]);
 	backgroundOrder = $state([]);
-	flagStates = $state([]); // authorized colortag state ids
-	backgroundStates = $state([]); // authorized background state ids
-	stateBlinks = $state({}); // { 'flag_13': true, ... }
-	stateColors = $state({}); // { 'background_13': 'orange', ... }
+	flagStates = $state([]); // authorized colortag state ids (whitelist)
+	backgroundStates = $state([]); // authorized background state ids (whitelist)
+	stateBlinks = $state({}); // { 'flag_13': true, ... } — flashing toggles
+	stateColors = $state({}); // { 'background_13': 'orange' | '0xAARRGGBB', ... }
+	/** Segment order; entries are field names, 'linebreak', or null (spacer). */
 	shipLabelOrder = $state([]);
+	/** { segmentKey: { type, pre, post, state, bold, italic, underline, fontsize, color } } */
 	shipLabels = $state({});
 	userSettings = $state([]);
 
@@ -259,6 +287,11 @@ class CustomiserStore {
 		}
 	}
 
+	/**
+	 * Load a bundled base profile from public/defaults/ (e.g. "zs_core",
+	 * "fenris_default"). Fetch path is BASE_URL-aware for the GitHub Pages
+	 * subpath deployment.
+	 */
 	async loadPreset(presetKey) {
 		try {
 			const res = await fetch(`${import.meta.env.BASE_URL}defaults/${presetKey}.yaml`);
@@ -272,6 +305,10 @@ class CustomiserStore {
 		}
 	}
 
+	/**
+	 * Replace the whole profile model with a parsed/merged one and reset the
+	 * UI cursors (active tab / active preset) to the first entries.
+	 */
 	applyModel(model) {
 		this.presets = model.presets;
 		this.tabs = model.tabs;
@@ -309,6 +346,7 @@ class CustomiserStore {
 		};
 	}
 
+	/** Serialize the current model to a genuine, in-game-importable .yaml string. */
 	exportYaml() {
 		return serializeOverviewYaml(this.model);
 	}
@@ -348,12 +386,18 @@ class CustomiserStore {
 	}
 
 	/* -------------------------- appearance helpers -------------------------- */
+	/**
+	 * CSS colour for a state's flag or background. `kind` is 'flag' or
+	 * 'background'. Falls back to the state's canonical default colour when the
+	 * profile doesn't override it in stateColorsNameList.
+	 */
 	stateColor(kind, id) {
 		const key = `${kind}_${id}`;
 		const value = this.stateColors[key] ?? STATES[id]?.color ?? "grey";
 		return resolveStateColor(value);
 	}
 
+	/** Whether the profile flags this state's flag/background to blink. */
 	stateBlink(kind, id) {
 		return this.stateBlinks[`${kind}_${id}`] === true;
 	}
@@ -370,12 +414,14 @@ class CustomiserStore {
 	}
 
 	/* -------------------------- mutation helpers -------------------------- */
+	/** Swap arr[index] with its neighbour (dir = ±1); no-op at the edges. */
 	reorder(arr, index, dir) {
 		const j = index + dir;
 		if (j < 0 || j >= arr.length) return;
 		[arr[index], arr[j]] = [arr[j], arr[index]];
 	}
 
+	/** Add `value` to the array if absent, remove it if present (checkbox semantics). */
 	toggleMember(arr, value) {
 		const i = arr.indexOf(value);
 		if (i > -1) arr.splice(i, 1);
@@ -493,9 +539,24 @@ class CustomiserStore {
 	}
 
 	/**
-	 * Resolve how an entity renders under a given preset:
-	 * visibility (alwaysShown > filtered > group membership) and the winning
-	 * flag/background ids by walking the priority orders ∩ authorized states.
+	 * Resolve how an entity renders under a given preset — the heart of the
+	 * preview, mirroring the EVE client's evaluation rules exactly:
+	 *
+	 * Visibility precedence:
+	 *   1. any entity state ∈ preset.alwaysShownStates → ALWAYS visible
+	 *      (supreme override, bypasses everything);
+	 *   2. else any state ∈ preset.filteredStates → hidden (absolute veto,
+	 *      even when the group is authorised);
+	 *   3. else visible iff the entity's groupId ∈ preset.groups.
+	 *
+	 * Appearance: the winning colortag/background is the FIRST id in
+	 * flagOrder/backgroundOrder that the entity carries AND that the
+	 * corresponding whitelist (flagStates/backgroundStates) authorises —
+	 * evaluation stops at the first match, so list order is everything.
+	 *
+	 * @returns {{visible:boolean, flagId:?number, bgId:?number,
+	 *            flagColor:?string, bgColor:?string,
+	 *            flagBlink:boolean, bgBlink:boolean}}
 	 */
 	resolveEntity(entity, preset) {
 		const states = entity.states ?? [];

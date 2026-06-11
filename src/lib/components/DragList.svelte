@@ -1,7 +1,7 @@
 <script>
   import { dragHandle, dragHandleZone, SHADOW_ITEM_MARKER_PROPERTY_NAME } from 'svelte-dnd-action';
   import { flip } from 'svelte/animate';
-  import { t } from '$lib/i18n/strings';
+  import { t } from '$lib/i18n/strings.svelte.js';
 
   // Generic reorderable list. `values` is the store's own primitive/object
   // array; `onchange` receives the reordered values to commit.

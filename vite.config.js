@@ -8,6 +8,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
+	// Served from a repo subpath on GitHub Pages. Runtime fetches must use
+	// import.meta.env.BASE_URL so they resolve under this base too.
 	base: "/Z-S-Overview-Customizer/",
 	plugins: [svelte()],
 	resolve: {

@@ -1,5 +1,13 @@
+<!--
+  @component
+  Bracket-label composer. Segments (fields / line breaks / spacers) reorder
+  via DragList and can be added or removed freely — field types are unique in
+  the order, breaks and spacers can repeat. Field segments expose prefix /
+  suffix text and styling (B/I/U, px size, colour) that feed
+  utils/labels.buildShipLabelHtml for the live preview.
+-->
 <script>
-  import { t } from '$lib/i18n/strings';
+  import { t } from '$lib/i18n/strings.svelte.js';
   import { customiser } from '$lib/stores/customiserStore.svelte';
   import { cssToFloatTriplet, floatTripletToCss } from '$lib/utils/eveFormat';
   import DragList from './DragList.svelte';
@@ -82,7 +90,7 @@
             aria-label={t('ships.color')}
           />
           {#if Array.isArray(cfg.color)}
-            <button onclick={() => cfg.color = null} class="text-[9px] text-app-muted hover:text-app-text underline">clear</button>
+            <button onclick={() => cfg.color = null} class="text-[9px] text-app-muted hover:text-app-text underline">{t('common.clear')}</button>
           {/if}
         </label>
       </div>

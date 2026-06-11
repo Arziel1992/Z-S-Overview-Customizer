@@ -1,6 +1,13 @@
+<!--
+  @component
+  Editor for the live-preview entity roster. The list shows each entity's
+  name/type plus dots for its first relationship states; add opens a modal
+  with a draft (committed on confirm), edit opens the same modal bound
+  directly to the store entity so changes preview live as you type.
+-->
 <script>
   import { STATES } from '$lib/data/stateMatrix';
-  import { t } from '$lib/i18n/strings';
+  import { t } from '$lib/i18n/strings.svelte.js';
   import { customiser } from '$lib/stores/customiserStore.svelte';
   import Modal from './Modal.svelte';
 
@@ -56,7 +63,7 @@
             <span class="w-2 h-2 rounded-full" style="background:{customiser.stateColor('flag', s)}" title={STATES[s]?.name}></span>
           {/each}
         </div>
-        <button onclick={() => openEdit(entity)} class="text-app-muted hover:text-app-text px-1" aria-label="Edit">✎</button>
+        <button onclick={() => openEdit(entity)} class="text-app-muted hover:text-app-text px-1" aria-label={t('preview.edit')}>✎</button>
         <button onclick={() => customiser.removeEntity(entity.id)} class="text-red-400 hover:text-red-300 px-1" aria-label={t('preview.remove')}>✕</button>
       </div>
     {/each}
@@ -68,15 +75,15 @@
     <div class="space-y-3 text-sm">
       <div class="grid grid-cols-2 gap-2">
         <label class="flex flex-col gap-1">
-          <span class="text-[9px] uppercase text-app-muted">Pilot</span>
+          <span class="text-[9px] uppercase text-app-muted">{t('preview.pilot')}</span>
           <input type="text" bind:value={editing.pilotName} class="bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent" />
         </label>
         <label class="flex flex-col gap-1">
-          <span class="text-[9px] uppercase text-app-muted">Type</span>
+          <span class="text-[9px] uppercase text-app-muted">{t('preview.type')}</span>
           <input type="text" bind:value={editing.type} class="bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent" />
         </label>
         <label class="flex flex-col gap-1">
-          <span class="text-[9px] uppercase text-app-muted">Group</span>
+          <span class="text-[9px] uppercase text-app-muted">{t('preview.group')}</span>
           <select bind:value={editing.groupId} class="bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent">
             {#each GROUP_OPTIONS as [gid, label]}
               <option value={gid}>{label} ({gid})</option>
@@ -88,11 +95,11 @@
           <input type="number" bind:value={editing.distance} min="0" class="bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent" />
         </label>
         <label class="flex flex-col gap-1">
-          <span class="text-[9px] uppercase text-app-muted">Corporation</span>
+          <span class="text-[9px] uppercase text-app-muted">{t('preview.corporation')}</span>
           <input type="text" bind:value={editing.corp} class="bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent" />
         </label>
         <label class="flex flex-col gap-1">
-          <span class="text-[9px] uppercase text-app-muted">Alliance</span>
+          <span class="text-[9px] uppercase text-app-muted">{t('preview.alliance')}</span>
           <input type="text" bind:value={editing.alliance} class="bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent" />
         </label>
       </div>
@@ -108,7 +115,7 @@
       </div>
 
       <div class="flex justify-end gap-2 pt-1">
-        <button onclick={close} class="text-xs border border-app-border hover:border-app-accent px-3 py-1.5 rounded transition-colors">{isNew ? t('importer.cancel') : 'Done'}</button>
+        <button onclick={close} class="text-xs border border-app-border hover:border-app-accent px-3 py-1.5 rounded transition-colors">{isNew ? t('importer.cancel') : t('common.done')}</button>
         {#if isNew}
           <button onclick={confirmAdd} class="text-xs bg-app-accent hover:bg-app-accentHover text-white font-semibold px-4 py-1.5 rounded transition-colors">+ {t('preview.addEntity')}</button>
         {/if}

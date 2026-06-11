@@ -11,6 +11,7 @@ const DB_NAME = "zs-overview";
 const STORE = "snapshots";
 const VERSION = 1;
 
+/** Open (and lazily create/upgrade) the database. Callers must db.close(). */
 function openDb() {
 	return new Promise((resolve, reject) => {
 		const req = indexedDB.open(DB_NAME, VERSION);
@@ -25,10 +26,12 @@ function openDb() {
 	});
 }
 
+/** Shorthand: one transaction → its object store. */
 function tx(db, mode) {
 	return db.transaction(STORE, mode).objectStore(STORE);
 }
 
+/** Adapt an IDBRequest's success/error callbacks into a Promise. */
 function wrap(request) {
 	return new Promise((resolve, reject) => {
 		request.onsuccess = () => resolve(request.result);

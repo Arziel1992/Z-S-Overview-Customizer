@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-06-11 - 22:49
+
+### Iteration 6 — Spanish localisation, navbar redesign, docs
+
+- **i18n completed:** the locale is now reactive Svelte 5 `$state`
+  (`src/lib/i18n/strings.svelte.js`) — switching language re-renders instantly,
+  persists to localStorage, and falls back to English for untranslated keys.
+  Added a full **Español (Spanish)** translation and swept the remaining
+  hardcoded strings (roster fields, misc stats, empty states, modal close,
+  "clear" buttons) into the locale file.
+- **Language selector** added to the header.
+- **Navbar redesigned:** base profiles collapse into a single **Base dropdown**
+  (imports/snapshots show as a transient entry), versions/import and clear-all
+  become **icon buttons** with tooltips, and the language/scale/theme/GitHub
+  controls form one compact cluster. The **UI scale now affects the whole app**
+  — header and dialogs included (zoom wrapper moved to the root).
+- **README:** new **Contributing translations** guide (step-by-step for adding
+  a language) and a **License** section (AGPL-3.0, linking to `LICENSE`) just
+  before the copyright notice.
+- **Documentation pass across the codebase:** every Svelte component now opens
+  with an `@component` doc block (purpose, bindings, behaviour); the store,
+  codec, merge/history/labels utils and entry/config files gained detailed
+  JSDoc — including a full specification of `resolveEntity()`'s visibility and
+  priority rules and the YAML serialisation faithfulness guarantees.
+
 ## 2026-06-11 - 22:20
 
 ### Iteration 5 — theme-aware YAML panel, clipboard-only sharing, README polish

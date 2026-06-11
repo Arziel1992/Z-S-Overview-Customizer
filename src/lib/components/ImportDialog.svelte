@@ -1,5 +1,11 @@
+<!--
+  @component
+  YAML import dialog: file picker or pasted text, validated through the codec
+  before anything is applied. The mode radio mirrors the in-game workflow —
+  "Apply on top" (merge, for pack pieces) vs "Overwrite" (full replace).
+-->
 <script>
-  import { t } from '$lib/i18n/strings';
+  import { t } from '$lib/i18n/strings.svelte.js';
   import { customiser } from '$lib/stores/customiserStore.svelte';
   import { parseOverviewYaml } from '$lib/utils/eveFormat';
   import Modal from './Modal.svelte';

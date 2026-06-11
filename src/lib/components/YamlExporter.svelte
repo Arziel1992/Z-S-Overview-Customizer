@@ -1,9 +1,18 @@
+<!--
+  @component
+  Live export view: the exact game-importable YAML for the current model,
+  rendered with a sticky, selection-excluded line-number gutter, plus
+  download and copy-to-clipboard actions.
+-->
 <script>
   import { customiser } from '$lib/stores/customiserStore.svelte';
-  import { t } from '$lib/i18n/strings';
+  import { t } from '$lib/i18n/strings.svelte.js';
 
   const yamlText = $derived(customiser.exportYaml());
   const lines = $derived(yamlText.split('\n'));
+  // Gutter width sized to the largest line number (in ch) so it never shifts
+  // mid-scroll; the gutter itself is select-none so copying lines from the
+  // panel never grabs the numbers.
   const gutterCh = $derived(String(lines.length).length);
   let copied = $state(false);
 

@@ -1,13 +1,17 @@
 /**
- * EVE Online Overview State Matrix — single source of truth.
+ * EVE Online Overview State Matrix — single source of truth for the client's
+ * integer "state" identifiers (relationship / legal / standing conditions).
  *
- * Maps the client's integer "state" identifiers to human-readable metadata.
- * Sourced from notes/config_keys.md §5 and the deep-dive §6.3. These integers
- * are what the client actually evaluates; UI string keys are derived from here,
- * never the reverse (the previous STATE_ID_MAP was mis-shifted and is removed).
+ * These integers are what the game's YAML actually stores in flagOrder,
+ * backgroundOrder, filteredStates etc.; everything in the app derives display
+ * names from here, never the reverse. Sourced from the community-documented
+ * taxonomy (see the README's state-ID table); ids 66/68 are undocumented but
+ * observed in live Z-S exports.
  *
- * `kind` groups states for display:
+ * `kind` loosely buckets states for display purposes:
  *   legal | standing | affiliation | militia | misc
+ * `color` is the canonical default used when a profile's stateColorsNameList
+ * doesn't override that state.
  */
 
 import { argbHexToCss } from "$lib/utils/eveFormat";

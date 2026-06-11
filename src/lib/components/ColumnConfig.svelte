@@ -1,6 +1,13 @@
+<!--
+  @component
+  Telemetry column editor. The list renders the master columnOrder (with any
+  columns the profile doesn't know yet appended) — the checkbox toggles a
+  column in/out of the active overviewColumns set, DragList ordering rewrites
+  columnOrder.
+-->
 <script>
   import { ALL_COLUMNS, COLUMN_DEFS } from '$lib/data/stateMatrix';
-  import { t } from '$lib/i18n/strings';
+  import { t } from '$lib/i18n/strings.svelte.js';
   import { customiser } from '$lib/stores/customiserStore.svelte';
   import DragList from './DragList.svelte';
 

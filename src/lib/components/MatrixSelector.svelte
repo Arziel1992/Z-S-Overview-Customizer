@@ -1,3 +1,10 @@
+<!--
+  @component
+  SDE group browser bound to the active preset's `groups` whitelist.
+  Category tabs come from the compiled matrix; the search box matches both
+  group names and individual hull/type names (showing the matching hulls as
+  chips under their parent group).
+-->
 <script>
   import { customiser } from '$lib/stores/customiserStore.svelte';
 
