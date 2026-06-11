@@ -27,7 +27,6 @@
 {#snippet tabCard(tab)}
   <div class="bg-app-panel2 border border-app-border rounded p-3 space-y-2">
     <div class="flex items-center gap-2">
-      <button class="drag-handle cursor-grab active:cursor-grabbing text-app-muted hover:text-app-text px-0.5 touch-none" aria-label="Drag to reorder">⠿</button>
       <span class="text-[10px] text-app-muted w-6 shrink-0">#{tab.index}</span>
       <span class="font-mono text-xs flex-1 truncate" title={stripEveMarkup(tab.name)}>{@html renderEveMarkup(tab.name)}</span>
       {#if customiser.tabs.length > 1}

@@ -32,7 +32,6 @@
 {#snippet column(col)}
   {@const active = customiser.overviewColumns.includes(col)}
   <div class="flex items-center gap-2 bg-app-panel2 border border-app-border rounded px-2 py-1.5">
-    <button class="drag-handle cursor-grab active:cursor-grabbing text-app-muted hover:text-app-text px-0.5 touch-none" aria-label="Drag to reorder">⠿</button>
     <input type="checkbox" checked={active} onchange={() => toggleActive(col)} class="accent-app-accent" aria-label={COLUMN_DEFS[col]?.label} />
     <div class="flex-1 min-w-0">
       <span class="text-xs text-app-text">{COLUMN_DEFS[col]?.label ?? col}</span>

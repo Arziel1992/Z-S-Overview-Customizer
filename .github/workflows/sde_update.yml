@@ -2,7 +2,7 @@
 # Z-S Overview Customiser — SDE Auto-Update & Deploy
 # -----------------------------------------------------------
 # Runs the SDE matrix builder on a weekly schedule and on
-# manual dispatch.  When CCP's Static Data Export changes,
+# manual dispatch.  When Fenris' Static Data Export changes,
 # the refreshed lookup matrix is committed directly to main,
 # the site is rebuilt with Vite, and deployed to GitHub Pages.
 # -----------------------------------------------------------
@@ -81,7 +81,6 @@ jobs:
       github.event_name == 'workflow_dispatch' ||
       needs.update-sde.outputs.changed == 'true'
     runs-on: ubuntu-latest
-
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

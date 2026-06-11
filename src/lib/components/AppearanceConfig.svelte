@@ -7,7 +7,6 @@
 
 {#snippet stateRow(kind, authorized, id)}
   <div class="flex items-center gap-2 bg-app-panel2 border border-app-border rounded px-2 py-1.5 text-xs">
-    <button class="drag-handle cursor-grab active:cursor-grabbing text-app-muted hover:text-app-text px-0.5 touch-none" aria-label="Drag to reorder">⠿</button>
     <input
       type="checkbox"
       checked={authorized.includes(id)}

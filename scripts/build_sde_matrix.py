@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Z-S SDE Matrix Builder (Official 2026 CCP YAML Schema Compliant)
+Z-S SDE Matrix Builder (Official 2026 Fenris YAML Schema Compliant)
 Downloads the official ZIP archive, parses categories, groups, and types,
 and outputs a minified, lightweight search-optimised JSON map for the customiser.
 
@@ -45,7 +45,7 @@ def download_and_extract_sde():
     with zipfile.ZipFile(zip_bytes) as z:
         # Search the internal archive paths (sde/fsd/...)
         for member in z.namelist():
-            # CCP uses plural names for the official YAML distribution
+            # Fenris uses plural names for the official YAML distribution
             if any(
                 k in member for k in ["categories.yaml", "groups.yaml", "types.yaml"]
             ):
@@ -70,7 +70,7 @@ def load_yaml_fast(filename):
 
 
 def process_and_minify():
-    # CCP SDE Plural Schema
+    # Fenris SDE Plural Schema
     categories_raw = load_yaml_fast("categories.yaml")
     groups_raw = load_yaml_fast("groups.yaml")
     types_raw = load_yaml_fast("types.yaml")
