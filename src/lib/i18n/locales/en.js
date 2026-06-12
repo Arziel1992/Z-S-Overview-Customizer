@@ -50,6 +50,10 @@ export default {
 		clearAll: "Clear all",
 		clearAllTitle: "Reset to a blank profile",
 		historyTitle: "Saved versions & import",
+		sdeUpdated: "SDE {date}",
+		sdeUpdatedHelp: "Ship database last pulled from Fenris' Static Data Export on {date} — the tool keeps itself up to date automatically.",
+		sdeError: "SDE offline",
+		sdeErrorHelp: "Could not load the ship database — running on a minimal built-in fallback, so the group browser will be limited. Reload to retry.",
 	},
 	welcome: {
 		title: "Welcome to the Z-S Overview Customiser",

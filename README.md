@@ -12,6 +12,34 @@ parameter the game exposes, watch a live in-game-style preview react, and export
 
 ---
 
+## Table of contents
+
+- [A 10th-anniversary gift to the EVE community](#a-10th-anniversary-gift-to-the-eve-community)
+- [Features](#features)
+- [How the EVE Overview actually works](#how-the-eve-overview-actually-works)
+  - [1. The data foundation: typeID → groupID → categoryID](#1-the-data-foundation-typeid--groupid--categoryid)
+  - [2. Presets: the boolean logic engine](#2-presets-the-boolean-logic-engine)
+  - [3. Tabs: lists and brackets, decoupled](#3-tabs-lists-and-brackets-decoupled)
+  - [4. The state matrix: colortags, backgrounds, priority](#4-the-state-matrix-colortags-backgrounds-priority)
+- [YAML config key legend](#yaml-config-key-legend)
+  - [Root keys](#root-keys)
+  - [Telemetry column values](#telemetry-column-values)
+  - [Preset variables](#preset-variables)
+  - [Tab setup variables](#tab-setup-variables)
+  - [The state ID table](#the-state-id-table)
+- [Using your YAML out of game](#using-your-yaml-out-of-game)
+- [Project layout](#project-layout)
+  - [Architecture & flow diagrams](#architecture--flow-diagrams)
+- [Tech stack](#tech-stack)
+- [Setup](#setup)
+- [Using the app](#using-the-app)
+- [Contributing translations](#contributing-translations)
+- [Community & support](#community--support)
+- [License](#license)
+- [Copyright notice](#copyright-notice)
+
+---
+
 ## A 10th-anniversary gift to the EVE community
 
 Life has a strange way of closing loops. Early in **June 2026**, a change in my

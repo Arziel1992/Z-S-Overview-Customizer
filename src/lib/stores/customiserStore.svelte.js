@@ -163,6 +163,10 @@ class CustomiserStore {
 
 	// --- SDE + preview ---
 	sdeMatrix = $state(null);
+	/** Unix seconds the bundled SDE matrix was compiled (shown in the header). */
+	sdeCompiledAt = $state(null);
+	/** True when the matrix fetch failed and the minimal fallback is in use. */
+	sdeError = $state(false);
 	loading = $state(true);
 	roster = $state(seedRoster());
 	activePresetName = $state(null);
@@ -261,8 +265,10 @@ class CustomiserStore {
 			const res = await fetch(`${import.meta.env.BASE_URL}data/matrix_latest.json`);
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
 			this.sdeMatrix = await res.json();
+			this.sdeCompiledAt = this.sdeMatrix?.metadata?.compiledAt ?? null;
 		} catch (e) {
 			console.warn("[!] SDE matrix fetch failed; using minimal fallback.", e);
+			this.sdeError = true;
 			this.sdeMatrix = {
 				categories: {
 					6: { name: "Ship", groups: [25, 26, 27] },
