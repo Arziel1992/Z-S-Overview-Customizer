@@ -5,11 +5,15 @@
 # manual dispatch.  When Fenris' Static Data Export changes,
 # the refreshed lookup matrix is committed directly to main,
 # the site is rebuilt with Vite, and deployed to GitHub Pages.
+# Pushes to main skip the SDE rebuild and deploy directly
+# (the bot's own "[skip ci]" commit cannot re-trigger this).
 # -----------------------------------------------------------
 
 name: SDE Update
 
 on:
+  push:
+    branches: [main]
   schedule:
     # Every Monday at 06:00 UTC
     - cron: "0 6 * * 1"
@@ -31,6 +35,9 @@ concurrency:
 jobs:
   update-sde:
     name: Rebuild SDE matrix
+    # Skipped on plain pushes — commits deploy the site without re-downloading
+    # the (large, weekly-cadence) Static Data Export.
+    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     outputs:
       changed: ${{ steps.commit.outputs.changed }}
@@ -76,10 +83,14 @@ jobs:
   deploy:
     name: Build & deploy to Pages
     needs: update-sde
-    # Always deploy on manual dispatch; on schedule only when data changed
+    # Deploy on every push and manual dispatch; on schedule only when the SDE
+    # data actually changed. `!cancelled()` lets this run although update-sde
+    # is skipped for pushes (a skipped dependency normally skips dependents).
     if: >-
-      github.event_name == 'workflow_dispatch' ||
-      needs.update-sde.outputs.changed == 'true'
+      !cancelled() &&
+      (github.event_name == 'push' ||
+       github.event_name == 'workflow_dispatch' ||
+       needs.update-sde.outputs.changed == 'true')
     runs-on: ubuntu-latest
     environment:
       name: github-pages

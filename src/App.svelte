@@ -25,6 +25,13 @@
   import { customiser } from "$lib/stores/customiserStore.svelte";
   import { version } from "../package.json";
 
+  // Locale-aware date of the bundled SDE pull (CI refreshes it weekly).
+  const sdeDate = $derived(
+    customiser.sdeCompiledAt
+      ? new Date(customiser.sdeCompiledAt * 1000).toLocaleDateString(getLocale())
+      : null
+  );
+
   const REPO = "https://github.com/Arziel1992/Z-S-Overview-Customizer/";
 
   let section = $state("tabs");
@@ -96,6 +103,19 @@
         class="text-[10px] font-mono text-app-muted hover:text-app-text border border-app-border rounded px-1.5 py-0.5 shrink-0 transition-colors"
         title="View changelog">v{version}</a
       >
+      <!-- SDE freshness: shows the tool self-updates; warns when the pull failed -->
+      {#if customiser.sdeError}
+        <span
+          class="text-[10px] font-mono text-amber-400 border border-amber-500/50 bg-amber-500/10 rounded px-1.5 py-0.5 shrink-0 hidden sm:inline-flex items-center gap-1"
+          title={t("app.sdeErrorHelp")}
+          role="status"
+        >⚠ {t("app.sdeError")}</span>
+      {:else if sdeDate}
+        <span
+          class="text-[10px] font-mono text-app-muted border border-app-border rounded px-1.5 py-0.5 shrink-0 hidden sm:inline-flex items-center gap-1"
+          title={t("app.sdeUpdatedHelp", { date: sdeDate })}
+        >🛰 {t("app.sdeUpdated", { date: sdeDate })}</span>
+      {/if}
     </div>
 
     <div class="flex items-center gap-1.5 text-xs">

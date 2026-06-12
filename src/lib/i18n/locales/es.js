@@ -48,6 +48,10 @@ export default {
 		clearAll: "Vaciar todo",
 		clearAllTitle: "Restablecer a un perfil en blanco",
 		historyTitle: "Versiones guardadas e importación",
+		sdeUpdated: "SDE {date}",
+		sdeUpdatedHelp: "Base de datos de naves descargada por última vez del Static Data Export de Fenris el {date} — la herramienta se mantiene actualizada automáticamente.",
+		sdeError: "SDE sin conexión",
+		sdeErrorHelp: "No se pudo cargar la base de datos de naves; se usa una lista mínima integrada, así que el navegador de grupos estará limitado. Recarga para reintentar.",
 	},
 	welcome: {
 		title: "Bienvenido al Z-S Overview Customiser",

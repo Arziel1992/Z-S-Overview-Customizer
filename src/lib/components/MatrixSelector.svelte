@@ -48,11 +48,15 @@
     bind:value={searchQuery}
     placeholder="Search group or hull (e.g. Frigate, Rifter)…"
     aria-label="Search groups"
-    class="w-full bg-app-bg border border-app-border rounded px-2.5 py-1.5 text-xs mb-2 focus:outline-none focus:border-app-accent"
+    class="w-full shrink-0 bg-app-bg border border-app-border rounded px-2.5 py-1.5 text-xs mb-2 focus:outline-none focus:border-app-accent"
   />
 
   {#if customiser.sdeMatrix}
-    <div class="flex gap-1 border-b border-app-border mb-2 overflow-x-auto">
+    <!-- shrink-0: without it, a long unfiltered group list (flex base height of
+         thousands of px) absorbs the container's max-height squeeze
+         proportionally and crushes this strip to ~0px — it then only "appeared"
+         once a search query made the list short. -->
+    <div class="flex gap-1 border-b border-app-border mb-2 overflow-x-auto shrink-0">
       {#each categories as [cid, cat] (cid)}
         <button
           onclick={() => activeCategory = cid}

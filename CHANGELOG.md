@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-06-13 - 01:12
+
+### Bugfix & housekeeping — group-browser category strip, README TOC, CI on push
+
+- **Bugfix:** the Celestial / Station / Ship / Drone category tabs in the
+  Authorised Groups browser only appeared while a search query was active.
+  Cause: a flexbox squeeze — inside the browser's max-height container, the
+  unfiltered group list's huge flex base height absorbed the shrink
+  proportionally and crushed the strip to ~0px; a search made the list short
+  enough to release it. Fixed with `shrink-0` on the category strip (and the
+  search input).
+- **README:** added a table of contents.
+- **CI:** the SDE Update workflow now also triggers on **push to main** —
+  pushes skip the weekly SDE re-download and deploy the site directly (the
+  bot's own `[skip ci]` commit cannot re-trigger it).
+- **Header SDE freshness chip** next to the version: shows the date the ship
+  database was last pulled from the Static Data Export (🛰 SDE {date},
+  locale-aware, tooltip explaining the tool self-updates). If the matrix
+  fetch fails, an amber **⚠ SDE offline** warning appears instead, noting the
+  app is running on the minimal built-in fallback. Translated in EN/ES.
+
 ## 2026-06-12 - 11:32
 
 ### Iteration 9 — editor unification, overview tab interactions, Tailwind 4
