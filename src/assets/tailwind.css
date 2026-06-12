@@ -1,42 +1,72 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /* ----------------------------------------------------------------- */
-/* Theme tokens — channels are space-separated RGB for alpha support. */
+/* Theme tokens.                                                      */
+/* The app-shell palette switches with [data-theme]; the eve palette  */
+/* is the fixed, game-accurate chrome used by the preview panels.     */
 /* ----------------------------------------------------------------- */
 :root,
 [data-theme="dark"] {
-  --bg: 6 8 11;
-  --panel: 14 17 24;
-  --panel-2: 17 22 33;
-  --border: 27 34 48;
-  --text: 226 232 240;
-  --text-muted: 124 143 166;
-  --accent: 56 132 255;
-  --accent-hover: 96 165 250;
+  --bg: #06080b;
+  --panel: #0e1118;
+  --panel-2: #111621;
+  --border: #1b2230;
+  --text: #e2e8f0;
+  --text-muted: #7c8fa6;
+  --accent: #3884ff;
+  --accent-hover: #60a5fa;
 }
 
 [data-theme="light"] {
-  --bg: 238 242 247;
-  --panel: 255 255 255;
-  --panel-2: 248 250 252;
-  --border: 209 217 228;
-  --text: 17 24 39;
-  --text-muted: 90 105 128;
-  --accent: 37 99 235;
-  --accent-hover: 29 78 216;
+  --bg: #eef2f7;
+  --panel: #ffffff;
+  --panel-2: #f8fafc;
+  --border: #d1d9e4;
+  --text: #111827;
+  --text-muted: #5a6980;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+}
+
+/* Map the tokens (and the fixed game chrome) to Tailwind v4 utilities.
+   `inline` keeps utilities referencing var(--…) so the value re-resolves
+   when [data-theme] changes at runtime. */
+@theme inline {
+  --color-app-bg: var(--bg);
+  --color-app-panel: var(--panel);
+  --color-app-panel2: var(--panel-2);
+  --color-app-border: var(--border);
+  --color-app-text: var(--text);
+  --color-app-muted: var(--text-muted);
+  --color-app-accent: var(--accent);
+  --color-app-accentHover: var(--accent-hover);
+
+  /* Game-accurate EVE overview chrome (dark in every theme, softened
+     space-blue rather than pure black). */
+  --color-eve-bg: #0c1018;
+  --color-eve-panel: #11161f;
+  --color-eve-panel2: #171d28;
+  --color-eve-header: #10141c;
+  --color-eve-border: #283242;
+  --color-eve-accent: #3aa0ff;
+  --color-eve-text: #c8d4e3;
+  --color-eve-muted: #8295ac;
+
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 }
 
 html {
-  background-color: rgb(var(--bg));
+  background-color: var(--bg);
 }
 
 body {
-  background-color: rgb(var(--bg));
-  color: rgb(var(--text));
+  background-color: var(--bg);
+  color: var(--text);
   overflow-x: hidden;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 /* Native-client scrollbars, theme-aware */
@@ -45,14 +75,14 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: rgb(var(--bg));
+  background: var(--bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgb(var(--border));
+  background: var(--border);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(var(--accent));
+  background: var(--accent);
 }
 
 /* Rhythmic blink used by overview rows / colortags (EVE oscillation). */
@@ -71,6 +101,6 @@ body {
 
 /* Focus visibility for a11y across themes. */
 :focus-visible {
-  outline: 2px solid rgb(var(--accent));
+  outline: 2px solid var(--accent);
   outline-offset: 1px;
 }

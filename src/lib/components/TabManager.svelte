@@ -11,10 +11,6 @@
   import { cssToFloatTriplet, floatTripletToCss, renderEveMarkup, stripEveMarkup } from '$lib/utils/eveFormat';
   import DragList from './DragList.svelte';
   import MarkupInput from './MarkupInput.svelte';
-
-  function setTabColor(tab, css) {
-    tab.color = cssToFloatTriplet(css);
-  }
 </script>
 
 <div class="space-y-3">
@@ -42,7 +38,16 @@
       {/if}
     </div>
 
-    <MarkupInput label={t('tabs.name')} value={tab.name} oncommit={(v) => tab.name = v} />
+    <!-- The colour swatch edits the tab's native tabSetup colour field
+         (an [r,g,b] triplet — how Z-S and the game colour tabs), not name
+         markup, so loaded profiles show their real colour here. -->
+    <MarkupInput
+      label={t('tabs.name')}
+      value={tab.name}
+      oncommit={(v) => tab.name = v}
+      colorCss={Array.isArray(tab.color) ? floatTripletToCss(tab.color) : null}
+      oncolor={(css) => tab.color = css ? cssToFloatTriplet(css) : null}
+    />
 
     <div class="grid grid-cols-2 gap-2">
       <label class="flex flex-col gap-1">
@@ -64,18 +69,5 @@
       </label>
     </div>
 
-    <div class="flex items-center gap-2">
-      <span class="text-[9px] uppercase text-app-muted">{t('tabs.tabColor')}</span>
-      <input
-        type="color"
-        value={Array.isArray(tab.color) ? floatTripletToCss(tab.color) : '#ffffff'}
-        oninput={(e) => setTabColor(tab, e.currentTarget.value)}
-        class="w-7 h-6 rounded bg-transparent border border-app-border cursor-pointer"
-        aria-label={t('tabs.tabColor')}
-      />
-      {#if Array.isArray(tab.color)}
-        <button onclick={() => tab.color = null} class="text-[10px] text-app-muted hover:text-app-text underline">{t('common.clear')}</button>
-      {/if}
-    </div>
   </div>
 {/snippet}

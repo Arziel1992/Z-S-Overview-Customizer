@@ -258,7 +258,7 @@
           <SpaceBrackets />
         </div>
         <div class="h-[320px] lg:h-auto lg:flex-1 min-h-0">
-          <OverviewWindow />
+          <OverviewWindow onaddtab={() => (section = "tabs")} />
         </div>
         <div
           class="shrink-0 h-[200px] lg:h-[28%] lg:min-h-[140px] bg-app-panel border border-app-border rounded-lg p-3 flex flex-col min-h-0"

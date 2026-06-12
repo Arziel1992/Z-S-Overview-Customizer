@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 
 // Standard ES module workaround to define paths robustly
@@ -11,7 +12,7 @@ export default defineConfig({
 	// Served from a repo subpath on GitHub Pages. Runtime fetches must use
 	// import.meta.env.BASE_URL so they resolve under this base too.
 	base: "/Z-S-Overview-Customizer/",
-	plugins: [svelte()],
+	plugins: [tailwindcss(), svelte()],
 	resolve: {
 		alias: {
 			$lib: path.resolve(__dirname, "./src/lib"),

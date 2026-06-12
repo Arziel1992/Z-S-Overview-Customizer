@@ -238,7 +238,6 @@ client's overview import pipeline. Adapted from the
 Z-S-Overview-Customizer/
 ├── index.html                      # entry HTML (theme bootstrapping, fonts)
 ├── vite.config.js                  # Vite + base path (GitHub Pages) + aliases
-├── tailwind.config.js              # app (theme-aware) + eve (game-chrome) palettes
 ├── biome.json                      # lint/format config (+ Svelte overrides)
 ├── scripts/
 │   └── build_sde_matrix.py         # Fenris SDE zip → minified matrix_latest.json
@@ -363,8 +362,9 @@ For full disclosure, the libraries and tooling this project depends on:
 ### Build / dev tooling
 
 - [Vite](https://vitejs.dev/) (`^8`) + [@sveltejs/vite-plugin-svelte](https://github.com/sveltejs/vite-plugin-svelte) — dev server and bundler.
-- [Tailwind CSS](https://tailwindcss.com/) (`^3.3`) with
-  [PostCSS](https://postcss.org/) + [Autoprefixer](https://github.com/postcss/autoprefixer) — styling, themed via CSS custom properties.
+- [Tailwind CSS](https://tailwindcss.com/) (`^4`) via
+  [@tailwindcss/vite](https://tailwindcss.com/docs/installation/using-vite) —
+  styling with CSS-first `@theme` config, themed via CSS custom properties.
 - [Biome](https://biomejs.dev/) (`2.4`) — linter / formatter.
 
 ### Browser platform APIs
