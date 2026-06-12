@@ -36,6 +36,15 @@
 	},
 	"overrides": [
 		{
+			"includes": ["**/assets/tailwind.css"],
+			"linter": {
+				"enabled": false
+			},
+			"formatter": {
+				"enabled": false
+			}
+		},
+		{
 			"includes": ["**/*.svelte"],
 			"linter": {
 				"rules": {

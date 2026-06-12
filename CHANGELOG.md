@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-06-12 - 11:32
+
+### Iteration 9 — editor unification, overview tab interactions, Tailwind 4
+
+- **MarkupInput restyled on the ship-label editor's controls** (the preferred
+  look): same B / I / U buttons, plus a **px size field** (wrapping
+  `<fontsize=NN>`, now understood by the wrap/unwrap codec) and the colour
+  picker.
+- **Tab colour unified — and the "Z-S doesn't load" mystery solved:** Z-S (and
+  the game) colour tabs via the separate `tabSetup.color` field, not name
+  markup, which is why the markup swatch looked empty on load. The tab-name
+  editor's swatch now drives that native field directly (shown in the live
+  preview chip), and the legacy bottom colour-picker row is gone.
+- **Overview panel "+"** after the last tab (while under the game's 8-tab cap):
+  adds a tab and moves focus to the Tab Setup section to edit it.
+- **In-game-style right-click on overview tabs:** a context menu to re-point
+  the tab's **list preset** and **bracket preset** (incl. "None") without
+  leaving the preview; closes on pick / Escape / outside click. Preset entries
+  render with their **styled names** (colour/bold markup), matching how the
+  packs colour-code preset roles, with plain-text tooltips for truncated ones.
+- **Tailwind CSS migrated to v4** (dependency bump to `^4.3`): switched to the
+  first-party `@tailwindcss/vite` plugin, CSS-first `@theme inline` tokens
+  (runtime dark/light switching preserved), removed `tailwind.config.js`,
+  `postcss.config.js`, and the autoprefixer/postcss dev-dependencies; verified
+  all custom utilities and opacity modifiers in the production bundle.
+
 ## 2026-06-12 - 11:14
 
 ### Iteration 8 — unified markup editing UX

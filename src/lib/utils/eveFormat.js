@@ -122,18 +122,26 @@ export function renderEveMarkup(raw) {
 /**
  * Peel the *outermost* recognised wrappers off a markup string so a toolbar
  * can toggle them. Returns `{ inner, flags }` where flags is
- * `{ color: '0xAARRGGBB'|null, b, i, u: boolean }`. Peeling stops at the first
- * layer it doesn't recognise, so hand-written inner markup survives untouched.
+ * `{ color: '0xAARRGGBB'|null, fontsize: number|null, b, i, u: boolean }`.
+ * Peeling stops at the first layer it doesn't recognise, so hand-written
+ * inner markup survives untouched.
  */
 export function analyzeMarkup(raw) {
 	let inner = String(raw ?? "");
-	const flags = { color: null, b: false, i: false, u: false };
+	const flags = { color: null, fontsize: null, b: false, i: false, u: false };
 	let changed = true;
 	while (changed) {
 		changed = false;
 		// Only peel when the candidate inner has no stray close tag of the same
 		// kind — `<b>x</b> and <b>y</b>` must NOT be treated as one bold wrap.
-		let m = inner.match(/^<color=(0x[0-9a-fA-F]{6,8})>([\s\S]*)<\/color>$/);
+		let m = inner.match(/^<fontsize=(\d+)>([\s\S]*)<\/fontsize>$/);
+		if (m && flags.fontsize == null && !m[2].includes("</fontsize>")) {
+			flags.fontsize = Number(m[1]);
+			inner = m[2];
+			changed = true;
+			continue;
+		}
+		m = inner.match(/^<color=(0x[0-9a-fA-F]{6,8})>([\s\S]*)<\/color>$/);
 		if (m && flags.color == null && !m[2].includes("</color>")) {
 			flags.color = m[1];
 			inner = m[2];
@@ -155,7 +163,8 @@ export function analyzeMarkup(raw) {
 
 /**
  * Inverse of analyzeMarkup: re-wrap `inner` in the flagged tags using the
- * conventional nesting seen in real exports (`<color=…><b>…</b></color>`).
+ * conventional nesting seen in real exports
+ * (`<fontsize=12><color=…><b>…</b></color></fontsize>`).
  */
 export function composeMarkup(inner, flags) {
 	let out = inner;
@@ -163,6 +172,7 @@ export function composeMarkup(inner, flags) {
 	if (flags.i) out = `<i>${out}</i>`;
 	if (flags.b) out = `<b>${out}</b>`;
 	if (flags.color) out = `<color=${flags.color}>${out}</color>`;
+	if (flags.fontsize) out = `<fontsize=${flags.fontsize}>${out}</fontsize>`;
 	return out;
 }
 
