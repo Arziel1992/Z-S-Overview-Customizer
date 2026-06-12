@@ -119,6 +119,53 @@ export function renderEveMarkup(raw) {
 	return out + "</span>".repeat(open);
 }
 
+/**
+ * Peel the *outermost* recognised wrappers off a markup string so a toolbar
+ * can toggle them. Returns `{ inner, flags }` where flags is
+ * `{ color: '0xAARRGGBB'|null, b, i, u: boolean }`. Peeling stops at the first
+ * layer it doesn't recognise, so hand-written inner markup survives untouched.
+ */
+export function analyzeMarkup(raw) {
+	let inner = String(raw ?? "");
+	const flags = { color: null, b: false, i: false, u: false };
+	let changed = true;
+	while (changed) {
+		changed = false;
+		// Only peel when the candidate inner has no stray close tag of the same
+		// kind — `<b>x</b> and <b>y</b>` must NOT be treated as one bold wrap.
+		let m = inner.match(/^<color=(0x[0-9a-fA-F]{6,8})>([\s\S]*)<\/color>$/);
+		if (m && flags.color == null && !m[2].includes("</color>")) {
+			flags.color = m[1];
+			inner = m[2];
+			changed = true;
+			continue;
+		}
+		for (const tag of ["b", "i", "u"]) {
+			m = inner.match(new RegExp(`^<${tag}>([\\s\\S]*)</${tag}>$`));
+			if (m && !flags[tag] && !m[1].includes(`</${tag}>`)) {
+				flags[tag] = true;
+				inner = m[1];
+				changed = true;
+				break;
+			}
+		}
+	}
+	return { inner, flags };
+}
+
+/**
+ * Inverse of analyzeMarkup: re-wrap `inner` in the flagged tags using the
+ * conventional nesting seen in real exports (`<color=…><b>…</b></color>`).
+ */
+export function composeMarkup(inner, flags) {
+	let out = inner;
+	if (flags.u) out = `<u>${out}</u>`;
+	if (flags.i) out = `<i>${out}</i>`;
+	if (flags.b) out = `<b>${out}</b>`;
+	if (flags.color) out = `<color=${flags.color}>${out}</color>`;
+	return out;
+}
+
 /** Strip all markup to plain text (for aria-labels, dropdowns). */
 export function stripEveMarkup(raw) {
 	if (raw == null) return "";

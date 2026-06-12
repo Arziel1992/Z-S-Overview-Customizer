@@ -433,6 +433,88 @@ class CustomiserStore {
 		if (preset) this.toggleMember(preset.groups, groupId);
 	}
 
+	/* -------------------------- preset CRUD -------------------------- */
+	// Tabs reference presets BY NAME (that is how the game's tabSetup works),
+	// so every operation here keeps tab.overview / tab.bracket consistent:
+	// rename cascades, delete remaps.
+
+	/** Derive a name that doesn't collide with any existing preset. */
+	uniquePresetName(base) {
+		if (!this.presets.some((p) => p.name === base)) return base;
+		let i = 2;
+		while (this.presets.some((p) => p.name === `${base} ${i}`)) i++;
+		return `${base} ${i}`;
+	}
+
+	/** Create an empty preset and make it the one being edited. */
+	addPreset(name = "New Preset") {
+		const unique = this.uniquePresetName(name);
+		this.presets.push({
+			name: unique,
+			alwaysShownStates: [],
+			filteredStates: [],
+			groups: [],
+		});
+		this.activePresetName = unique;
+		return unique;
+	}
+
+	/** Deep-copy a preset (filters and groups included) under a "(copy)" name. */
+	duplicatePreset(name = this.activePresetName) {
+		const src = this.presetByName(name);
+		if (!src) return null;
+		const unique = this.uniquePresetName(`${src.name} (copy)`);
+		this.presets.push({
+			name: unique,
+			alwaysShownStates: [...src.alwaysShownStates],
+			filteredStates: [...src.filteredStates],
+			groups: [...src.groups],
+		});
+		this.activePresetName = unique;
+		return unique;
+	}
+
+	/**
+	 * Rename a preset and cascade the new name into every tab that points at
+	 * it. Returns false (no change) when the name is empty or already taken.
+	 */
+	renamePreset(oldName, newName) {
+		const trimmed = newName?.trim();
+		if (!trimmed || trimmed === oldName) return false;
+		if (this.presets.some((p) => p.name === trimmed)) return false;
+		const preset = this.presetByName(oldName);
+		if (!preset) return false;
+
+		preset.name = trimmed;
+		for (const tab of this.tabs) {
+			if (tab.overview === oldName) tab.overview = trimmed;
+			if (tab.bracket === oldName) tab.bracket = trimmed;
+		}
+		if (this.activePresetName === oldName) this.activePresetName = trimmed;
+		return true;
+	}
+
+	/**
+	 * Delete a preset. Refusing to delete the last one (a profile must keep at
+	 * least one preset for its tabs). Tabs that used it fall back: list views
+	 * to the first remaining preset, brackets to none (null), matching how a
+	 * missing preset would degrade in the client.
+	 */
+	removePreset(name = this.activePresetName) {
+		if (this.presets.length <= 1) return false;
+		const i = this.presets.findIndex((p) => p.name === name);
+		if (i < 0) return false;
+
+		this.presets.splice(i, 1);
+		const fallback = this.presets[0].name;
+		for (const tab of this.tabs) {
+			if (tab.overview === name) tab.overview = fallback;
+			if (tab.bracket === name) tab.bracket = null;
+		}
+		if (this.activePresetName === name) this.activePresetName = fallback;
+		return true;
+	}
+
 	/* -------------------------- tabs -------------------------- */
 	addTab() {
 		if (this.tabs.length >= 8) return;
