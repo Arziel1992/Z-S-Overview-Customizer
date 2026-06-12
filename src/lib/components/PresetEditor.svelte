@@ -1,18 +1,44 @@
 <!--
   @component
-  Preset filter-logic editor. Pick a preset, then toggle its filteredStates
-  (red veto chips), alwaysShownStates (green override chips) and authorised
-  SDE groups (via MatrixSelector). Chips show "id · name" so the numeric ids
-  stay visible alongside their meaning.
+  Preset manager + filter-logic editor — the core of the overview system.
+  Create, duplicate, rename and delete presets (rename cascades into the tabs
+  that reference them; delete remaps those tabs), then edit the selected
+  preset's filteredStates (red veto chips), alwaysShownStates (green override
+  chips) and authorised SDE groups (via MatrixSelector). Chips show
+  "id · name" so the numeric ids stay visible alongside their meaning.
 -->
 <script>
   import { ALL_STATE_IDS, STATES } from '$lib/data/stateMatrix';
   import { t } from '$lib/i18n/strings.svelte.js';
   import { customiser } from '$lib/stores/customiserStore.svelte';
   import { stripEveMarkup } from '$lib/utils/eveFormat';
+  import MarkupInput from './MarkupInput.svelte';
   import MatrixSelector from './MatrixSelector.svelte';
 
   const preset = $derived(customiser.activePreset);
+
+  // Rename works on a draft committed via the store (NOT bind:value on
+  // preset.name) because tabs reference presets by name — a live binding
+  // would desync tab.overview/tab.bracket on every keystroke.
+  let nameDraft = $state('');
+  let nameError = $state('');
+  $effect(() => {
+    nameDraft = preset?.name ?? '';
+    nameError = '';
+  });
+
+  function commitRename() {
+    nameError = '';
+    if (!preset || nameDraft === preset.name) return;
+    if (!customiser.renamePreset(preset.name, nameDraft)) {
+      nameError = nameDraft.trim() ? t('presets.nameTaken') : '';
+      nameDraft = preset.name; // restore the valid name
+    }
+  }
+
+  function removeCurrent() {
+    if (!customiser.removePreset()) nameError = t('presets.lastPreset');
+  }
 
   function toggle(list, id) {
     const i = list.indexOf(id);
@@ -27,18 +53,51 @@
     <p class="text-[11px] text-app-muted mt-0.5">{t('presets.help')}</p>
   </div>
 
-  <label class="flex items-center gap-2">
-    <span class="text-[10px] uppercase text-app-muted shrink-0">{t('presets.select')}</span>
-    <select
-      value={customiser.activePresetName}
-      onchange={(e) => customiser.activePresetName = e.currentTarget.value}
-      class="flex-1 bg-app-bg border border-app-border rounded px-2 py-1 text-xs focus:outline-none focus:border-app-accent"
-    >
-      {#each customiser.presetNames as name}
-        <option value={name}>{stripEveMarkup(name)}</option>
-      {/each}
-    </select>
-  </label>
+  <!-- Preset selection + lifecycle actions -->
+  <div class="flex flex-wrap items-center gap-1.5">
+    <label class="flex items-center gap-2 flex-1 min-w-[200px]">
+      <span class="text-[10px] uppercase text-app-muted shrink-0">{t('presets.select')}</span>
+      <select
+        value={customiser.activePresetName}
+        onchange={(e) => customiser.activePresetName = e.currentTarget.value}
+        class="flex-1 min-w-0 bg-app-bg border border-app-border rounded px-2 py-1 text-xs focus:outline-none focus:border-app-accent"
+      >
+        {#each customiser.presetNames as name}
+          <option value={name}>{stripEveMarkup(name)}</option>
+        {/each}
+      </select>
+    </label>
+    <button
+      onclick={() => customiser.addPreset()}
+      class="text-xs bg-app-accent hover:bg-app-accentHover text-white font-semibold px-2.5 py-1 rounded transition-colors"
+    >+ {t('presets.add')}</button>
+    <button
+      onclick={() => customiser.duplicatePreset()}
+      class="text-xs border border-app-border hover:border-app-accent px-2.5 py-1 rounded transition-colors text-app-muted hover:text-app-text"
+    >{t('presets.duplicate')}</button>
+    <button
+      onclick={removeCurrent}
+      disabled={customiser.presets.length <= 1}
+      title={customiser.presets.length <= 1 ? t('presets.lastPreset') : t('presets.removeNote')}
+      class="text-xs border border-red-500/40 text-red-400 hover:bg-red-500/10 px-2.5 py-1 rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+    >{t('presets.remove')}</button>
+  </div>
+
+  {#if preset}
+    <!-- Rename (commits on change/Enter so tab references stay in sync) -->
+    <div class="bg-app-panel2 border border-app-border rounded p-2.5 space-y-1.5">
+      <MarkupInput
+        label={t('presets.name')}
+        value={nameDraft}
+        oncommit={(v) => nameDraft = v}
+        onfinish={commitRename}
+      />
+      <p class="text-[10px] text-app-muted">{t('presets.nameHelp')}</p>
+      {#if nameError}
+        <p class="text-[11px] text-red-400" role="alert">{nameError}</p>
+      {/if}
+    </div>
+  {/if}
 
   {#if preset}
     <!-- State filters -->

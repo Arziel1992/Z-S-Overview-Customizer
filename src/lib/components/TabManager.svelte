@@ -10,6 +10,7 @@
   import { customiser } from '$lib/stores/customiserStore.svelte';
   import { cssToFloatTriplet, floatTripletToCss, renderEveMarkup, stripEveMarkup } from '$lib/utils/eveFormat';
   import DragList from './DragList.svelte';
+  import MarkupInput from './MarkupInput.svelte';
 
   function setTabColor(tab, css) {
     tab.color = cssToFloatTriplet(css);
@@ -41,10 +42,7 @@
       {/if}
     </div>
 
-    <label class="flex flex-col gap-1">
-      <span class="text-[9px] uppercase text-app-muted">{t('tabs.name')}</span>
-      <input type="text" bind:value={tab.name} class="bg-app-bg border border-app-border rounded px-2 py-1 text-xs font-mono focus:outline-none focus:border-app-accent" />
-    </label>
+    <MarkupInput label={t('tabs.name')} value={tab.name} oncommit={(v) => tab.name = v} />
 
     <div class="grid grid-cols-2 gap-2">
       <label class="flex flex-col gap-1">

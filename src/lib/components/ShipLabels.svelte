@@ -11,6 +11,7 @@
   import { customiser } from '$lib/stores/customiserStore.svelte';
   import { cssToFloatTriplet, floatTripletToCss } from '$lib/utils/eveFormat';
   import DragList from './DragList.svelte';
+  import MarkupHint from './MarkupHint.svelte';
 
   const FIELD_TYPES = ['ship type', 'ship name', 'pilot name', 'alliance', 'corporation', 'faction', 'militia'];
 
@@ -64,11 +65,11 @@
     {#if cfg && value != null && value !== 'linebreak'}
       <div class="grid grid-cols-2 gap-2 mt-2">
         <label class="flex flex-col gap-1">
-          <span class="text-[9px] uppercase text-app-muted">{t('ships.prefix')}</span>
+          <span class="text-[9px] uppercase text-app-muted flex items-center gap-1.5">{t('ships.prefix')} <MarkupHint /></span>
           <input type="text" bind:value={cfg.pre} class="bg-app-bg border border-app-border rounded px-2 py-1 text-xs font-mono focus:outline-none focus:border-app-accent" />
         </label>
         <label class="flex flex-col gap-1">
-          <span class="text-[9px] uppercase text-app-muted">{t('ships.suffix')}</span>
+          <span class="text-[9px] uppercase text-app-muted flex items-center gap-1.5">{t('ships.suffix')} <MarkupHint /></span>
           <input type="text" bind:value={cfg.post} class="bg-app-bg border border-app-border rounded px-2 py-1 text-xs font-mono focus:outline-none focus:border-app-accent" />
         </label>
       </div>

@@ -1,5 +1,43 @@
 # Changelog
 
+## 2026-06-12 - 11:14
+
+### Iteration 8 — unified markup editing UX
+
+- **New shared `MarkupInput` component** for every text field that accepts EVE
+  inline markup: raw-text input plus a formatting toolbar — **colour picker and
+  B / I / U toggles** that wrap/unwrap the *outermost* tags
+  (`analyzeMarkup`/`composeMarkup` in the codec; hand-written inner markup is
+  never touched, and unbalanced same-tag patterns are guarded against) — with a
+  live-rendered preview.
+- **New `MarkupHint` legend popover** ("?" icon): lists all supported tags
+  (`<color=0xAARRGGBB>`, `<b>`, `<i>`, `<u>`, `<fontsize=NN>`) with
+  live-rendered examples; keyboard accessible (Escape / focus-out closes).
+- **Unified across the app:** tab names and preset names now share the same
+  editor (preset names gained the colour picker and style toggles tab names
+  had been missing — and vice versa); ship-label prefix/suffix fields carry
+  the formatting legend.
+- All new UI copy translated in **English and Español**.
+
+## 2026-06-12 - 10:47
+
+### Iteration 7 — preset management, per-file locales
+
+- **Preset create / duplicate / rename / delete** — the missing core of the
+  overview system — added to the Presets panel and the store:
+  - **New** creates an empty preset (collision-safe naming) and selects it;
+    **Duplicate** deep-copies filters and groups under a "(copy)" name.
+  - **Rename** commits through the store (not a live binding) and **cascades
+    into every tab** whose `overview`/`bracket` points at the old name, with
+    duplicate-name validation and an EVE-markup live preview of the name.
+  - **Delete** refuses to remove the last preset; tabs that used the deleted
+    preset fall back (list views → first remaining preset, brackets → none).
+- **i18n restructured into one file per language** under
+  `src/lib/i18n/locales/` (`en.js` reference, `es.js`), with
+  `strings.svelte.js` reduced to the reactive runtime (locale state,
+  persistence, fallback resolution). README translation guide updated for the
+  new copy-one-file workflow.
+
 ## 2026-06-11 - 22:49
 
 ### Iteration 6 — Spanish localisation, navbar redesign, docs

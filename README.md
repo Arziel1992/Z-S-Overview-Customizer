@@ -38,9 +38,11 @@ behind a Z-S overview. Fly safe. o7
   YAML (ordered-map tuples, integer state ids, `<color=…>` / `<fontsize=…>`
   markup). Both bundled bases — **Fenris Default** and **Z-S Core** — parse through
   the same pipeline, and exports round-trip cleanly back into EVE.
-- **1:1 settings mirror.** Tabs, Presets (groups / filtered states / always-shown
-  states), Columns, Appearance (colortag + background priority, colour pickers,
-  blink), Ship Labels, Misc, and a live YAML view.
+- **1:1 settings mirror.** Tabs, Presets — create, duplicate, rename and delete
+  them (renames cascade into the tabs that use them) plus their groups /
+  filtered states / always-shown states — Columns, Appearance (colortag +
+  background priority, colour pickers, blink), Ship Labels, Misc, and a live
+  YAML view.
 - **Customisable live preview.** Add your own entities to the roster and watch
   them update live in a game-accurate overview list and a tactical bracket view
   with a twinkling starfield — including fully styled `shipLabels` bracket text.
@@ -433,23 +435,28 @@ npm run preview  # preview the production build
 
 ## Contributing translations
 
-All UI copy lives in one file:
-[src/lib/i18n/strings.svelte.js](./src/lib/i18n/strings.svelte.js). The app
-falls back to English for any key a translation hasn't covered yet, so partial
-translations are safe to ship.
+Each language is one file under
+[src/lib/i18n/locales/](./src/lib/i18n/locales/) —
+[`en.js`](./src/lib/i18n/locales/en.js) is the reference. The app falls back to
+English for any key a translation hasn't covered yet, so partial translations
+are safe to ship.
 
 To add a language (say, German):
 
-1. Open `src/lib/i18n/strings.svelte.js`.
-2. Copy the entire `en` object, rename the copy `de`, and translate the
-   **values only** — keep every key name and `{placeholder}` token exactly as
-   they are (e.g. `"{n}/8 tabs"` → `"{n}/8 Registerkarten"`).
-3. Register it in the `locales` map: `const locales = { en, es, de };`
-4. Add its native name to the selector list:
-   `export const LOCALE_NAMES = { en: "English", es: "Español", de: "Deutsch" };`
-5. Run `npm run dev`, pick the new language from the header dropdown, and click
+1. Copy `src/lib/i18n/locales/en.js` to `src/lib/i18n/locales/de.js`.
+2. Translate the **values only** — keep every key name and `{placeholder}`
+   token exactly as they are (e.g. `"{n}/8 tabs"` → `"{n}/8 Registerkarten"`).
+3. Register it in `src/lib/i18n/strings.svelte.js`:
+
+   ```js
+   import de from "./locales/de.js";
+   const locales = { en, es, de };
+   export const LOCALE_NAMES = { en: "English", es: "Español", de: "Deutsch" };
+   ```
+
+4. Run `npm run dev`, pick the new language from the header dropdown, and click
    through every panel and dialog to sanity-check lengths and encoding.
-6. Open a pull request — one file changed, nothing else needed.
+5. Open a pull request — one new file plus two registration lines.
 
 Guidelines: keep EVE-specific terms players know from the client (Overview,
 preset, bracket, colortag) untranslated where the localized client does the
