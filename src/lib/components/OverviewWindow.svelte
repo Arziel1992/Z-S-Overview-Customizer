@@ -2,7 +2,7 @@
   @component
   Game-accurate overview list preview. Renders the profile's tab strip (EVE
   markup + optional tab colours, a "+" to add a tab while under the game's
-  8-tab cap, and an in-game-style right-click menu to re-point a tab's list /
+  20-tab cap, and an in-game-style right-click menu to re-point a tab's list /
   bracket presets), the active column set in columnOrder order, and one row
   per roster entity that the active tab's *overview* preset lets through —
   with the winning colortag stripe, row background tint and blink resolved by
@@ -15,7 +15,7 @@
 <script>
   import { COLUMN_DEFS } from '$lib/data/stateMatrix';
   import { t } from '$lib/i18n/strings.svelte.js';
-  import { customiser } from '$lib/stores/customiserStore.svelte';
+  import { customiser, MAX_TABS } from '$lib/stores/customiserStore.svelte';
   import { floatTripletToCss, renderEveMarkup, stripEveMarkup } from '$lib/utils/eveFormat';
 
   let { onaddtab } = $props();
@@ -89,7 +89,7 @@
         class="px-3 py-1.5 text-xs border-b-2 transition-colors shrink-0 {customiser.activeTabId === tab.index ? 'border-eve-accent bg-eve-panel' : 'border-transparent hover:bg-white/5'}"
       >{@html renderEveMarkup(tab.name)}</button>
     {/each}
-    {#if customiser.tabs.length < 8}
+    {#if customiser.tabs.length < MAX_TABS}
       <button
         onclick={addTab}
         class="px-2.5 py-1.5 text-xs text-eve-muted hover:text-eve-text hover:bg-white/5 transition-colors shrink-0"

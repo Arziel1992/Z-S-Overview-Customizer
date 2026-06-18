@@ -26,6 +26,10 @@ import { mergeModel } from "$lib/utils/merge";
 // localStorage keys. SESSION_KEY holds the full working profile as YAML —
 // reusing the export format means session restore exercises the same codec
 // path as a user import (one format, no second serialisation scheme).
+// The EVE client now exposes up to 20 overview tabs (historically 8). This is
+// the single source of truth for the cap — UI and store both read it.
+export const MAX_TABS = 20;
+
 const THEME_KEY = "zs-overview-theme";
 const SCALE_KEY = "zs-overview-scale";
 const SESSION_KEY = "zs-overview-session";
@@ -141,7 +145,7 @@ class CustomiserStore {
 	// --- profile model (mirrors the YAML root keys 1:1) ---
 	/** [{ name, alwaysShownStates:[int], filteredStates:[int], groups:[int] }] */
 	presets = $state([]);
-	/** [{ index:0–7, name (EVE markup), color:[r,g,b]|null, overview, bracket|null }] */
+	/** [{ index:0–19, name (EVE markup), color:[r,g,b]|null, overview, bracket|null }] */
 	tabs = $state([]);
 	activeTabId = $state(0);
 	/** Master left-to-right column order (superset of the active set). */
@@ -523,7 +527,7 @@ class CustomiserStore {
 
 	/* -------------------------- tabs -------------------------- */
 	addTab() {
-		if (this.tabs.length >= 8) return;
+		if (this.tabs.length >= MAX_TABS) return;
 		const index = this.tabs.length
 			? Math.max(...this.tabs.map((t) => t.index)) + 1
 			: 0;
