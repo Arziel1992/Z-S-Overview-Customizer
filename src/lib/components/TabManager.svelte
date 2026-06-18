@@ -1,13 +1,13 @@
 <!--
   @component
-  Tab Setup editor (up to 8 client tabs). Each card binds a tab's markup name,
+  Tab Setup editor (up to 20 client tabs). Each card binds a tab's markup name,
   its list (overview) preset, its 3D bracket preset (or none), and an optional
   [r,g,b] tab-text colour. Cards reorder via DragList; indexes renumber on
   commit through the store so tab order matches the in-game strip.
 -->
 <script>
   import { t } from '$lib/i18n/strings.svelte.js';
-  import { customiser } from '$lib/stores/customiserStore.svelte';
+  import { customiser, MAX_TABS } from '$lib/stores/customiserStore.svelte';
   import { cssToFloatTriplet, floatTripletToCss, renderEveMarkup, stripEveMarkup } from '$lib/utils/eveFormat';
   import DragList from './DragList.svelte';
   import MarkupInput from './MarkupInput.svelte';
@@ -21,7 +21,7 @@
 
   <DragList values={customiser.tabs} onchange={(v) => customiser.reorderTabs(v)} row={tabCard} />
 
-  {#if customiser.tabs.length < 8}
+  {#if customiser.tabs.length < MAX_TABS}
     <button onclick={() => customiser.addTab()} class="w-full bg-app-accent hover:bg-app-accentHover text-white text-xs font-semibold py-2 rounded transition-colors">+ {t('tabs.add')}</button>
   {:else}
     <p class="text-center text-[11px] text-amber-500">{t('tabs.max')}</p>

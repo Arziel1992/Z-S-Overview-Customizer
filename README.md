@@ -124,7 +124,8 @@ with strict precedence:
 
 ### 3. Tabs: lists and brackets, decoupled
 
-The overview window supports up to **8 tabs**. Each tab points at **two**
+The overview window supports up to **20 tabs** (the client's current cap; it was
+historically 8). Each tab points at **two**
 presets: `overview` (the flat list) and `bracket` (the floating icons in 3D
 space) — independently. A logistics pilot can list only friendlies while still
 seeing hostile brackets in space to dodge incoming fire. `bracket: null`
@@ -164,7 +165,7 @@ The complete reference of every key the client parses in an overview `.yaml`.
 | `stateColorsNameList`             | Maps states to a named colour (`orange`, `darkBlue`, …) or `0xAARRGGBB` hex.     |
 | `overviewColumns` / `columnOrder` | Which telemetry columns show, and in what left-to-right order.                   |
 | `presets`                         | The named boolean filters (see Preset variables below).                          |
-| `tabSetup`                        | Maps tab indexes 0–7 to presets (see Tab variables below).                       |
+| `tabSetup`                        | Maps tab indexes 0–19 to presets (see Tab variables below).                      |
 | `shipLabelOrder` / `shipLabels`   | Order and styling of the floating bracket label segments.                        |
 | `userSettings`                    | Misc client-side settings carried with the profile.                              |
 
@@ -197,30 +198,41 @@ Exact strings accepted inside `overviewColumns` (misspelling breaks rendering):
 Prefix with `flag_` or `background_` when used in `stateBlinks` /
 `stateColorsNameList` (e.g. `background_13`).
 
-| ID      | Meaning                                                     |
-| ------- | ----------------------------------------------------------- |
-| 9       | Neutral standing                                            |
-| 10      | Bad standing                                                |
-| 11      | In your fleet                                               |
-| 12      | Terrible standing (−10)                                     |
-| 13      | Criminal / active Suspect-Criminal timer                    |
-| 14      | In your faction militia                                     |
-| 15      | Excellent standing (+10)                                    |
-| 16      | Good standing (+5)                                          |
-| 17      | Threat to your corporation                                  |
-| 18      | In your corporation                                         |
-| 19      | In your alliance                                            |
-| 20      | Security threat (legal/standing combos)                     |
-| 21      | Has an active bounty                                        |
-| 36 / 37 | Legacy veto states (edge-case entities in `filteredStates`) |
-| 44      | Outlaw / valid kill right                                   |
-| 45      | Low security status                                         |
-| 48 / 49 | Agent / VIP entities                                        |
-| 50      | Limited engagement (duel)                                   |
-| 51      | At war with your militia                                    |
-| 52      | Active war target                                           |
-| 53      | Secondary militia/war evaluation                            |
-| 66 / 68 | Faction / faction-militia states (observed in live exports) |
+The IDs and meanings below follow Tomas Iridium's canonical
+[`states_all.yaml`](https://github.com/iridiumops/overview/blob/main/parts/states_all.yaml)
+(creator of Iridium Overview). The same IDs drive filters, backgrounds and flags
+alike — **except** the wreck IDs (36 / 37), which the client honours only in
+`filteredStates` / `alwaysShownStates`, never as a colortag or background. ID 20
+has no observed in-game meaning but surfaces in YAML exports, so it is kept as a
+reserved passthrough.
+
+| ID | Meaning                                             |
+| -- | --------------------------------------------------- |
+| 9  | Pilot has a security status below -5                |
+| 10 | Pilot has a security status below 0                 |
+| 11 | Pilot is in your fleet                              |
+| 12 | Pilot is in your Capsuleer corporation              |
+| 13 | Pilot is at war with your corporation/alliance      |
+| 14 | Pilot is in your alliance                           |
+| 15 | Pilot has Excellent Standing                        |
+| 16 | Pilot has Good Standing                             |
+| 17 | Pilot has Neutral Standing                          |
+| 18 | Pilot has Bad Standing                              |
+| 19 | Pilot has Terrible Standing                         |
+| 20 | Reserved - appears in exports, no in-game meaning   |
+| 21 | Pilot (agent) is interactable                       |
+| 36 | Wreck is already viewed *(filter only)*             |
+| 37 | Wreck is empty *(filter only)*                      |
+| 44 | Pilot is at war with your militia                   |
+| 45 | Pilot is in your militia or allied to your militia  |
+| 48 | Pilot has No Standing                               |
+| 49 | Pilot is an ally in one or more of your wars        |
+| 50 | Pilot is a suspect                                  |
+| 51 | Pilot is a criminal                                 |
+| 52 | Pilot has a limited engagement with you             |
+| 53 | Pilot has a killright on them that you can activate |
+| 66 | Pilot is in your Non Capsuleer corporation          |
+| 68 | Pilot has retribution timer                         |
 
 ---
 
@@ -473,7 +485,7 @@ To add a language (say, German):
 
 1. Copy `src/lib/i18n/locales/en.js` to `src/lib/i18n/locales/de.js`.
 2. Translate the **values only** — keep every key name and `{placeholder}`
-   token exactly as they are (e.g. `"{n}/8 tabs"` → `"{n}/8 Registerkarten"`).
+   token exactly as they are (e.g. `"{n}/20 tabs"` → `"{n}/20 Registerkarten"`).
 3. Register it in `src/lib/i18n/strings.svelte.js`:
 
    ```js

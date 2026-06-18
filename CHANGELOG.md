@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-06-18 - 20:09
+
+### State matrix corrected to Tomas Iridium's canonical taxonomy + 20-tab cap
+
+- **State IDs realigned to the in-game truth.** The previous `STATES` map had
+  most IDs mislabelled/shifted (e.g. 9 was "Neutral Standing", actually
+  "security status below -5"; 17 was "Corp Threat", actually "Neutral
+  Standing"; 66/68 were guessed as faction states, actually "Non Capsuleer
+  corporation" / "retribution timer"). Every ID 9–68 has been corrected
+  against Tomas Iridium's canonical
+  [`states_all.yaml`](https://github.com/iridiumops/overview/blob/main/parts/states_all.yaml),
+  and each `name` is now the **verbatim** game/Iridium label so the UI text
+  matches the client exactly. `kind`/`color` defaults were re-bucketed to suit.
+- **Wreck IDs 36 / 37 flagged `filterOnly`.** Per Tomas, these are honoured only
+  in `filteredStates` / `alwaysShownStates`, never as a colortag or background.
+  Added `APPEARANCE_STATE_IDS` and `isFilterOnlyState()` so appearance-facing UI
+  can exclude them; the preset filter UI still lists them.
+- **ID 20 retained as a reserved passthrough** — no observed in-game meaning but
+  it surfaces in YAML exports, so it round-trips losslessly.
+- **Tab cap raised 8 → 20** to match the current client. Introduced a single
+  `MAX_TABS` constant (store) consumed by `TabManager` and `OverviewWindow`;
+  updated EN/ES strings and all docs/comments referencing the old limit.
+- **README:** rewrote the state-ID table with the exact Iridium wording and the
+  filter-only / reserved annotations; updated the 20-tab references.
+
 ## 2026-06-13 - 01:12
 
 ### Bugfix & housekeeping — group-browser category strip, README TOC, CI on push

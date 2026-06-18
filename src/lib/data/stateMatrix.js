@@ -4,9 +4,15 @@
  *
  * These integers are what the game's YAML actually stores in flagOrder,
  * backgroundOrder, filteredStates etc.; everything in the app derives display
- * names from here, never the reverse. Sourced from the community-documented
- * taxonomy (see the README's state-ID table); ids 66/68 are undocumented but
- * observed in live Z-S exports.
+ * names from here, never the reverse.
+ *
+ * Taxonomy corrected against Tomas Iridium's (Iridium Overview) canonical list:
+ *   https://github.com/iridiumops/overview/blob/main/parts/states_all.yaml
+ * Per his notes, the same ids drive filters, backgrounds and flags alike — with
+ * the exception of the wreck ids (36/37), which the client honours ONLY in
+ * filteredStates / alwaysShownStates (never as a colortag or background). Those
+ * carry `filterOnly: true`. Id 20 has no observed in-game meaning but appears in
+ * YAML exports, so it is retained as a reserved passthrough.
  *
  * `kind` loosely buckets states for display purposes:
  *   legal | standing | affiliation | militia | misc
@@ -16,32 +22,34 @@
 
 import { argbHexToCss } from "$lib/utils/eveFormat";
 
+// `name` is the verbatim in-game / Iridium label for each state — kept exact so
+// the UI text matches what the client shows; do not paraphrase these strings.
 export const STATES = {
-	9: { name: "Neutral Standing", kind: "standing", color: "grey" },
-	10: { name: "Bad Standing", kind: "standing", color: "orange" },
-	11: { name: "Fleet Member", kind: "affiliation", color: "purple" },
-	12: { name: "Terrible Standing", kind: "standing", color: "red" },
-	13: { name: "Criminal / Suspect", kind: "legal", color: "red" },
-	14: { name: "Same Militia", kind: "militia", color: "blue" },
-	15: { name: "Excellent Standing (+10)", kind: "standing", color: "darkBlue" },
-	16: { name: "Good Standing (+5)", kind: "standing", color: "darkBlue" },
-	17: { name: "Corp Threat", kind: "affiliation", color: "orange" },
-	18: { name: "Corp Member", kind: "affiliation", color: "green" },
-	19: { name: "Alliance Member", kind: "affiliation", color: "blue" },
-	20: { name: "Security Threat", kind: "legal", color: "orange" },
-	21: { name: "Has Bounty", kind: "misc", color: "white" },
-	36: { name: "Legacy Veto (36)", kind: "misc", color: "grey" },
-	37: { name: "Legacy Veto (37)", kind: "misc", color: "grey" },
-	44: { name: "Outlaw / Kill Right", kind: "legal", color: "red" },
-	45: { name: "Low Security Status", kind: "legal", color: "blue" },
-	48: { name: "Agent / VIP", kind: "misc", color: "black" },
-	49: { name: "VIP / Agent (alt)", kind: "misc", color: "blue" },
-	50: { name: "Limited Engagement", kind: "legal", color: "orange" },
-	51: { name: "Militia War", kind: "militia", color: "orange" },
-	52: { name: "War Target", kind: "legal", color: "orange" },
-	53: { name: "Militia / War (sec.)", kind: "militia", color: "orange" },
-	66: { name: "Faction (Same)", kind: "militia", color: "blue" },
-	68: { name: "Faction Militia", kind: "militia", color: "orange" },
+	9: { name: "Pilot has a security status below -5", kind: "legal", color: "red" },
+	10: { name: "Pilot has a security status below 0", kind: "legal", color: "orange" },
+	11: { name: "Pilot is in your fleet", kind: "affiliation", color: "purple" },
+	12: { name: "Pilot is in your Capsuleer corporation", kind: "affiliation", color: "green" },
+	13: { name: "Pilot is at war with your corporation/alliance", kind: "legal", color: "red" },
+	14: { name: "Pilot is in your alliance", kind: "affiliation", color: "blue" },
+	15: { name: "Pilot has Excellent Standing", kind: "standing", color: "darkBlue" },
+	16: { name: "Pilot has Good Standing", kind: "standing", color: "darkBlue" },
+	17: { name: "Pilot has Neutral Standing", kind: "standing", color: "grey" },
+	18: { name: "Pilot has Bad Standing", kind: "standing", color: "orange" },
+	19: { name: "Pilot has Terrible Standing", kind: "standing", color: "red" },
+	20: { name: "Reserved (20)", kind: "misc", color: "grey" },
+	21: { name: "Pilot (agent) is interactable", kind: "misc", color: "white" },
+	36: { name: "Wreck is already viewed", kind: "misc", color: "grey", filterOnly: true },
+	37: { name: "Wreck is empty", kind: "misc", color: "grey", filterOnly: true },
+	44: { name: "Pilot is at war with your militia", kind: "militia", color: "red" },
+	45: { name: "Pilot is in your militia or allied to your militia", kind: "militia", color: "blue" },
+	48: { name: "Pilot has No Standing", kind: "standing", color: "grey" },
+	49: { name: "Pilot is an ally in one or more of your wars", kind: "legal", color: "blue" },
+	50: { name: "Pilot is a suspect", kind: "legal", color: "yellow" },
+	51: { name: "Pilot is a criminal", kind: "legal", color: "red" },
+	52: { name: "Pilot has a limited engagement with you", kind: "legal", color: "orange" },
+	53: { name: "Pilot has a killright on them that you can activate", kind: "legal", color: "orange" },
+	66: { name: "Pilot is in your Non Capsuleer corporation", kind: "affiliation", color: "green" },
+	68: { name: "Pilot has retribution timer", kind: "legal", color: "orange" },
 };
 
 /** All state ids the UI knows about, in ascending numeric order. */
@@ -49,12 +57,25 @@ export const ALL_STATE_IDS = Object.keys(STATES)
 	.map(Number)
 	.sort((a, b) => a - b);
 
+/**
+ * State ids valid as colortag/background appearance targets — everything except
+ * the wreck ids (36/37), which the client only evaluates as filters.
+ */
+export const APPEARANCE_STATE_IDS = ALL_STATE_IDS.filter(
+	(id) => !STATES[id]?.filterOnly,
+);
+
 export function stateName(id) {
 	return STATES[id]?.name ?? `State ${id}`;
 }
 
 export function stateKind(id) {
 	return STATES[id]?.kind ?? "misc";
+}
+
+/** True for ids the client honours only in filters, never as flag/background. */
+export function isFilterOnlyState(id) {
+	return STATES[id]?.filterOnly === true;
 }
 
 /**
