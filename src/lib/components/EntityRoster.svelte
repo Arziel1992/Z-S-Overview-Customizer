@@ -3,7 +3,12 @@
   Editor for the live-preview entity roster. The list shows each entity's
   name/type plus dots for its first relationship states; add opens a modal
   with a draft (committed on confirm), edit opens the same modal bound
-  directly to the store entity so changes preview live as you type.
+  directly to the store entity so changes preview live as you type. The
+  modal's Type field searches the full SDE matrix (every space-relevant
+  category), so any real type can be added; picking a match wires up its
+  typeId/groupId for the preset group filters. A "Rapid populate" section
+  loads, saves, renames, overwrites and deletes named entity groupings
+  (built-in samples included) via the store's rosterSets.
 -->
 <script>
   import { STATES } from '$lib/data/stateMatrix';
@@ -11,19 +16,43 @@
   import { customiser } from '$lib/stores/customiserStore.svelte';
   import Modal from './Modal.svelte';
 
-  const GROUP_OPTIONS = [
-    [25, 'Frigate'], [26, 'Cruiser'], [27, 'Battleship'], [28, 'Hauler'],
-    [419, 'Combat Battlecruiser'], [540, 'Command Ship'], [547, 'Carrier'],
-    [30, 'Titan'], [90, 'Capsule (Pod)'], [10, 'Stargate'], [15, 'Station'],
-    [6, 'Sun'], [1657, 'Citadel'], [365, 'Control Tower'],
-  ];
   const STATE_OPTIONS = [9, 10, 11, 12, 13, 14, 18, 19, 44, 45, 50, 51, 52];
 
   let editing = $state(null); // entity ref (edit) or draft (add)
   let isNew = $state(false);
+  let typeQuery = $state(''); // live SDE search text; '' = dropdown closed
+  let newSetName = $state('');
+
+  // Up to 25 SDE types whose name contains the query (across all categories).
+  const typeMatches = $derived.by(() => {
+    const m = customiser.sdeMatrix;
+    const q = typeQuery.toLowerCase().trim();
+    if (!m || q.length < 2) return [];
+    const out = [];
+    for (const [tid, tp] of Object.entries(m.types)) {
+      if (tp.name.toLowerCase().includes(q)) {
+        const g = m.groups[tp.groupId];
+        out.push({ tid: Number(tid), name: tp.name, groupId: tp.groupId, groupName: g?.name ?? String(tp.groupId) });
+        if (out.length >= 25) break;
+      }
+    }
+    return out;
+  });
+
+  const groupName = $derived(
+    customiser.sdeMatrix?.groups[editing?.groupId]?.name ?? `#${editing?.groupId}`
+  );
+
+  function pickType(match) {
+    editing.type = match.name;
+    editing.typeId = match.tid;
+    editing.groupId = match.groupId;
+    typeQuery = '';
+  }
 
   function openAdd() {
     isNew = true;
+    typeQuery = '';
     editing = {
       pilotName: 'New Pilot', shipName: '', type: 'Rifter', typeId: 587, groupId: 25,
       corp: '—', alliance: '—', faction: '—', militia: '—', size: 'S',
@@ -32,6 +61,7 @@
   }
   function openEdit(entity) {
     isNew = false;
+    typeQuery = '';
     editing = entity;
   }
   function close() {
@@ -46,6 +76,14 @@
     if (i > -1) editing.states.splice(i, 1);
     else editing.states.push(id);
   }
+
+  function saveNewSet() {
+    if (customiser.saveRosterSet(newSetName)) newSetName = '';
+  }
+  function renameSet(set) {
+    const name = prompt(t('preview.renameSet'), set.name);
+    if (name != null) customiser.renameRosterSet(set.name, name);
+  }
 </script>
 
 <div class="flex flex-col h-full min-h-0">
@@ -53,6 +91,31 @@
     <h3 class="text-xs font-semibold uppercase tracking-wider text-app-muted">{t('preview.roster')}</h3>
     <button onclick={openAdd} class="text-[11px] font-semibold bg-app-accent hover:bg-app-accentHover text-white px-2.5 py-1 rounded transition-colors">+ {t('preview.addEntity')}</button>
   </div>
+
+  <details class="shrink-0 mb-2 text-xs">
+    <summary class="cursor-pointer select-none text-[11px] text-app-muted hover:text-app-text">⚡ {t('preview.rapidPopulate')}</summary>
+    <div class="mt-1.5 space-y-1">
+      {#each customiser.rosterSets as set (set.name)}
+        <div class="flex items-center gap-1 bg-app-panel2 border border-app-border rounded px-2 py-1">
+          <button onclick={() => customiser.loadRosterSet(set.name)} title={t('preview.loadSet')} class="flex-1 min-w-0 text-left truncate text-app-text hover:text-app-accent transition-colors">
+            {set.name} <span class="text-app-muted">({set.entities.length})</span>
+          </button>
+          <button onclick={() => renameSet(set)} title={t('preview.renameSet')} aria-label={t('preview.renameSet')} class="text-app-muted hover:text-app-text px-1">✎</button>
+          <button onclick={() => customiser.saveRosterSet(set.name)} title={t('preview.overwriteSet')} aria-label={t('preview.overwriteSet')} class="text-app-muted hover:text-app-text px-1">⟳</button>
+          <button onclick={() => customiser.deleteRosterSet(set.name)} title={t('preview.deleteSet')} aria-label={t('preview.deleteSet')} class="text-red-400 hover:text-red-300 px-1">✕</button>
+        </div>
+      {/each}
+      <div class="flex gap-1">
+        <input
+          bind:value={newSetName}
+          placeholder={t('preview.setName')}
+          aria-label={t('preview.setName')}
+          class="flex-1 min-w-0 bg-app-bg border border-app-border rounded px-2 py-1 text-[11px] focus:outline-none focus:border-app-accent"
+        />
+        <button onclick={saveNewSet} class="text-[11px] border border-app-border hover:border-app-accent px-2 py-1 rounded transition-colors shrink-0">💾 {t('preview.saveSet')}</button>
+      </div>
+    </div>
+  </details>
 
   <div class="flex-1 overflow-y-auto space-y-1 pr-1">
     {#each customiser.roster as entity (entity.id)}
@@ -78,18 +141,30 @@
           <span class="text-[9px] uppercase text-app-muted">{t('preview.pilot')}</span>
           <input type="text" bind:value={editing.pilotName} class="bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent" />
         </label>
-        <label class="flex flex-col gap-1">
+        <label class="flex flex-col gap-1 relative">
           <span class="text-[9px] uppercase text-app-muted">{t('preview.type')}</span>
-          <input type="text" bind:value={editing.type} class="bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent" />
+          <input
+            type="text"
+            bind:value={editing.type}
+            oninput={() => typeQuery = editing.type}
+            placeholder={t('preview.typeSearch')}
+            class="bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent"
+          />
+          {#if typeMatches.length}
+            <div class="absolute top-full left-0 right-0 z-10 mt-0.5 max-h-44 overflow-y-auto bg-app-panel2 border border-app-border rounded shadow-xl">
+              {#each typeMatches as match (match.tid)}
+                <button
+                  onclick={() => pickType(match)}
+                  class="w-full text-left px-2 py-1 text-xs hover:bg-app-accent/15 transition-colors"
+                >{match.name} <span class="text-[9px] text-app-muted">· {match.groupName}</span></button>
+              {/each}
+            </div>
+          {/if}
         </label>
-        <label class="flex flex-col gap-1">
+        <div class="flex flex-col gap-1">
           <span class="text-[9px] uppercase text-app-muted">{t('preview.group')}</span>
-          <select bind:value={editing.groupId} class="bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent">
-            {#each GROUP_OPTIONS as [gid, label]}
-              <option value={gid}>{label} ({gid})</option>
-            {/each}
-          </select>
-        </label>
+          <span class="px-2 py-1 text-xs text-app-muted border border-app-border/60 rounded bg-app-bg/50 truncate" title="Group {editing.groupId}">{groupName} ({editing.groupId})</span>
+        </div>
         <label class="flex flex-col gap-1">
           <span class="text-[9px] uppercase text-app-muted">{t('preview.distance')}</span>
           <input type="number" bind:value={editing.distance} min="0" class="bg-app-bg border border-app-border rounded px-2 py-1 focus:outline-none focus:border-app-accent" />

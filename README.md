@@ -64,8 +64,8 @@ behind a Z-S overview. Fly safe. o7
 
 - **Real EVE format, both ways.** Loads and exports the actual in-game overview
   YAML (ordered-map tuples, integer state ids, `<color=…>` / `<fontsize=…>`
-  markup). Both bundled bases — **Fenris Default** and **Z-S Core** — parse through
-  the same pipeline, and exports round-trip cleanly back into EVE.
+  markup). All bundled bases — **Fenris Default**, **Z-S Core** and **Z-S Full**
+  — parse through the same pipeline, and exports round-trip cleanly back into EVE.
 - **1:1 settings mirror.** Tabs, Presets — create, duplicate, rename and delete
   them (renames cascade into the tabs that use them) plus their groups /
   filtered states / always-shown states — Columns, Appearance (colortag +
@@ -74,6 +74,14 @@ behind a Z-S overview. Fly safe. o7
 - **Customisable live preview.** Add your own entities to the roster and watch
   them update live in a game-accurate overview list and a tactical bracket view
   with a twinkling starfield — including fully styled `shipLabels` bracket text.
+  The entity editor's Type field searches the **entire SDE database** (ships,
+  NPCs, asteroids, Upwell/sov structures, drones, deployables, wrecks…), so any
+  real space object can join the preview with its correct group wired up.
+- **Rapid populate & saved groupings.** One click swaps the whole preview
+  roster for a named entity grouping — built-in samples (fleet skirmish, mining
+  fleet, structure bash, NPC site) ship out of the box, and you can save your
+  own from the current roster. Every grouping, samples included, can be
+  renamed, overwritten or deleted, and the list persists in your browser.
 - **Import any YAML** (file or paste) with a choice of **Overwrite** or
   **Apply on top** — multi-part packs (like the Z-S pieces) merge onto a core
   profile exactly as they do in-game: same-named presets are replaced, new ones
@@ -286,8 +294,9 @@ Z-S-Overview-Customizer/
 ├── public/
 │   ├── data/matrix_latest.json     # categories → groups → types lookup
 │   └── defaults/
-│       ├── fenris_default.yaml        # stock base (real EVE format)
-│       └── zs_core.yaml            # Z-S Core base (real EVE format)
+│       ├── fenris_default.yaml     # stock base (real EVE format)
+│       ├── zs_core.yaml            # Z-S Core base (real EVE format)
+│       └── zs_full.yaml            # Z-S Full base (real EVE format)
 ├── images/                         # flow-diagram renders used in this README
 ├── notes/                          # local research workspace (gitignored)
 └── src/
@@ -468,9 +477,11 @@ npm run preview  # preview the production build
    the browser, so later visits **resume where you left off**.
 2. Configure tabs, presets, columns, appearance, and ship labels in the left
    panel — every applicable EVE parameter is mirrored 1:1.
-3. Add entities in **Preview Entities** (type/group, distance, relationship
-   states) to see colortags, row backgrounds, blink, and bracket labels resolve
-   live under each tab's presets.
+3. Add entities in **Preview Entities** (search any SDE type, set distance and
+   relationship states) to see colortags, row backgrounds, blink, and bracket
+   labels resolve live under each tab's presets — or use **Rapid populate** to
+   load a sample grouping (mining fleet, structure bash…) in one click and save
+   your own groupings for later.
 4. **Import** more packs via *+ Custom / Import* — choose **Apply on top** to
    layer pack pieces (the in-game multi-import workflow) or **Overwrite** to
    replace everything. Save named **versions**, re-load, export, or share them.

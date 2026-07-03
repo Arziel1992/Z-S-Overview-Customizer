@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-07-03 - 22:53
+
+### Full-SDE preview entities, rapid populate, saved groupings + Z-S Full base
+
+- **Preview entities can now be anything in space.** The add/edit entity
+  modal's Type field live-searches the full SDE matrix (all 13 space-relevant
+  categories — 16,000+ types); picking a match wires up the correct
+  `typeId`/`groupId` so the preset group filters, the live overview list and
+  the tactical bracket renderer resolve it exactly like the client would. The
+  old hardcoded 14-group dropdown is gone.
+- **Rapid populate.** New collapsible section in the Preview Entities panel
+  with named entity groupings; loading one clears the roster and populates it
+  in a click. Ships with four built-in samples spanning the new categories:
+  *Fleet skirmish*, *Mining fleet* (Veldspar/Bezdnacine asteroids, barges,
+  Orca, a suspect), *Structure bash* (Astrahus, Fortizar, POCO, Sov Hub,
+  Skyhook, a war target) and *NPC site* (Guristas rats, wreck, MTU, drone).
+- **Saved entity groupings.** Save the current roster under a name, load,
+  rename, overwrite and delete any grouping — built-in samples included —
+  persisted in the browser (`localStorage`).
+- **Z-S Full bundled base.** `defaults/zs_full.yaml` added and selectable from
+  the header Base dropdown alongside Fenris Default and Z-S Core.
+- The header's SDE pull-date badge now always shows `YYYY/MM/DD` (UTC) instead
+  of a locale-dependent format.
+- README: features and usage updated; both locales (en/es) extended.
+
 ## 2026-07-03 - 21:59
 
 ### SDE matrix covers all space-relevant categories + "All" tab in the group browser

@@ -25,10 +25,10 @@
   import { customiser } from "$lib/stores/customiserStore.svelte";
   import { version } from "../package.json";
 
-  // Locale-aware date of the bundled SDE pull (CI refreshes it weekly).
+  // Date of the bundled SDE pull (CI refreshes it weekly), fixed YYYY/MM/DD.
   const sdeDate = $derived(
     customiser.sdeCompiledAt
-      ? new Date(customiser.sdeCompiledAt * 1000).toLocaleDateString(getLocale())
+      ? new Date(customiser.sdeCompiledAt * 1000).toISOString().slice(0, 10).replaceAll("-", "/")
       : null
   );
 
@@ -59,11 +59,12 @@
     [1.3, "XL"],
   ];
 
-  // The two bundled bases selectable from the header. Anything else (imports,
+  // The bundled bases selectable from the header. Anything else (imports,
   // snapshots, blank) shows as a transient extra option.
   const BASES = [
     ["fenris_default", "app.loadFenris"],
     ["zs_core", "app.loadZs"],
+    ["zs_full", "app.loadZsFull"],
   ];
   const isBundledBase = $derived(BASES.some(([key]) => key === customiser.baseProfile));
 

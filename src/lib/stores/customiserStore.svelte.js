@@ -34,6 +34,7 @@ const THEME_KEY = "zs-overview-theme";
 const SCALE_KEY = "zs-overview-scale";
 const SESSION_KEY = "zs-overview-session";
 const BASE_KEY = "zs-overview-base";
+const SETS_KEY = "zs-overview-rostersets";
 
 /**
  * Default preview roster so the renderer is populated on first load.
@@ -141,6 +142,52 @@ function seedRoster() {
 	];
 }
 
+/**
+ * Built-in rapid-populate samples: named entity groupings covering the main
+ * overview use cases across the full SDE category range (ships, NPCs,
+ * asteroids, Upwell/sov structures, drones, deployables, wrecks). They seed
+ * the persisted roster-set list on first run; after that the user owns them —
+ * every set (sample or saved) can be renamed, overwritten or deleted.
+ * Entities are partial: addEntity() fills the remaining fields.
+ */
+function sampleSets() {
+	return [
+		{ name: "Fleet skirmish", entities: seedRoster().map(({ id, ...rest }) => rest) },
+		{
+			name: "Mining fleet",
+			entities: [
+				{ pilotName: "—", type: "Veldspar", typeId: 1230, groupId: 462, size: "S", distance: 12800 },
+				{ pilotName: "—", type: "Bezdnacine", typeId: 52316, groupId: 4031, size: "S", distance: 18400 },
+				{ pilotName: "Orin Vael", shipName: "Ore Hound", type: "Retriever", typeId: 17478, groupId: 463, corp: "CIDLA", alliance: "Z-S", size: "M", states: [11, 12], distance: 9200, velocity: 15 },
+				{ pilotName: "Mira Sen", type: "Hulk", typeId: 22544, groupId: 543, corp: "CIDLA", alliance: "Z-S", size: "M", states: [11], distance: 11300, velocity: 20 },
+				{ pilotName: "Doran Kel", type: "Orca", typeId: 28606, groupId: 941, corp: "CIDLA", alliance: "Z-S", size: "L", states: [11, 14], distance: 14000, velocity: 5 },
+				{ pilotName: "Vex Arden", type: "Stabber", typeId: 622, groupId: 26, corp: "RED", size: "M", states: [50], distance: 52000, velocity: 950 },
+			],
+		},
+		{
+			name: "Structure bash",
+			entities: [
+				{ pilotName: "—", type: "Astrahus", typeId: 35832, groupId: 1657, size: "XL", distance: 38000 },
+				{ pilotName: "—", type: "Fortizar", typeId: 35833, groupId: 1657, size: "XL", distance: 152000 },
+				{ pilotName: "—", type: "Customs Office", typeId: 2233, groupId: 1025, size: "L", distance: 68000 },
+				{ pilotName: "—", type: "Sovereignty Hub", typeId: 32458, groupId: 1012, size: "L", distance: 240000 },
+				{ pilotName: "—", type: "Orbital Skyhook", typeId: 81080, groupId: 4736, size: "XL", distance: 310000 },
+				{ pilotName: "Kai Roth", type: "Rupture", typeId: 629, groupId: 26, corp: "BURN", alliance: "WAR.", size: "M", states: [13], distance: 21000, velocity: 380 },
+			],
+		},
+		{
+			name: "NPC site",
+			entities: [
+				{ pilotName: "Guristas Scout", type: "Pithi Arrogator", typeId: 16981, groupId: 615, corp: "Guristas", faction: "Guristas", size: "S", states: [9], distance: 24500, velocity: 620 },
+				{ pilotName: "Guristas Enforcer", type: "Pithum Abolisher", typeId: 24088, groupId: 613, corp: "Guristas", faction: "Guristas", size: "M", states: [9], distance: 31800, velocity: 340 },
+				{ pilotName: "—", type: "Frigate Wreck", typeId: 26557, groupId: 186, size: "S", distance: 8600 },
+				{ pilotName: "—", type: "Mobile Tractor Unit", typeId: 33475, groupId: 1250, size: "S", distance: 2500 },
+				{ pilotName: "Sela Siona", type: "Hobgoblin II", typeId: 2456, groupId: 100, corp: "CIDLA", alliance: "Z-S", size: "S", states: [11, 12], distance: 5100, velocity: 400 },
+			],
+		},
+	];
+}
+
 class CustomiserStore {
 	// --- profile model (mirrors the YAML root keys 1:1) ---
 	/** [{ name, alwaysShownStates:[int], filteredStates:[int], groups:[int] }] */
@@ -173,6 +220,8 @@ class CustomiserStore {
 	sdeError = $state(false);
 	loading = $state(true);
 	roster = $state(seedRoster());
+	/** [{ name, entities:[partial entity] }] — samples + user-saved groupings. */
+	rosterSets = $state(sampleSets());
 	activePresetName = $state(null);
 
 	// --- UI ---
@@ -188,6 +237,16 @@ class CustomiserStore {
 		if (ls) this.uiScale = Number(ls.getItem(SCALE_KEY)) || 1;
 		this.applyTheme();
 		this.fetchSdeMatrix();
+
+		// Roster sets: the stored list (samples included, once touched) wins.
+		const sets = ls?.getItem(SETS_KEY);
+		if (sets) {
+			try {
+				this.rosterSets = JSON.parse(sets);
+			} catch (e) {
+				console.warn("[!] Could not restore roster sets.", e);
+			}
+		}
 
 		// Restore the last working session if present; otherwise greet the user.
 		const session = ls?.getItem(SESSION_KEY);
@@ -628,6 +687,60 @@ class CustomiserStore {
 	removeEntity(id) {
 		const i = this.roster.findIndex((e) => e.id === id);
 		if (i > -1) this.roster.splice(i, 1);
+	}
+
+	/* -------------------------- roster sets -------------------------- */
+	// Rapid-populate groupings. Samples and user-saved sets live in one
+	// persisted list, so all of them are loadable, renamable, overwritable
+	// and deletable alike.
+
+	persistRosterSets() {
+		if (typeof localStorage === "undefined") return;
+		try {
+			localStorage.setItem(SETS_KEY, JSON.stringify(this.rosterSets));
+		} catch (e) {
+			console.warn("[!] Roster sets save failed.", e);
+		}
+	}
+
+	/** Replace the whole roster with a set's entities (rapid populate). */
+	loadRosterSet(name) {
+		const set = this.rosterSets.find((s) => s.name === name);
+		if (!set) return;
+		this.roster = [];
+		// copy states too, or edits to a loaded entity would mutate the stored set
+		for (const e of set.entities) this.addEntity({ ...e, states: [...(e.states ?? [])] });
+	}
+
+	/** Save the current roster under `name` — new set, or overwrite if taken. */
+	saveRosterSet(name) {
+		const trimmed = name?.trim();
+		if (!trimmed) return false;
+		const entities = this.roster.map(({ id, ...rest }) => ({ ...rest, states: [...rest.states] }));
+		const existing = this.rosterSets.find((s) => s.name === trimmed);
+		if (existing) existing.entities = entities;
+		else this.rosterSets.push({ name: trimmed, entities });
+		this.persistRosterSets();
+		return true;
+	}
+
+	renameRosterSet(oldName, newName) {
+		const trimmed = newName?.trim();
+		if (!trimmed || trimmed === oldName) return false;
+		if (this.rosterSets.some((s) => s.name === trimmed)) return false;
+		const set = this.rosterSets.find((s) => s.name === oldName);
+		if (!set) return false;
+		set.name = trimmed;
+		this.persistRosterSets();
+		return true;
+	}
+
+	deleteRosterSet(name) {
+		const i = this.rosterSets.findIndex((s) => s.name === name);
+		if (i > -1) {
+			this.rosterSets.splice(i, 1);
+			this.persistRosterSets();
+		}
 	}
 
 	/**
