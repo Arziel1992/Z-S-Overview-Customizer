@@ -6,7 +6,11 @@
   chips under their parent group).
 -->
 <script>
+  import { t } from '$lib/i18n/strings.svelte.js';
   import { customiser } from '$lib/stores/customiserStore.svelte';
+
+  // Pseudo-category spanning every group; safe key, real ids are numeric.
+  const ALL = 'all';
 
   let searchQuery = $state('');
   let activeCategory = $state('6'); // Ships by default
@@ -18,10 +22,11 @@
   const filteredGroups = $derived.by(() => {
     const m = customiser.sdeMatrix;
     if (!m) return [];
-    const cat = m.categories[activeCategory];
-    if (!cat) return [];
+    const gids = activeCategory === ALL
+      ? Object.values(m.categories).flatMap((c) => c.groups)
+      : (m.categories[activeCategory]?.groups ?? []);
     const q = searchQuery.toLowerCase().trim();
-    return cat.groups
+    return gids
       .map((gid) => {
         const g = m.groups[gid];
         if (!g) return null;
@@ -57,6 +62,10 @@
          proportionally and crushes this strip to ~0px — it then only "appeared"
          once a search query made the list short. -->
     <div class="flex gap-1 border-b border-app-border mb-2 overflow-x-auto shrink-0">
+      <button
+        onclick={() => activeCategory = ALL}
+        class="px-2.5 py-1 text-[11px] border-b-2 transition-colors shrink-0 {activeCategory === ALL ? 'border-app-accent text-app-text' : 'border-transparent text-app-muted hover:text-app-text'}"
+      >{t('presets.allCategories')}</button>
       {#each categories as [cid, cat] (cid)}
         <button
           onclick={() => activeCategory = cid}

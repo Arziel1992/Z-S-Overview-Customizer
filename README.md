@@ -445,6 +445,12 @@ Downloads Fenris' official SDE zip, extracts `categories.yaml`, `groups.yaml`,
 `types.yaml`, and writes the minified map to `public/data/matrix_latest.json`.
 Requires Python with `pyyaml` and `requests`.
 
+The map covers every category that can appear in space on the overview,
+mirroring the game's own overview-settings tree: Celestial, Station, Ship,
+Charge, Entity (NPCs), Drone, Deployable, Starbase, Asteroid, Sovereignty
+Structures, Orbitals (customs offices), Structure (Upwell citadels, skyhooks)
+and Fighter.
+
 ### Develop
 
 ```bash

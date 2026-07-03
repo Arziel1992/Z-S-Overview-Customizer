@@ -22,9 +22,13 @@ SDE_ZIP_URL = "https://developers.eveonline.com/static-data/eve-online-static-da
 OUTPUT_PATH = "public/data/matrix_latest.json"
 TEMP_DIR = "sde_temp"
 
-# Target Categories to extract
-# Category 6 = Ships, Category 2 = Modules, Category 3 = Celestials, Category 18 = Drones
-TARGET_CATEGORIES = {2, 3, 6, 18}
+# Target Categories to extract — everything that can appear in space on the
+# overview, mirroring EVE's own overview-settings tree:
+#   2 = Celestial, 3 = Station, 6 = Ship, 8 = Charge (probes/bombs/missiles),
+#   11 = Entity (NPCs), 18 = Drone, 22 = Deployable, 23 = Starbase,
+#   25 = Asteroid, 40 = Sovereignty Structures, 46 = Orbitals (POCOs),
+#   65 = Structure (Upwell: Citadels, Skyhooks), 87 = Fighter
+TARGET_CATEGORIES = {2, 3, 6, 8, 11, 18, 22, 23, 25, 40, 46, 65, 87}
 
 
 def download_and_extract_sde():

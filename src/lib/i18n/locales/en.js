@@ -125,6 +125,7 @@ export default {
 		help: "A preset defines which entities a tab may render. Groups authorise hull classes; filtered states veto; always-shown states force visibility.",
 		select: "Editing preset",
 		groups: "Authorised Groups",
+		allCategories: "All",
 		filtered: "Filtered States (veto)",
 		alwaysShown: "Always-Shown States (override)",
 		groupCount: "{n} groups authorised",

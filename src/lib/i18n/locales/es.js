@@ -123,6 +123,7 @@ export default {
 		help: "Un preset define qué entidades puede mostrar una pestaña. Los grupos autorizan clases de casco; los estados filtrados vetan; los estados siempre visibles fuerzan la visibilidad.",
 		select: "Editando preset",
 		groups: "Grupos autorizados",
+		allCategories: "Todos",
 		filtered: "Estados filtrados (veto)",
 		alwaysShown: "Estados siempre visibles (anulación)",
 		groupCount: "{n} grupos autorizados",

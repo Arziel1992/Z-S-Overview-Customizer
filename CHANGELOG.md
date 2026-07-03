@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-07-03 - 21:59
+
+### SDE matrix covers all space-relevant categories + "All" tab in the group browser
+
+- **SDE matrix expanded** (user reports: citadels, sov hubs, skyhooks, POCOs
+  and asteroids/ores missing). `build_sde_matrix.py` now extracts every
+  category that can appear in space on the overview — mirroring the game's
+  overview-settings tree: Celestial (2), Station (3), Ship (6), Charge (8),
+  Entity/NPCs (11), Drone (18), Deployable (22), Starbase (23), Asteroid (25),
+  Sovereignty Structures (40), Orbitals/POCOs (46), Structure/Upwell (65),
+  Fighter (87). Previously only 2/3/6/18 were shipped. Also fixed the stale
+  comment that mislabelled category 2 as "Modules". Regenerated
+  `matrix_latest.json` (0.46 → 1.05 MB; 766 groups, 16 288 types) — Veldspar,
+  Bezdnacine, Citadel, Sovereignty Hub, Skyhook and Customs Office (group
+  "Orbital Infrastructure") all verified present.
+- **"All" tab** added ahead of the category tabs in the authorised-groups
+  browser (`MatrixSelector`), searching/listing groups across every category.
+  Label localised (EN/ES).
+- **README:** documented the category coverage in the SDE pipeline section.
+
 ## 2026-06-18 - 20:09
 
 ### State matrix corrected to Tomas Iridium's canonical taxonomy + 20-tab cap
