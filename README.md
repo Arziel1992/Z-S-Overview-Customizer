@@ -16,6 +16,7 @@ parameter the game exposes, watch a live in-game-style preview react, and export
 
 - [A 10th-anniversary gift to the EVE community](#a-10th-anniversary-gift-to-the-eve-community)
 - [Features](#features)
+- [Screenshots](#screenshots)
 - [How the EVE Overview actually works](#how-the-eve-overview-actually-works)
   - [1. The data foundation: typeID → groupID → categoryID](#1-the-data-foundation-typeid--groupid--categoryid)
   - [2. Presets: the boolean logic engine](#2-presets-the-boolean-logic-engine)
@@ -101,6 +102,34 @@ behind a Z-S overview. Fly safe. o7
 
 ---
 
+## Screenshots
+
+The full editor — settings panel on the left, live tactical-bracket and
+overview-list preview on the right:
+
+![The full editor in dark theme](./images/screenshot-1_full-app-dark.png)
+
+The live preview column: game-accurate tactical brackets, the overview list
+resolving each entity against the active tab's preset, and the Preview Entities
+roster:
+
+![Live preview column](./images/screenshot-3_live-preview.png)
+
+Rapid populate — one click swaps the preview roster for a built-in sample or
+one of your own saved groupings:
+
+![Rapid populate and saved groupings](./images/screenshot-4_rapid-populate.png)
+
+The tactical brackets rendering the *Mining fleet* sample:
+
+![Tactical brackets showing the mining fleet sample](./images/screenshot-5_mining-brackets.png)
+
+Light theme is available too, persisted across visits:
+
+![The full editor in light theme](./images/screenshot-6_full-app-light.png)
+
+---
+
 ## How the EVE Overview actually works
 
 The Overview is not a passive list — it is a real-time **boolean filtering
@@ -116,7 +145,10 @@ Types roll up into **`groupID`s** (*Frigate* = group `25`, *Stargate* = group
 filters operate almost exclusively at the **group** level: white-listing group
 `26` shows every Cruiser variant ever added to the game. This data comes from
 Fenris' **Static Data Export (SDE)**; the customiser compiles it into
-`public/data/matrix_latest.json` via `scripts/build_sde_matrix.py`.
+`public/data/matrix_latest.json` via `scripts/build_sde_matrix.py`, filtered
+down to objects that can actually appear on the overview — inventory-only
+types (ammo, mining crystals, module scripts…) and render-only scenery
+(dust clouds, invisible beacons, map hierarchy objects) are excluded.
 
 ### 2. Presets: the boolean logic engine
 
@@ -297,7 +329,7 @@ Z-S-Overview-Customizer/
 │       ├── fenris_default.yaml     # stock base (real EVE format)
 │       ├── zs_core.yaml            # Z-S Core base (real EVE format)
 │       └── zs_full.yaml            # Z-S Full base (real EVE format)
-├── images/                         # flow-diagram renders used in this README
+├── images/                         # flow-diagram renders + screenshots used in this README
 ├── notes/                          # local research workspace (gitignored)
 └── src/
     ├── main.js                     # Svelte 5 mount

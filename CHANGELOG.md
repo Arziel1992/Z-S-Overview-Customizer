@@ -1,5 +1,45 @@
 # Changelog
 
+## 2026-07-04 - 00:39
+
+### SDE matrix cleaned of inventory-only and render-only entities
+
+- **Inventory items no longer pollute the type search.** The Charge category
+  is now whitelisted to the 8 groups that can genuinely appear on the
+  overview (bombs, scanner/survey/interdiction probes, interdiction burst
+  probes); ammo, missiles, mining crystals (e.g. *Veldspar Mining Crystal I*),
+  module scripts and burst charges — ~1,100 cargo/fitting-only types — are
+  excluded at matrix-build time.
+- **Render-/map-only scenery dropped** from Celestial and Asteroid: dust
+  clouds, non-interactable objects, invisible beacons, map hierarchy
+  (Region/Constellation/Solar System) and decorative asteroids — ~3,100 types.
+- **Planetary Industry bases added.** Category 41 joins the matrix,
+  whitelisted to *Mercenary Bases* (1081) and *Capsuleer Bases* (1082) — real
+  space structures referenced by Z-S profiles that previously didn't resolve
+  in the group browser. On-planet PI pins stay excluded.
+- Net effect: **766 → 678 groups, 16,288 → 12,075 types (−26%)** across 14
+  categories; smaller payload, faster startup fetch. Every group referenced
+  by the bundled profiles still resolves (except two ids CCP has removed from
+  the game).
+- README: SDE pipeline section documents the filtering.
+
+## 2026-07-04 - 00:26
+
+### Richer preview samples + README screenshots
+
+- **Preview samples reworked.** The *Mining fleet* sample now contains an
+  actual asteroid belt (Veldspar, Scordite, Plagioclase, Pyroxeres, Kernite,
+  Bezdnacine) alongside the barges, and every sample got a fresh crew — keep an
+  eye on local, you might recognise a name or two. o7
+- Corrected several seed-roster type ids that predated the full-SDE matrix
+  (the war-target cruiser, the criminal frigate, the Guristas scout and the
+  stargate now carry their real `typeId`/`groupId`).
+- Stored roster sets migrate once to the reworked built-in samples;
+  user-saved groupings carry over untouched.
+- **README screenshots.** New Screenshots section with section-cropped shots
+  of the editor (dark + light), the live preview column, rapid populate and
+  the tactical brackets.
+
 ## 2026-07-03 - 22:53
 
 ### Full-SDE preview entities, rapid populate, saved groupings + Z-S Full base

@@ -34,24 +34,28 @@ const THEME_KEY = "zs-overview-theme";
 const SCALE_KEY = "zs-overview-scale";
 const SESSION_KEY = "zs-overview-session";
 const BASE_KEY = "zs-overview-base";
-const SETS_KEY = "zs-overview-rostersets";
+// v2: sample rosters were reworked (easter-egg pilots, real asteroid belt).
+// Bumping the key refreshes the built-ins; user-made groupings migrate over.
+const SETS_KEY = "zs-overview-rostersets-v2";
+const SETS_KEY_V1 = "zs-overview-rostersets";
 
 /**
  * Default preview roster so the renderer is populated on first load.
  * Covers the interesting cases out of the box: a fleet/corp friendly (11+18),
  * a war target (52), a neutral NPC (9), a criminal outlaw (13+44), and a
  * stateless celestial (stargate) that only group filters can show/hide.
+ * Pilot names throughout the samples are a tip of the hat to New Eden. o7
  */
 function seedRoster() {
 	return [
 		{
 			id: 1,
-			pilotName: "Sela Siona",
+			pilotName: "Zirio",
 			shipName: "Whirlwind",
 			type: "Rifter",
 			typeId: 587,
 			groupId: 25,
-			corp: "CIDLA",
+			corp: "PROMP",
 			alliance: "Z-S",
 			faction: "—",
 			militia: "—",
@@ -65,13 +69,13 @@ function seedRoster() {
 		},
 		{
 			id: 2,
-			pilotName: "Vandis Alar",
-			shipName: "Reaper",
+			pilotName: "The Mittani",
+			shipName: "Sins of a Solar Spymaster",
 			type: "Rupture",
-			typeId: 620,
+			typeId: 629,
 			groupId: 26,
-			corp: "BURN",
-			alliance: "WAR.",
+			corp: "GoonWaffe",
+			alliance: "CONDI",
 			faction: "—",
 			militia: "—",
 			size: "M",
@@ -87,8 +91,8 @@ function seedRoster() {
 			pilotName: "Guristas Scout",
 			shipName: "",
 			type: "Pithi Arrogator",
-			typeId: 0,
-			groupId: 26,
+			typeId: 16981,
+			groupId: 615,
 			corp: "Guristas",
 			alliance: "—",
 			faction: "Guristas",
@@ -103,13 +107,13 @@ function seedRoster() {
 		},
 		{
 			id: 4,
-			pilotName: "Khron Vex",
-			shipName: "Anathema",
-			type: "Slasher",
-			typeId: 588,
+			pilotName: "Rixx Javix",
+			shipName: "Stay Frosty",
+			type: "Federation Navy Comet",
+			typeId: 17841,
 			groupId: 25,
-			corp: "CRIM",
-			alliance: "—",
+			corp: "Stay Frosty.",
+			alliance: "ABA",
 			faction: "—",
 			militia: "—",
 			size: "S",
@@ -122,10 +126,29 @@ function seedRoster() {
 		},
 		{
 			id: 5,
+			pilotName: "Suitonia",
+			shipName: "EVE is Easy",
+			type: "Kestrel",
+			typeId: 602,
+			groupId: 25,
+			corp: "—",
+			alliance: "—",
+			faction: "—",
+			militia: "—",
+			size: "S",
+			states: [50],
+			distance: 61200,
+			velocity: 780,
+			radial: -620,
+			transversal: 95,
+			angular: 0.002,
+		},
+		{
+			id: 6,
 			pilotName: "—",
 			shipName: "",
-			type: "Stargate (Caldari)",
-			typeId: 0,
+			type: "Stargate (Caldari System)",
+			typeId: 16,
 			groupId: 10,
 			corp: "—",
 			alliance: "—",
@@ -152,37 +175,246 @@ function seedRoster() {
  */
 function sampleSets() {
 	return [
-		{ name: "Fleet skirmish", entities: seedRoster().map(({ id, ...rest }) => rest) },
+		{
+			name: "Fleet skirmish",
+			entities: seedRoster().map(({ id, ...rest }) => rest),
+		},
 		{
 			name: "Mining fleet",
 			entities: [
-				{ pilotName: "—", type: "Veldspar", typeId: 1230, groupId: 462, size: "S", distance: 12800 },
-				{ pilotName: "—", type: "Bezdnacine", typeId: 52316, groupId: 4031, size: "S", distance: 18400 },
-				{ pilotName: "Orin Vael", shipName: "Ore Hound", type: "Retriever", typeId: 17478, groupId: 463, corp: "CIDLA", alliance: "Z-S", size: "M", states: [11, 12], distance: 9200, velocity: 15 },
-				{ pilotName: "Mira Sen", type: "Hulk", typeId: 22544, groupId: 543, corp: "CIDLA", alliance: "Z-S", size: "M", states: [11], distance: 11300, velocity: 20 },
-				{ pilotName: "Doran Kel", type: "Orca", typeId: 28606, groupId: 941, corp: "CIDLA", alliance: "Z-S", size: "L", states: [11, 14], distance: 14000, velocity: 5 },
-				{ pilotName: "Vex Arden", type: "Stabber", typeId: 622, groupId: 26, corp: "RED", size: "M", states: [50], distance: 52000, velocity: 950 },
+				{
+					pilotName: "—",
+					type: "Veldspar",
+					typeId: 1230,
+					groupId: 462,
+					size: "S",
+					distance: 12800,
+				},
+				{
+					pilotName: "—",
+					type: "Scordite",
+					typeId: 1228,
+					groupId: 460,
+					size: "S",
+					distance: 14100,
+				},
+				{
+					pilotName: "—",
+					type: "Plagioclase",
+					typeId: 18,
+					groupId: 458,
+					size: "S",
+					distance: 15600,
+				},
+				{
+					pilotName: "—",
+					type: "Pyroxeres",
+					typeId: 1224,
+					groupId: 459,
+					size: "S",
+					distance: 16900,
+				},
+				{
+					pilotName: "—",
+					type: "Kernite",
+					typeId: 20,
+					groupId: 457,
+					size: "S",
+					distance: 17700,
+				},
+				{
+					pilotName: "—",
+					type: "Bezdnacine",
+					typeId: 52316,
+					groupId: 4031,
+					size: "S",
+					distance: 18400,
+				},
+				{
+					pilotName: "Chribba",
+					shipName: "Veldnaught",
+					type: "Revelation",
+					typeId: 19720,
+					groupId: 485,
+					corp: "Otherworld Enterprises",
+					size: "XL",
+					distance: 12950,
+					velocity: 0,
+				},
+				{
+					pilotName: "Kismeteer",
+					shipName: "Ore Hound",
+					type: "Retriever",
+					typeId: 17478,
+					groupId: 463,
+					corp: "PROMP",
+					alliance: "Z-S",
+					size: "M",
+					states: [11, 12],
+					distance: 9200,
+					velocity: 15,
+				},
+				{
+					pilotName: "Deuce Syundai",
+					type: "Hulk",
+					typeId: 22544,
+					groupId: 543,
+					corp: "PROMP",
+					alliance: "Z-S",
+					size: "M",
+					states: [11],
+					distance: 11300,
+					velocity: 20,
+				},
+				{
+					pilotName: "Tomas Iridium",
+					type: "Orca",
+					typeId: 28606,
+					groupId: 941,
+					corp: "PROMP",
+					alliance: "Z-S",
+					size: "L",
+					states: [11, 14],
+					distance: 14000,
+					velocity: 5,
+				},
+				{
+					pilotName: "Shadoo",
+					type: "Stabber",
+					typeId: 622,
+					groupId: 26,
+					corp: "SNIGG",
+					alliance: "PL",
+					size: "M",
+					states: [50],
+					distance: 52000,
+					velocity: 950,
+				},
 			],
 		},
 		{
 			name: "Structure bash",
 			entities: [
-				{ pilotName: "—", type: "Astrahus", typeId: 35832, groupId: 1657, size: "XL", distance: 38000 },
-				{ pilotName: "—", type: "Fortizar", typeId: 35833, groupId: 1657, size: "XL", distance: 152000 },
-				{ pilotName: "—", type: "Customs Office", typeId: 2233, groupId: 1025, size: "L", distance: 68000 },
-				{ pilotName: "—", type: "Sovereignty Hub", typeId: 32458, groupId: 1012, size: "L", distance: 240000 },
-				{ pilotName: "—", type: "Orbital Skyhook", typeId: 81080, groupId: 4736, size: "XL", distance: 310000 },
-				{ pilotName: "Kai Roth", type: "Rupture", typeId: 629, groupId: 26, corp: "BURN", alliance: "WAR.", size: "M", states: [13], distance: 21000, velocity: 380 },
+				{
+					pilotName: "—",
+					type: "Astrahus",
+					typeId: 35832,
+					groupId: 1657,
+					size: "XL",
+					distance: 38000,
+				},
+				{
+					pilotName: "—",
+					type: "Fortizar",
+					typeId: 35833,
+					groupId: 1657,
+					size: "XL",
+					distance: 152000,
+				},
+				{
+					pilotName: "—",
+					type: "Customs Office",
+					typeId: 2233,
+					groupId: 1025,
+					size: "L",
+					distance: 68000,
+				},
+				{
+					pilotName: "—",
+					type: "Sovereignty Hub",
+					typeId: 32458,
+					groupId: 1012,
+					size: "L",
+					distance: 240000,
+				},
+				{
+					pilotName: "—",
+					type: "Orbital Skyhook",
+					typeId: 81080,
+					groupId: 4736,
+					size: "XL",
+					distance: 310000,
+				},
+				{
+					pilotName: "Chessur",
+					type: "Rupture",
+					typeId: 629,
+					groupId: 26,
+					corp: "BURN",
+					alliance: "WAR.",
+					size: "M",
+					states: [13],
+					distance: 21000,
+					velocity: 380,
+				},
 			],
 		},
 		{
 			name: "NPC site",
 			entities: [
-				{ pilotName: "Guristas Scout", type: "Pithi Arrogator", typeId: 16981, groupId: 615, corp: "Guristas", faction: "Guristas", size: "S", states: [9], distance: 24500, velocity: 620 },
-				{ pilotName: "Guristas Enforcer", type: "Pithum Abolisher", typeId: 24088, groupId: 613, corp: "Guristas", faction: "Guristas", size: "M", states: [9], distance: 31800, velocity: 340 },
-				{ pilotName: "—", type: "Frigate Wreck", typeId: 26557, groupId: 186, size: "S", distance: 8600 },
-				{ pilotName: "—", type: "Mobile Tractor Unit", typeId: 33475, groupId: 1250, size: "S", distance: 2500 },
-				{ pilotName: "Sela Siona", type: "Hobgoblin II", typeId: 2456, groupId: 100, corp: "CIDLA", alliance: "Z-S", size: "S", states: [11, 12], distance: 5100, velocity: 400 },
+				{
+					pilotName: "Guristas Scout",
+					type: "Pithi Arrogator",
+					typeId: 16981,
+					groupId: 615,
+					corp: "Guristas",
+					faction: "Guristas",
+					size: "S",
+					states: [9],
+					distance: 24500,
+					velocity: 620,
+				},
+				{
+					pilotName: "Guristas Enforcer",
+					type: "Pithum Abolisher",
+					typeId: 24088,
+					groupId: 613,
+					corp: "Guristas",
+					faction: "Guristas",
+					size: "M",
+					states: [9],
+					distance: 31800,
+					velocity: 340,
+				},
+				{
+					pilotName: "—",
+					type: "Frigate Wreck",
+					typeId: 26557,
+					groupId: 186,
+					size: "S",
+					distance: 8600,
+				},
+				{
+					pilotName: "—",
+					type: "Mobile Tractor Unit",
+					typeId: 33475,
+					groupId: 1250,
+					size: "S",
+					distance: 2500,
+				},
+				{
+					pilotName: "Zirio",
+					type: "Hobgoblin II",
+					typeId: 2456,
+					groupId: 100,
+					corp: "PROMP",
+					alliance: "Z-S",
+					size: "S",
+					states: [11, 12],
+					distance: 5100,
+					velocity: 400,
+				},
+				{
+					pilotName: "Katia Sae",
+					shipName: "Into the Unknown",
+					type: "Astero",
+					typeId: 33468,
+					groupId: 25,
+					corp: "Signal Cartel",
+					size: "S",
+					distance: 87400,
+					velocity: 240,
+				},
 			],
 		},
 	];
@@ -246,6 +478,20 @@ class CustomiserStore {
 			} catch (e) {
 				console.warn("[!] Could not restore roster sets.", e);
 			}
+		} else if (ls?.getItem(SETS_KEY_V1)) {
+			// One-time v1 → v2 migration: fresh built-in samples replace the old
+			// ones (same names); everything the user saved themselves carries over.
+			try {
+				const builtin = new Set(this.rosterSets.map((s) => s.name));
+				const own = JSON.parse(ls.getItem(SETS_KEY_V1)).filter(
+					(s) => !builtin.has(s.name),
+				);
+				this.rosterSets = [...this.rosterSets, ...own];
+				this.persistRosterSets();
+			} catch (e) {
+				console.warn("[!] Could not migrate v1 roster sets.", e);
+			}
+			ls.removeItem(SETS_KEY_V1);
 		}
 
 		// Restore the last working session if present; otherwise greet the user.
@@ -302,8 +548,23 @@ class CustomiserStore {
 	/** Reset to a minimal blank profile (one empty preset + one tab). */
 	clearAll() {
 		this.applyModel({
-			presets: [{ name: "New Preset", alwaysShownStates: [], filteredStates: [], groups: [] }],
-			tabs: [{ index: 0, name: "Tab 1", color: null, overview: "New Preset", bracket: null }],
+			presets: [
+				{
+					name: "New Preset",
+					alwaysShownStates: [],
+					filteredStates: [],
+					groups: [],
+				},
+			],
+			tabs: [
+				{
+					index: 0,
+					name: "Tab 1",
+					color: null,
+					overview: "New Preset",
+					bracket: null,
+				},
+			],
 			columnOrder: ["ICON", "DISTANCE", "NAME", "TYPE"],
 			overviewColumns: ["ICON", "DISTANCE", "NAME", "TYPE"],
 			flagOrder: [],
@@ -325,7 +586,9 @@ class CustomiserStore {
 	/* -------------------------- loading -------------------------- */
 	async fetchSdeMatrix() {
 		try {
-			const res = await fetch(`${import.meta.env.BASE_URL}data/matrix_latest.json`);
+			const res = await fetch(
+				`${import.meta.env.BASE_URL}data/matrix_latest.json`,
+			);
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
 			this.sdeMatrix = await res.json();
 			this.sdeCompiledAt = this.sdeMatrix?.metadata?.compiledAt ?? null;
@@ -363,7 +626,9 @@ class CustomiserStore {
 	 */
 	async loadPreset(presetKey) {
 		try {
-			const res = await fetch(`${import.meta.env.BASE_URL}defaults/${presetKey}.yaml`);
+			const res = await fetch(
+				`${import.meta.env.BASE_URL}defaults/${presetKey}.yaml`,
+			);
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
 			const text = await res.text();
 			this.applyModel(parseOverviewYaml(text));
@@ -649,7 +914,8 @@ class CustomiserStore {
 			return;
 		}
 		// A field label — only one of each type may exist in the order.
-		if (!this.shipLabels[type]) this.shipLabels[type] = this.defaultLabelConfig(type);
+		if (!this.shipLabels[type])
+			this.shipLabels[type] = this.defaultLabelConfig(type);
 		this.shipLabelOrder.push(type);
 	}
 
@@ -709,14 +975,18 @@ class CustomiserStore {
 		if (!set) return;
 		this.roster = [];
 		// copy states too, or edits to a loaded entity would mutate the stored set
-		for (const e of set.entities) this.addEntity({ ...e, states: [...(e.states ?? [])] });
+		for (const e of set.entities)
+			this.addEntity({ ...e, states: [...(e.states ?? [])] });
 	}
 
 	/** Save the current roster under `name` — new set, or overwrite if taken. */
 	saveRosterSet(name) {
 		const trimmed = name?.trim();
 		if (!trimmed) return false;
-		const entities = this.roster.map(({ id, ...rest }) => ({ ...rest, states: [...rest.states] }));
+		const entities = this.roster.map(({ id, ...rest }) => ({
+			...rest,
+			states: [...rest.states],
+		}));
 		const existing = this.rosterSets.find((s) => s.name === trimmed);
 		if (existing) existing.entities = entities;
 		else this.rosterSets.push({ name: trimmed, entities });

@@ -24,11 +24,39 @@ TEMP_DIR = "sde_temp"
 
 # Target Categories to extract — everything that can appear in space on the
 # overview, mirroring EVE's own overview-settings tree:
-#   2 = Celestial, 3 = Station, 6 = Ship, 8 = Charge (probes/bombs/missiles),
+#   2 = Celestial, 3 = Station, 6 = Ship, 8 = Charge (probes/bombs only),
 #   11 = Entity (NPCs), 18 = Drone, 22 = Deployable, 23 = Starbase,
-#   25 = Asteroid, 40 = Sovereignty Structures, 46 = Orbitals (POCOs),
+#   25 = Asteroid, 40 = Sovereignty Structures, 41 = Planetary Industry
+#   (Mercenary/Capsuleer Bases only), 46 = Orbitals (POCOs),
 #   65 = Structure (Upwell: Citadels, Skyhooks), 87 = Fighter
-TARGET_CATEGORIES = {2, 3, 6, 8, 11, 18, 22, 23, 25, 40, 46, 65, 87}
+TARGET_CATEGORIES = {2, 3, 6, 8, 11, 18, 22, 23, 25, 40, 41, 46, 65, 87}
+
+# Mixed categories: mostly inventory (8) or on-planet (41) items, with a
+# handful of genuine space objects. Only these groups are extracted:
+#   8  — Bomb, Scanner/Survey/Interdiction Probe, Bomb ECM/Energy, Guided
+#        Bomb, Interdiction Burst Probes (everything else is ammo, mining
+#        crystals, scripts… — cargo/fitting inventory, never on the overview)
+#   41 — Mercenary Bases, Capsuleer Bases (the rest are on-planet PI pins)
+GROUP_WHITELIST = {
+    8: {90, 479, 492, 548, 863, 864, 1548, 4088},
+    41: {1081, 1082},
+}
+
+# Render-/map-only groups that never appear on the overview, dropped from
+# otherwise space-relevant categories (Celestial dust clouds, non-interactable
+# scenery, map hierarchy objects, decorative asteroids…).
+GROUP_BLOCKLIST = {
+    2: {3, 4, 5, 227, 312, 995, 1198, 1882, 1973, 1975, 1980, 1983, 4055, 4070, 4430, 4579, 4713},
+    25: {519, 4714},
+}
+
+
+def group_allowed(cid, gid):
+    """True if a group in a target category belongs in the overview matrix."""
+    allow = GROUP_WHITELIST.get(cid)
+    if allow is not None and gid not in allow:
+        return False
+    return gid not in GROUP_BLOCKLIST.get(cid, set())
 
 
 def download_and_extract_sde():
@@ -91,7 +119,7 @@ def process_and_minify():
     groups = {}
     for gid, d in groups_raw.items():
         cid = d.get("categoryID")
-        if cid in TARGET_CATEGORIES:
+        if cid in TARGET_CATEGORIES and group_allowed(cid, gid):
             groups[str(gid)] = {
                 "name": d.get("name", {}).get("en", f"Group {gid}"),
                 "categoryId": cid,
