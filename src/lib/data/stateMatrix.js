@@ -25,30 +25,79 @@ import { argbHexToCss } from "$lib/utils/eveFormat";
 // `name` is the verbatim in-game / Iridium label for each state — kept exact so
 // the UI text matches what the client shows; do not paraphrase these strings.
 export const STATES = {
-	9: { name: "Pilot has a security status below -5", kind: "legal", color: "red" },
-	10: { name: "Pilot has a security status below 0", kind: "legal", color: "orange" },
+	9: {
+		name: "Pilot has a security status below -5",
+		kind: "legal",
+		color: "red",
+	},
+	10: {
+		name: "Pilot has a security status below 0",
+		kind: "legal",
+		color: "orange",
+	},
 	11: { name: "Pilot is in your fleet", kind: "affiliation", color: "purple" },
-	12: { name: "Pilot is in your Capsuleer corporation", kind: "affiliation", color: "green" },
-	13: { name: "Pilot is at war with your corporation/alliance", kind: "legal", color: "red" },
+	12: {
+		name: "Pilot is in your Capsuleer corporation",
+		kind: "affiliation",
+		color: "green",
+	},
+	13: {
+		name: "Pilot is at war with your corporation/alliance",
+		kind: "legal",
+		color: "red",
+	},
 	14: { name: "Pilot is in your alliance", kind: "affiliation", color: "blue" },
-	15: { name: "Pilot has Excellent Standing", kind: "standing", color: "darkBlue" },
+	15: {
+		name: "Pilot has Excellent Standing",
+		kind: "standing",
+		color: "darkBlue",
+	},
 	16: { name: "Pilot has Good Standing", kind: "standing", color: "darkBlue" },
 	17: { name: "Pilot has Neutral Standing", kind: "standing", color: "grey" },
 	18: { name: "Pilot has Bad Standing", kind: "standing", color: "orange" },
 	19: { name: "Pilot has Terrible Standing", kind: "standing", color: "red" },
 	20: { name: "Reserved (20)", kind: "misc", color: "grey" },
 	21: { name: "Pilot (agent) is interactable", kind: "misc", color: "white" },
-	36: { name: "Wreck is already viewed", kind: "misc", color: "grey", filterOnly: true },
+	36: {
+		name: "Wreck is already viewed",
+		kind: "misc",
+		color: "grey",
+		filterOnly: true,
+	},
 	37: { name: "Wreck is empty", kind: "misc", color: "grey", filterOnly: true },
-	44: { name: "Pilot is at war with your militia", kind: "militia", color: "red" },
-	45: { name: "Pilot is in your militia or allied to your militia", kind: "militia", color: "blue" },
+	44: {
+		name: "Pilot is at war with your militia",
+		kind: "militia",
+		color: "red",
+	},
+	45: {
+		name: "Pilot is in your militia or allied to your militia",
+		kind: "militia",
+		color: "blue",
+	},
 	48: { name: "Pilot has No Standing", kind: "standing", color: "grey" },
-	49: { name: "Pilot is an ally in one or more of your wars", kind: "legal", color: "blue" },
+	49: {
+		name: "Pilot is an ally in one or more of your wars",
+		kind: "legal",
+		color: "blue",
+	},
 	50: { name: "Pilot is a suspect", kind: "legal", color: "yellow" },
 	51: { name: "Pilot is a criminal", kind: "legal", color: "red" },
-	52: { name: "Pilot has a limited engagement with you", kind: "legal", color: "orange" },
-	53: { name: "Pilot has a killright on them that you can activate", kind: "legal", color: "orange" },
-	66: { name: "Pilot is in your Non Capsuleer corporation", kind: "affiliation", color: "green" },
+	52: {
+		name: "Pilot has a limited engagement with you",
+		kind: "legal",
+		color: "orange",
+	},
+	53: {
+		name: "Pilot has a killright on them that you can activate",
+		kind: "legal",
+		color: "orange",
+	},
+	66: {
+		name: "Pilot is in your Non Capsuleer corporation",
+		kind: "affiliation",
+		color: "green",
+	},
 	68: { name: "Pilot has retribution timer", kind: "legal", color: "orange" },
 };
 

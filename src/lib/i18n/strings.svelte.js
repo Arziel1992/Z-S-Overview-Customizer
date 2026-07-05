@@ -40,7 +40,8 @@ export function getLocale() {
 export function setLocale(loc) {
 	if (!locales[loc]) return;
 	state.locale = loc;
-	if (typeof localStorage !== "undefined") localStorage.setItem(LOCALE_KEY, loc);
+	if (typeof localStorage !== "undefined")
+		localStorage.setItem(LOCALE_KEY, loc);
 }
 
 /**

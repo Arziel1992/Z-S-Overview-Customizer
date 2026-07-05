@@ -5,40 +5,44 @@
   "Apply on top" (merge, for pack pieces) vs "Overwrite" (full replace).
 -->
 <script>
-  import { t } from '$lib/i18n/strings.svelte.js';
-  import { customiser } from '$lib/stores/customiserStore.svelte';
-  import { parseOverviewYaml } from '$lib/utils/eveFormat';
-  import Modal from './Modal.svelte';
+import { t } from "$lib/i18n/strings.svelte.js";
+import { customiser } from "$lib/stores/customiserStore.svelte";
+import { parseOverviewYaml } from "$lib/utils/eveFormat";
+import Modal from "./Modal.svelte";
 
-  let { onclose, presetLabel = 'custom' } = $props();
+let { onclose, presetLabel = "custom" } = $props();
 
-  let text = $state('');
-  let mode = $state('merge');
-  let error = $state('');
-  let fileName = $state('');
+let text = $state("");
+let mode = $state("merge");
+let error = $state("");
+let fileName = $state("");
 
-  async function onFile(e) {
-    const file = e.currentTarget.files?.[0];
-    if (!file) return;
-    fileName = file.name;
-    text = await file.text();
-    error = '';
-  }
+async function onFile(e) {
+	const file = e.currentTarget.files?.[0];
+	if (!file) return;
+	fileName = file.name;
+	text = await file.text();
+	error = "";
+}
 
-  function apply() {
-    if (!text.trim()) {
-      error = t('importer.invalid');
-      return;
-    }
-    try {
-      parseOverviewYaml(text); // validate first
-      customiser.importYaml(text, mode, fileName ? fileName.replace(/\.ya?ml$/i, '') : presetLabel);
-      onclose?.();
-    } catch (e) {
-      console.warn(e);
-      error = t('importer.invalid');
-    }
-  }
+function apply() {
+	if (!text.trim()) {
+		error = t("importer.invalid");
+		return;
+	}
+	try {
+		parseOverviewYaml(text); // validate first
+		customiser.importYaml(
+			text,
+			mode,
+			fileName ? fileName.replace(/\.ya?ml$/i, "") : presetLabel,
+		);
+		onclose?.();
+	} catch (e) {
+		console.warn(e);
+		error = t("importer.invalid");
+	}
+}
 </script>
 
 <Modal title={t('importer.title')} {onclose} maxWidth="max-w-xl">

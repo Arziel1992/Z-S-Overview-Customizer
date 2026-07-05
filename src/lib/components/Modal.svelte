@@ -6,13 +6,13 @@
   Carries role="dialog"/aria-modal for assistive tech.
 -->
 <script>
-  import { t } from '$lib/i18n/strings.svelte.js';
+import { t } from "$lib/i18n/strings.svelte.js";
 
-  let { title = '', onclose, children, maxWidth = 'max-w-lg' } = $props();
+let { title = "", onclose, children, maxWidth = "max-w-lg" } = $props();
 
-  function onkeydown(e) {
-    if (e.key === 'Escape') onclose?.();
-  }
+function onkeydown(e) {
+	if (e.key === "Escape") onclose?.();
+}
 </script>
 
 <svelte:window onkeydown={onkeydown} />

@@ -4,18 +4,18 @@
   of `userSettings` (opaque client-side settings carried through untouched).
 -->
 <script>
-  import { customiser } from '$lib/stores/customiserStore.svelte';
-  import { t } from '$lib/i18n/strings.svelte.js';
+import { t } from "$lib/i18n/strings.svelte.js";
+import { customiser } from "$lib/stores/customiserStore.svelte";
 
-  // Locale-key based so the captions follow the active language.
-  const stats = $derived([
-    ['misc.statPresets', customiser.presets.length],
-    ['misc.statTabs', customiser.tabs.length],
-    ['misc.statFlags', customiser.flagStates.length],
-    ['misc.statBackgrounds', customiser.backgroundStates.length],
-    ['misc.statColumns', customiser.overviewColumns.length],
-    ['misc.statLabels', customiser.shipLabelOrder.length],
-  ]);
+// Locale-key based so the captions follow the active language.
+const stats = $derived([
+	["misc.statPresets", customiser.presets.length],
+	["misc.statTabs", customiser.tabs.length],
+	["misc.statFlags", customiser.flagStates.length],
+	["misc.statBackgrounds", customiser.backgroundStates.length],
+	["misc.statColumns", customiser.overviewColumns.length],
+	["misc.statLabels", customiser.shipLabelOrder.length],
+]);
 </script>
 
 <div class="space-y-3">

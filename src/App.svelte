@@ -8,70 +8,90 @@
   resume where the user left off.
 -->
 <script>
-  import AppearanceConfig from "$lib/components/AppearanceConfig.svelte";
-  import ColumnConfig from "$lib/components/ColumnConfig.svelte";
-  import EntityRoster from "$lib/components/EntityRoster.svelte";
-  import HistoryDialog from "$lib/components/HistoryDialog.svelte";
-  import ImportDialog from "$lib/components/ImportDialog.svelte";
-  import MiscConfig from "$lib/components/MiscConfig.svelte";
-  import OverviewWindow from "$lib/components/OverviewWindow.svelte";
-  import PresetEditor from "$lib/components/PresetEditor.svelte";
-  import ShipLabels from "$lib/components/ShipLabels.svelte";
-  import SpaceBrackets from "$lib/components/SpaceBrackets.svelte";
-  import TabManager from "$lib/components/TabManager.svelte";
-  import WelcomeModal from "$lib/components/WelcomeModal.svelte";
-  import YamlExporter from "$lib/components/YamlExporter.svelte";
-  import { getLocale, LOCALE_NAMES, setLocale, t } from "$lib/i18n/strings.svelte.js";
-  import { customiser } from "$lib/stores/customiserStore.svelte";
-  import { version } from "../package.json";
+import AppearanceConfig from "$lib/components/AppearanceConfig.svelte";
+import ColumnConfig from "$lib/components/ColumnConfig.svelte";
+import ComparePanel from "$lib/components/ComparePanel.svelte";
+import EntityRoster from "$lib/components/EntityRoster.svelte";
+import HistoryDialog from "$lib/components/HistoryDialog.svelte";
+import ImportDialog from "$lib/components/ImportDialog.svelte";
+import MiscConfig from "$lib/components/MiscConfig.svelte";
+import OverviewWindow from "$lib/components/OverviewWindow.svelte";
+import PresetEditor from "$lib/components/PresetEditor.svelte";
+import ShipLabels from "$lib/components/ShipLabels.svelte";
+import SpaceBrackets from "$lib/components/SpaceBrackets.svelte";
+import TabManager from "$lib/components/TabManager.svelte";
+import WelcomeModal from "$lib/components/WelcomeModal.svelte";
+import YamlExporter from "$lib/components/YamlExporter.svelte";
+import {
+	getLocale,
+	LOCALE_NAMES,
+	setLocale,
+	t,
+} from "$lib/i18n/strings.svelte.js";
+import { customiser } from "$lib/stores/customiserStore.svelte";
+import { version } from "../package.json";
 
-  // Date of the bundled SDE pull (CI refreshes it weekly), fixed YYYY/MM/DD.
-  const sdeDate = $derived(
-    customiser.sdeCompiledAt
-      ? new Date(customiser.sdeCompiledAt * 1000).toISOString().slice(0, 10).replaceAll("-", "/")
-      : null
-  );
+// Date of the bundled SDE pull (CI refreshes it weekly), fixed YYYY/MM/DD.
+const sdeDate = $derived(
+	customiser.sdeCompiledAt
+		? new Date(customiser.sdeCompiledAt * 1000)
+				.toISOString()
+				.slice(0, 10)
+				.replaceAll("-", "/")
+		: null,
+);
 
-  const REPO = "https://github.com/Arziel1992/Z-S-Overview-Customizer/";
+const REPO = "https://github.com/Arziel1992/Z-S-Overview-Customizer/";
 
-  let section = $state("tabs");
-  let showImport = $state(false);
-  let showHistory = $state(false);
+let section = $state("tabs");
+let showImport = $state(false);
+let showHistory = $state(false);
 
-  // Autosave the working profile (debounced) so a reload resumes where it left off.
-  let saveTimer;
-  $effect(() => {
-    customiser.exportYaml(); // read the whole model so this effect tracks it
-    customiser.baseProfile;
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => customiser.saveSession(), 500);
-  });
+// Autosave the working profile (debounced) so a reload resumes where it left off.
+let saveTimer;
+$effect(() => {
+	customiser.exportYaml(); // read the whole model so this effect tracks it
+	customiser.baseProfile;
+	clearTimeout(saveTimer);
+	saveTimer = setTimeout(() => customiser.saveSession(), 500);
+});
 
-  // Section keys only — captions resolve through t() in the template so they
-  // re-render when the locale changes.
-  const NAV = ["tabs", "presets", "columns", "appearance", "ships", "misc", "yaml"];
-  const FULL_HEIGHT = new Set(["appearance", "yaml"]);
+// Section keys only — captions resolve through t() in the template so they
+// re-render when the locale changes.
+const NAV = [
+	"tabs",
+	"presets",
+	"columns",
+	"appearance",
+	"ships",
+	"misc",
+	"compare",
+	"yaml",
+];
+const FULL_HEIGHT = new Set(["appearance", "yaml"]);
 
-  const SCALES = [
-    [0.85, "S"],
-    [1, "M"],
-    [1.15, "L"],
-    [1.3, "XL"],
-  ];
+const SCALES = [
+	[0.85, "S"],
+	[1, "M"],
+	[1.15, "L"],
+	[1.3, "XL"],
+];
 
-  // The bundled bases selectable from the header. Anything else (imports,
-  // snapshots, blank) shows as a transient extra option.
-  const BASES = [
-    ["fenris_default", "app.loadFenris"],
-    ["zs_core", "app.loadZs"],
-    ["zs_full", "app.loadZsFull"],
-  ];
-  const isBundledBase = $derived(BASES.some(([key]) => key === customiser.baseProfile));
+// The bundled bases selectable from the header. Anything else (imports,
+// snapshots, blank) shows as a transient extra option.
+const BASES = [
+	["zs_full_v10.06.09", "app.loadZsFull"],
+	["zs_full_v9.00.0347", "app.loadZsFullLegacy"],
+	["fenris_default_v24.01", "app.loadFenris"],
+];
+const isBundledBase = $derived(
+	BASES.some(([key]) => key === customiser.baseProfile),
+);
 
-  function onBaseChange(e) {
-    const key = e.currentTarget.value;
-    if (key && key !== "__current__") customiser.loadPreset(key);
-  }
+function onBaseChange(e) {
+	const key = e.currentTarget.value;
+	if (key && key !== "__current__") customiser.loadPreset(key);
+}
 </script>
 
 <!-- Single zoom wrapper so the UI scale affects the header, workspace and dialogs alike. -->
@@ -269,6 +289,7 @@
           {:else if section === "appearance"}<AppearanceConfig />
           {:else if section === "ships"}<ShipLabels />
           {:else if section === "misc"}<MiscConfig />
+          {:else if section === "compare"}<ComparePanel />
           {:else if section === "yaml"}<YamlExporter />{/if}
         </div>
       </section>

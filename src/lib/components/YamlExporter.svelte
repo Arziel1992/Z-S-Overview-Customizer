@@ -5,38 +5,38 @@
   download and copy-to-clipboard actions.
 -->
 <script>
-  import { customiser } from '$lib/stores/customiserStore.svelte';
-  import { t } from '$lib/i18n/strings.svelte.js';
+import { t } from "$lib/i18n/strings.svelte.js";
+import { customiser } from "$lib/stores/customiserStore.svelte";
 
-  const yamlText = $derived(customiser.exportYaml());
-  const lines = $derived(yamlText.split('\n'));
-  // Gutter width sized to the largest line number (in ch) so it never shifts
-  // mid-scroll; the gutter itself is select-none so copying lines from the
-  // panel never grabs the numbers.
-  const gutterCh = $derived(String(lines.length).length);
-  let copied = $state(false);
+const yamlText = $derived(customiser.exportYaml());
+const lines = $derived(yamlText.split("\n"));
+// Gutter width sized to the largest line number (in ch) so it never shifts
+// mid-scroll; the gutter itself is select-none so copying lines from the
+// panel never grabs the numbers.
+const gutterCh = $derived(String(lines.length).length);
+let copied = $state(false);
 
-  function download() {
-    const blob = new Blob([yamlText], { type: 'text/yaml;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `${customiser.baseProfile}_custom.yaml`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }
+function download() {
+	const blob = new Blob([yamlText], { type: "text/yaml;charset=utf-8" });
+	const url = URL.createObjectURL(blob);
+	const link = document.createElement("a");
+	link.href = url;
+	link.download = `${customiser.baseProfile}_custom.yaml`;
+	document.body.appendChild(link);
+	link.click();
+	document.body.removeChild(link);
+	URL.revokeObjectURL(url);
+}
 
-  async function copy() {
-    try {
-      await navigator.clipboard.writeText(yamlText);
-      copied = true;
-      setTimeout(() => (copied = false), 1500);
-    } catch (e) {
-      console.warn('Clipboard write failed', e);
-    }
-  }
+async function copy() {
+	try {
+		await navigator.clipboard.writeText(yamlText);
+		copied = true;
+		setTimeout(() => (copied = false), 1500);
+	} catch (e) {
+		console.warn("Clipboard write failed", e);
+	}
+}
 </script>
 
 <div class="flex flex-col h-full min-h-0">

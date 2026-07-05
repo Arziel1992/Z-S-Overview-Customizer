@@ -34,32 +34,95 @@ const THEME_KEY = "zs-overview-theme";
 const SCALE_KEY = "zs-overview-scale";
 const SESSION_KEY = "zs-overview-session";
 const BASE_KEY = "zs-overview-base";
-// v2: sample rosters were reworked (easter-egg pilots, real asteroid belt).
+// v3: sample rosters reworked again (signature hulls, mining-fleet logi).
 // Bumping the key refreshes the built-ins; user-made groupings migrate over.
-const SETS_KEY = "zs-overview-rostersets-v2";
-const SETS_KEY_V1 = "zs-overview-rostersets";
+const SETS_KEY = "zs-overview-rostersets-v3";
+const SETS_KEYS_OLD = ["zs-overview-rostersets-v2", "zs-overview-rostersets"];
 
 /**
  * Default preview roster so the renderer is populated on first load.
  * Covers the interesting cases out of the box: a fleet/corp friendly (11+18),
  * a war target (52), a neutral NPC (9), a criminal outlaw (13+44), and a
  * stateless celestial (stargate) that only group filters can show/hide.
- * Pilot names throughout the samples are a tip of the hat to New Eden. o7
+ * Pilot names throughout the samples are a tip of the hat to New Eden — and
+ * the friendly / war-target slots draw randomly from the cast on every load,
+ * so repeat visitors eventually meet everyone. o7
  */
 function seedRoster() {
-	return [
+	const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+	// Signature hulls per pilot request: Zirio flies a Vargur, Deuce a logi.
+	const friendly = pick([
 		{
-			id: 1,
 			pilotName: "Zirio",
+			shipName: "Whirlwind",
+			type: "Vargur",
+			typeId: 28665,
+			groupId: 900,
+			size: "L",
+		},
+		{
+			pilotName: "Kismeteer",
 			shipName: "Whirlwind",
 			type: "Rifter",
 			typeId: 587,
 			groupId: 25,
+			size: "S",
+		},
+		{
+			pilotName: "Tomas Iridium",
+			shipName: "Whirlwind",
+			type: "Rifter",
+			typeId: 587,
+			groupId: 25,
+			size: "S",
+		},
+		pick([
+			{
+				pilotName: "Deuce Syundai",
+				shipName: "Whirlwind",
+				type: "Scimitar",
+				typeId: 11978,
+				groupId: 832,
+				size: "M",
+			},
+			{
+				pilotName: "Deuce Syundai",
+				shipName: "Whirlwind",
+				type: "Basilisk",
+				typeId: 11985,
+				groupId: 832,
+				size: "M",
+			},
+		]),
+	]);
+	const warTarget = pick([
+		{
+			pilotName: "The Mittani",
+			shipName: "Sins of a Solar Spymaster",
+			type: "Rupture",
+			typeId: 629,
+			groupId: 26,
+			corp: "GoonWaffe",
+			alliance: "CONDI",
+		},
+		{
+			pilotName: "Shadoo",
+			shipName: "",
+			type: "Stabber",
+			typeId: 622,
+			groupId: 26,
+			corp: "SNIGG",
+			alliance: "PL",
+		},
+	]);
+	return [
+		{
+			id: 1,
+			...friendly,
 			corp: "PROMP",
 			alliance: "Z-S",
 			faction: "—",
 			militia: "—",
-			size: "S",
 			states: [11, 18],
 			distance: 14250,
 			velocity: 340,
@@ -69,13 +132,7 @@ function seedRoster() {
 		},
 		{
 			id: 2,
-			pilotName: "The Mittani",
-			shipName: "Sins of a Solar Spymaster",
-			type: "Rupture",
-			typeId: 629,
-			groupId: 26,
-			corp: "GoonWaffe",
-			alliance: "CONDI",
+			...warTarget,
 			faction: "—",
 			militia: "—",
 			size: "M",
@@ -255,7 +312,7 @@ function sampleSets() {
 					velocity: 15,
 				},
 				{
-					pilotName: "Deuce Syundai",
+					pilotName: "Halada",
 					type: "Hulk",
 					typeId: 22544,
 					groupId: 543,
@@ -265,6 +322,18 @@ function sampleSets() {
 					states: [11],
 					distance: 11300,
 					velocity: 20,
+				},
+				{
+					pilotName: "Deuce Syundai",
+					type: "Basilisk",
+					typeId: 11985,
+					groupId: 832,
+					corp: "PROMP",
+					alliance: "Z-S",
+					size: "M",
+					states: [11],
+					distance: 10400,
+					velocity: 60,
 				},
 				{
 					pilotName: "Tomas Iridium",
@@ -460,7 +529,7 @@ class CustomiserStore {
 	theme = $state("dark");
 	uiScale = $state(1); // zoom factor applied to the whole app
 	fontFamily = $state("'Inter', sans-serif");
-	baseProfile = $state("zs_core");
+	baseProfile = $state("zs_full_v10.06.09");
 	showWelcome = $state(false);
 
 	constructor() {
@@ -478,20 +547,21 @@ class CustomiserStore {
 			} catch (e) {
 				console.warn("[!] Could not restore roster sets.", e);
 			}
-		} else if (ls?.getItem(SETS_KEY_V1)) {
-			// One-time v1 → v2 migration: fresh built-in samples replace the old
-			// ones (same names); everything the user saved themselves carries over.
-			try {
-				const builtin = new Set(this.rosterSets.map((s) => s.name));
-				const own = JSON.parse(ls.getItem(SETS_KEY_V1)).filter(
-					(s) => !builtin.has(s.name),
-				);
-				this.rosterSets = [...this.rosterSets, ...own];
-				this.persistRosterSets();
-			} catch (e) {
-				console.warn("[!] Could not migrate v1 roster sets.", e);
+		} else if (ls) {
+			// One-time migration from an older key: fresh built-in samples replace
+			// the old ones (same names); everything the user saved carries over.
+			const old = SETS_KEYS_OLD.map((k) => ls.getItem(k)).find(Boolean);
+			if (old) {
+				try {
+					const builtin = new Set(this.rosterSets.map((s) => s.name));
+					const own = JSON.parse(old).filter((s) => !builtin.has(s.name));
+					this.rosterSets = [...this.rosterSets, ...own];
+					this.persistRosterSets();
+				} catch (e) {
+					console.warn("[!] Could not migrate old roster sets.", e);
+				}
+				for (const k of SETS_KEYS_OLD) ls.removeItem(k);
 			}
-			ls.removeItem(SETS_KEY_V1);
 		}
 
 		// Restore the last working session if present; otherwise greet the user.
@@ -502,10 +572,10 @@ class CustomiserStore {
 				this.baseProfile = ls.getItem(BASE_KEY) || "custom";
 			} catch (e) {
 				console.warn("[!] Could not restore session.", e);
-				this.loadPreset("zs_core");
+				this.loadPreset("zs_full_v10.06.09");
 			}
 		} else {
-			this.loadPreset("zs_core");
+			this.loadPreset("zs_full_v10.06.09");
 			this.showWelcome = true;
 		}
 	}
@@ -620,9 +690,10 @@ class CustomiserStore {
 	}
 
 	/**
-	 * Load a bundled base profile from public/defaults/ (e.g. "zs_core",
-	 * "fenris_default"). Fetch path is BASE_URL-aware for the GitHub Pages
-	 * subpath deployment.
+	 * Load a bundled base profile from public/defaults/ (e.g.
+	 * "zs_full_v10.06.09", "fenris_default_v24.01" — file names carry the
+	 * in-game pack/client version). Fetch path is BASE_URL-aware for the
+	 * GitHub Pages subpath deployment.
 	 */
 	async loadPreset(presetKey) {
 		try {

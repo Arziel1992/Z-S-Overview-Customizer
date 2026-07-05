@@ -65,13 +65,21 @@ behind a Z-S overview. Fly safe. o7
 
 - **Real EVE format, both ways.** Loads and exports the actual in-game overview
   YAML (ordered-map tuples, integer state ids, `<color=…>` / `<fontsize=…>`
-  markup). All bundled bases — **Fenris Default**, **Z-S Core** and **Z-S Full**
-  — parse through the same pipeline, and exports round-trip cleanly back into EVE.
+  markup). All bundled bases — **Z-S Full v10.06.09** (the default, an
+  in-game-only release), **Z-S Full v9.00.0347** (the last git-tracked pack,
+  kept for compatibility) and **Fenris Default v24.01** (the stock overview a
+  fresh character gets) — parse through the same pipeline, and exports
+  round-trip cleanly back into EVE.
 - **1:1 settings mirror.** Tabs, Presets — create, duplicate, rename and delete
   them (renames cascade into the tabs that use them) plus their groups /
   filtered states / always-shown states — Columns, Appearance (colortag +
   background priority, colour pickers, blink), Ship Labels, Misc, and a live
-  YAML view.
+  YAML view. Tab brackets support the client's **"Show all brackets"** mode
+  (`_BracketFilterShowAll`) alongside per-preset bracket filtering.
+- **Compare profiles.** Load one or more overview `.yaml` files and diff their
+  settings side by side against your current profile (differing rows are
+  highlighted), then drill into **preset vs preset**: pick one preset per
+  profile and see exactly which groups each of them selects.
 - **Customisable live preview.** Add your own entities to the roster and watch
   them update live in a game-accurate overview list and a tactical bracket view
   with a twinkling starfield — including fully styled `shipLabels` bracket text.
@@ -147,8 +155,11 @@ filters operate almost exclusively at the **group** level: white-listing group
 Fenris' **Static Data Export (SDE)**; the customiser compiles it into
 `public/data/matrix_latest.json` via `scripts/build_sde_matrix.py`, filtered
 down to objects that can actually appear on the overview — inventory-only
-types (ammo, mining crystals, module scripts…) and render-only scenery
-(dust clouds, invisible beacons, map hierarchy objects) are excluded.
+types (ammo, mining crystals, module scripts, compressed ore/ice/moon-ore
+variants…) and render-only scenery (dust clouds, invisible beacons, map
+hierarchy objects) are excluded. The group set is validated 1:1 against an
+in-game "every group" preset export (game version v24.01, committed under
+`scripts/reference/`), and the build warns when a future SDE drifts from it.
 
 ### 2. Presets: the boolean logic engine
 
@@ -320,15 +331,16 @@ Z-S-Overview-Customizer/
 ├── vite.config.js                  # Vite + base path (GitHub Pages) + aliases
 ├── biome.json                      # lint/format config (+ Svelte overrides)
 ├── scripts/
-│   └── build_sde_matrix.py         # Fenris SDE zip → minified matrix_latest.json
+│   ├── build_sde_matrix.py         # Fenris SDE zip → minified matrix_latest.json
+│   └── reference/                  # in-game "All Entities" export (v24.01) — group-set ground truth
 ├── .github/workflows/
 │   └── sde_update.yml              # scheduled CI refresh of the SDE matrix
 ├── public/
 │   ├── data/matrix_latest.json     # categories → groups → types lookup
 │   └── defaults/
-│       ├── fenris_default.yaml     # stock base (real EVE format)
-│       ├── zs_core.yaml            # Z-S Core base (real EVE format)
-│       └── zs_full.yaml            # Z-S Full base (real EVE format)
+│       ├── fenris_default_v24.01.yaml  # stock base (real EVE format)
+│       ├── zs_full_v10.06.09.yaml      # Z-S Full base — the default (in-game-only release)
+│       └── zs_full_v9.00.0347.yaml     # Z-S Full legacy base (last git-tracked pack)
 ├── images/                         # flow-diagram renders + screenshots used in this README
 ├── notes/                          # local research workspace (gitignored)
 └── src/
@@ -488,9 +500,12 @@ Requires Python with `pyyaml` and `requests`.
 
 The map covers every category that can appear in space on the overview,
 mirroring the game's own overview-settings tree: Celestial, Station, Ship,
-Charge, Entity (NPCs), Drone, Deployable, Starbase, Asteroid, Sovereignty
-Structures, Orbitals (customs offices), Structure (Upwell citadels, skyhooks)
-and Fighter.
+Charge, Entity (NPCs), Commodity (Homefront objectives), Drone, Deployable,
+Starbase, Asteroid, Sovereignty Structures, Orbitals (customs offices),
+Structure (Upwell citadels, skyhooks) and Fighter. The extracted group set is
+checked against `scripts/reference/All_Entities_v24.01.yaml` — an in-game
+export of a preset containing every loadable overview group — and any drift
+is reported in the build log.
 
 ### Develop
 
@@ -504,9 +519,10 @@ npm run preview  # preview the production build
 
 ## Using the app
 
-1. On first visit, the **welcome screen** asks what to start from: Z-S Core,
-   Fenris Default, an imported `.yaml`, or a blank profile. Your work autosaves to
-   the browser, so later visits **resume where you left off**.
+1. On first visit, the **welcome screen** asks what to start from: Z-S Full
+   v10.06.09 (the recommended default), Fenris Default v24.01, an imported
+   `.yaml`, or a blank profile. Your work autosaves to the browser, so later
+   visits **resume where you left off**.
 2. Configure tabs, presets, columns, appearance, and ship labels in the left
    panel — every applicable EVE parameter is mirrored 1:1.
 3. Add entities in **Preview Entities** (search any SDE type, set distance and
@@ -517,6 +533,8 @@ npm run preview  # preview the production build
 4. **Import** more packs via *+ Custom / Import* — choose **Apply on top** to
    layer pack pieces (the in-game multi-import workflow) or **Overwrite** to
    replace everything. Save named **versions**, re-load, export, or share them.
+   Use the **Compare** tab to diff any overview `.yaml` files (settings and
+   preset-vs-preset group selections) against your current profile.
 5. Open the **YAML** tab and **Download .yaml**, then import it in game
    (see [Using your YAML out of game](#using-your-yaml-out-of-game)).
 

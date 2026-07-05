@@ -5,24 +5,24 @@
   with live-rendered examples; closes on Escape or when focus leaves it.
 -->
 <script>
-  import { t } from '$lib/i18n/strings.svelte.js';
-  import { renderEveMarkup } from '$lib/utils/eveFormat';
+import { t } from "$lib/i18n/strings.svelte.js";
+import { renderEveMarkup } from "$lib/utils/eveFormat";
 
-  let open = $state(false);
+let open = $state(false);
 
-  // [raw example, i18n description key]
-  const TAGS = [
-    ['<color=0xFF66CCFF>text</color>', 'markup.colorTag'],
-    ['<b>text</b>', 'markup.boldTag'],
-    ['<i>text</i>', 'markup.italicTag'],
-    ['<u>text</u>', 'markup.underlineTag'],
-    ['<fontsize=12>text</fontsize>', 'markup.fontsizeTag'],
-  ];
+// [raw example, i18n description key]
+const TAGS = [
+	["<color=0xFF66CCFF>text</color>", "markup.colorTag"],
+	["<b>text</b>", "markup.boldTag"],
+	["<i>text</i>", "markup.italicTag"],
+	["<u>text</u>", "markup.underlineTag"],
+	["<fontsize=12>text</fontsize>", "markup.fontsizeTag"],
+];
 
-  function onfocusout(e) {
-    // Close only when focus truly leaves the widget (not moving within it).
-    if (!e.currentTarget.contains(e.relatedTarget)) open = false;
-  }
+function onfocusout(e) {
+	// Close only when focus truly leaves the widget (not moving within it).
+	if (!e.currentTarget.contains(e.relatedTarget)) open = false;
+}
 </script>
 
 <span class="relative inline-flex" onfocusout={onfocusout}>

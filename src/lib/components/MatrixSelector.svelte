@@ -6,45 +6,50 @@
   chips under their parent group).
 -->
 <script>
-  import { t } from '$lib/i18n/strings.svelte.js';
-  import { customiser } from '$lib/stores/customiserStore.svelte';
+import { t } from "$lib/i18n/strings.svelte.js";
+import { customiser } from "$lib/stores/customiserStore.svelte";
 
-  // Pseudo-category spanning every group; safe key, real ids are numeric.
-  const ALL = 'all';
+// Pseudo-category spanning every group; safe key, real ids are numeric.
+const ALL = "all";
 
-  let searchQuery = $state('');
-  let activeCategory = $state('6'); // Ships by default
+let searchQuery = $state("");
+let activeCategory = $state("6"); // Ships by default
 
-  const preset = $derived(customiser.activePreset);
-  // Stable, keyed category list so the nav doesn't re-render while typing.
-  const categories = $derived(customiser.sdeMatrix ? Object.entries(customiser.sdeMatrix.categories) : []);
+const preset = $derived(customiser.activePreset);
+// Stable, keyed category list so the nav doesn't re-render while typing.
+const categories = $derived(
+	customiser.sdeMatrix ? Object.entries(customiser.sdeMatrix.categories) : [],
+);
 
-  const filteredGroups = $derived.by(() => {
-    const m = customiser.sdeMatrix;
-    if (!m) return [];
-    const gids = activeCategory === ALL
-      ? Object.values(m.categories).flatMap((c) => c.groups)
-      : (m.categories[activeCategory]?.groups ?? []);
-    const q = searchQuery.toLowerCase().trim();
-    return gids
-      .map((gid) => {
-        const g = m.groups[gid];
-        if (!g) return null;
-        const matchGroup = g.name.toLowerCase().includes(q);
-        const matchTypes = q
-          ? g.types.filter((tid) => m.types[tid]?.name.toLowerCase().includes(q)).map((tid) => m.types[tid].name)
-          : [];
-        if (!q || matchGroup || matchTypes.length) {
-          return { id: gid, name: g.name, matches: matchTypes.slice(0, 6) };
-        }
-        return null;
-      })
-      .filter(Boolean);
-  });
+const filteredGroups = $derived.by(() => {
+	const m = customiser.sdeMatrix;
+	if (!m) return [];
+	const gids =
+		activeCategory === ALL
+			? Object.values(m.categories).flatMap((c) => c.groups)
+			: (m.categories[activeCategory]?.groups ?? []);
+	const q = searchQuery.toLowerCase().trim();
+	return gids
+		.map((gid) => {
+			const g = m.groups[gid];
+			if (!g) return null;
+			const matchGroup = g.name.toLowerCase().includes(q);
+			const matchTypes = q
+				? g.types
+						.filter((tid) => m.types[tid]?.name.toLowerCase().includes(q))
+						.map((tid) => m.types[tid].name)
+				: [];
+			if (!q || matchGroup || matchTypes.length) {
+				return { id: gid, name: g.name, matches: matchTypes.slice(0, 6) };
+			}
+			return null;
+		})
+		.filter(Boolean);
+});
 
-  function isOn(gid) {
-    return preset?.groups.includes(gid);
-  }
+function isOn(gid) {
+	return preset?.groups.includes(gid);
+}
 </script>
 
 <div class="bg-app-panel2 border border-app-border rounded p-2.5 flex flex-col" style="max-height: 360px;">

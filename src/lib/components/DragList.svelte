@@ -1,68 +1,72 @@
 <script>
-  import { dragHandle, dragHandleZone, SHADOW_ITEM_MARKER_PROPERTY_NAME } from 'svelte-dnd-action';
-  import { flip } from 'svelte/animate';
-  import { t } from '$lib/i18n/strings.svelte.js';
+import { flip } from "svelte/animate";
+import {
+	dragHandle,
+	dragHandleZone,
+	SHADOW_ITEM_MARKER_PROPERTY_NAME,
+} from "svelte-dnd-action";
+import { t } from "$lib/i18n/strings.svelte.js";
 
-  // Generic reorderable list. `values` is the store's own primitive/object
-  // array; `onchange` receives the reordered values to commit.
-  //
-  // Interaction model:
-  //  - DragList renders its own grab handle per row via the library's
-  //    dragHandle/dragHandleZone pair (reliable capture + built-in keyboard
-  //    support) — rows passed in via `row` need no handle of their own.
-  //  - While dragging, a dashed "ghost" placeholder marks the drop slot and
-  //    the other rows reflow live (animate:flip).
-  //  - Up/down arrow buttons are rendered per row as a touch-friendly
-  //    fallback to drag-and-drop.
-  let {
-    values,
-    onchange,
-    row,
-    flipMs = 150,
-    listClass = 'space-y-1.5',
-  } = $props();
+// Generic reorderable list. `values` is the store's own primitive/object
+// array; `onchange` receives the reordered values to commit.
+//
+// Interaction model:
+//  - DragList renders its own grab handle per row via the library's
+//    dragHandle/dragHandleZone pair (reliable capture + built-in keyboard
+//    support) — rows passed in via `row` need no handle of their own.
+//  - While dragging, a dashed "ghost" placeholder marks the drop slot and
+//    the other rows reflow live (animate:flip).
+//  - Up/down arrow buttons are rendered per row as a touch-friendly
+//    fallback to drag-and-drop.
+let {
+	values,
+	onchange,
+	row,
+	flipMs = 150,
+	listClass = "space-y-1.5",
+} = $props();
 
-  let items = $state([]);
-  let dragging = false;
-  let uid = 0;
+let items = $state([]);
+let dragging = false;
+let uid = 0;
 
-  function sameSequence(a, b) {
-    if (a.length !== b.length) return false;
-    for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
-    return true;
-  }
+function sameSequence(a, b) {
+	if (a.length !== b.length) return false;
+	for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+	return true;
+}
 
-  // Resync from the source when it changes externally (load/import/add/remove
-  // or an arrow move) — but never mid-drag, when `items` intentionally
-  // diverges from `values` (resyncing here stomped active drags, which is why
-  // grabs randomly "didn't take").
-  $effect(() => {
-    const next = values;
-    const cur = items.map((it) => it.v);
-    if (dragging) return;
-    if (!sameSequence(cur, next)) {
-      items = next.map((v) => ({ id: ++uid, v }));
-    }
-  });
+// Resync from the source when it changes externally (load/import/add/remove
+// or an arrow move) — but never mid-drag, when `items` intentionally
+// diverges from `values` (resyncing here stomped active drags, which is why
+// grabs randomly "didn't take").
+$effect(() => {
+	const next = values;
+	const cur = items.map((it) => it.v);
+	if (dragging) return;
+	if (!sameSequence(cur, next)) {
+		items = next.map((v) => ({ id: ++uid, v }));
+	}
+});
 
-  function consider(e) {
-    dragging = true;
-    items = e.detail.items;
-  }
+function consider(e) {
+	dragging = true;
+	items = e.detail.items;
+}
 
-  function finalize(e) {
-    items = e.detail.items;
-    dragging = false;
-    onchange(items.map((it) => it.v));
-  }
+function finalize(e) {
+	items = e.detail.items;
+	dragging = false;
+	onchange(items.map((it) => it.v));
+}
 
-  function move(i, dir) {
-    const arr = items.map((it) => it.v);
-    const j = i + dir;
-    if (j < 0 || j >= arr.length) return;
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-    onchange(arr);
-  }
+function move(i, dir) {
+	const arr = items.map((it) => it.v);
+	const j = i + dir;
+	if (j < 0 || j >= arr.length) return;
+	[arr[i], arr[j]] = [arr[j], arr[i]];
+	onchange(arr);
+}
 </script>
 
 <div

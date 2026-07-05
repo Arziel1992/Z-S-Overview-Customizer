@@ -20,72 +20,80 @@
     oncolor    — (cssHex|null) => void; required with colorCss
 -->
 <script>
-  import { t } from '$lib/i18n/strings.svelte.js';
-  import {
-    analyzeMarkup,
-    argbHexToCss,
-    composeMarkup,
-    cssToArgbHex,
-    renderEveMarkup,
-  } from '$lib/utils/eveFormat';
-  import MarkupHint from './MarkupHint.svelte';
+import { t } from "$lib/i18n/strings.svelte.js";
+import {
+	analyzeMarkup,
+	argbHexToCss,
+	composeMarkup,
+	cssToArgbHex,
+	renderEveMarkup,
+} from "$lib/utils/eveFormat";
+import MarkupHint from "./MarkupHint.svelte";
 
-  let {
-    label = '',
-    value = '',
-    oncommit,
-    onfinish,
-    placeholder = '',
-    colorCss = undefined,
-    oncolor = undefined,
-  } = $props();
+let {
+	label = "",
+	value = "",
+	oncommit,
+	onfinish,
+	placeholder = "",
+	colorCss = undefined,
+	oncolor = undefined,
+} = $props();
 
-  const externalColor = $derived(oncolor !== undefined);
+const externalColor = $derived(oncolor !== undefined);
 
-  // Local raw text mirrors `value`; the effect seeds it on mount and resyncs
-  // whenever the parent changes it (e.g. a failed rename restoring the name).
-  let raw = $state('');
-  $effect(() => {
-    raw = value;
-  });
+// Local raw text mirrors `value`; the effect seeds it on mount and resyncs
+// whenever the parent changes it (e.g. a failed rename restoring the name).
+let raw = $state("");
+$effect(() => {
+	raw = value;
+});
 
-  const parsed = $derived(analyzeMarkup(raw));
+const parsed = $derived(analyzeMarkup(raw));
 
-  // Swatch value: external field when provided, else the markup colour wrap.
-  const swatchCss = $derived(
-    externalColor
-      ? (colorCss ?? '#ffffff')
-      : parsed.flags.color
-        ? argbHexToCss(parsed.flags.color)
-        : '#ffffff'
-  );
-  const colorActive = $derived(externalColor ? colorCss != null : parsed.flags.color != null);
+// Swatch value: external field when provided, else the markup colour wrap.
+const swatchCss = $derived(
+	externalColor
+		? (colorCss ?? "#ffffff")
+		: parsed.flags.color
+			? argbHexToCss(parsed.flags.color)
+			: "#ffffff",
+);
+const colorActive = $derived(
+	externalColor ? colorCss != null : parsed.flags.color != null,
+);
 
-  function update(next) {
-    raw = next;
-    oncommit?.(next);
-  }
+function update(next) {
+	raw = next;
+	oncommit?.(next);
+}
 
-  function setFlags(mutate) {
-    const { inner, flags } = analyzeMarkup(raw);
-    mutate(flags);
-    update(composeMarkup(inner, flags));
-  }
+function setFlags(mutate) {
+	const { inner, flags } = analyzeMarkup(raw);
+	mutate(flags);
+	update(composeMarkup(inner, flags));
+}
 
-  function setColor(css) {
-    if (externalColor) oncolor(css);
-    else setFlags((f) => { f.color = cssToArgbHex(css).replace('0xff', '0xFF'); });
-  }
+function setColor(css) {
+	if (externalColor) oncolor(css);
+	else
+		setFlags((f) => {
+			f.color = cssToArgbHex(css).replace("0xff", "0xFF");
+		});
+}
 
-  function clearColor() {
-    if (externalColor) oncolor(null);
-    else setFlags((f) => { f.color = null; });
-  }
+function clearColor() {
+	if (externalColor) oncolor(null);
+	else
+		setFlags((f) => {
+			f.color = null;
+		});
+}
 
-  // Same button styling as the ship-label segment editor (the reference look).
-  function styleBtn(active) {
-    return `px-2 py-1 rounded text-[11px] border transition-colors ${active ? 'bg-app-accent border-app-accent text-white' : 'border-app-border text-app-muted'}`;
-  }
+// Same button styling as the ship-label segment editor (the reference look).
+function styleBtn(active) {
+	return `px-2 py-1 rounded text-[11px] border transition-colors ${active ? "bg-app-accent border-app-accent text-white" : "border-app-border text-app-muted"}`;
+}
 </script>
 
 <div class="space-y-1.5">

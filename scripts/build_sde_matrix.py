@@ -25,30 +25,49 @@ TEMP_DIR = "sde_temp"
 # Target Categories to extract — everything that can appear in space on the
 # overview, mirroring EVE's own overview-settings tree:
 #   2 = Celestial, 3 = Station, 6 = Ship, 8 = Charge (probes/bombs only),
-#   11 = Entity (NPCs), 18 = Drone, 22 = Deployable, 23 = Starbase,
-#   25 = Asteroid, 40 = Sovereignty Structures, 41 = Planetary Industry
+#   11 = Entity (NPCs), 17 = Commodity (Homefront objectives only),
+#   18 = Drone, 22 = Deployable, 23 = Starbase, 25 = Asteroid,
+#   40 = Sovereignty Structures, 41 = Planetary Industry
 #   (Mercenary/Capsuleer Bases only), 46 = Orbitals (POCOs),
 #   65 = Structure (Upwell: Citadels, Skyhooks), 87 = Fighter
-TARGET_CATEGORIES = {2, 3, 6, 8, 11, 18, 22, 23, 25, 40, 41, 46, 65, 87}
+TARGET_CATEGORIES = {2, 3, 6, 8, 11, 17, 18, 22, 23, 25, 40, 41, 46, 65, 87}
 
-# Mixed categories: mostly inventory (8) or on-planet (41) items, with a
+# Mixed categories: mostly inventory (8, 17) or on-planet (41) items, with a
 # handful of genuine space objects. Only these groups are extracted:
 #   8  — Bomb, Scanner/Survey/Interdiction Probe, Bomb ECM/Energy, Guided
 #        Bomb, Interdiction Burst Probes (everything else is ammo, mining
 #        crystals, scripts… — cargo/fitting inventory, never on the overview)
+#   17 — Homefront Operations Commodity (in-space objective objects)
 #   41 — Mercenary Bases, Capsuleer Bases (the rest are on-planet PI pins)
 GROUP_WHITELIST = {
     8: {90, 479, 492, 548, 863, 864, 1548, 4088},
+    17: {4575},
     41: {1081, 1082},
 }
 
-# Render-/map-only groups that never appear on the overview, dropped from
-# otherwise space-relevant categories (Celestial dust clouds, non-interactable
-# scenery, map hierarchy objects, decorative asteroids…).
+# Groups that never appear on the overview, dropped from otherwise
+# space-relevant categories. Validated against an in-game "All Entities"
+# preset export (see scripts/reference/All_Entities_v24.01.yaml): map hierarchy
+# objects, render-only scenery, legacy/unreleased content.
 GROUP_BLOCKLIST = {
-    2: {3, 4, 5, 227, 312, 995, 1198, 1882, 1973, 1975, 1980, 1983, 4055, 4070, 4430, 4579, 4713},
-    25: {519, 4714},
+    2: {3, 4, 5, 11, 13, 227, 305, 312, 368, 382, 502, 885, 995, 1071, 1165,
+        1198, 1882, 1940, 1971, 1973, 1975, 1980, 1983, 4055, 4430, 4579},
+    3: {16},
+    18: {97, 299, 470, 545, 549, 1023},
+    22: {1297},
+    23: {364, 414, 418, 445, 480, 710, 840, 877},
+    25: {519, 903, 4714},
+    46: {1073},
+    65: {1405, 1407, 1409, 1410},
 }
+
+# Inventory-only type-name prefixes inside otherwise valid Asteroid groups:
+# compressed ore/ice/moon-ore variants live in the same SDE group as the
+# in-space rocks but only ever exist in a hangar. Applied to category 25 only
+# (group 4168 "Compressed Gas" in category 2 is a real in-space object).
+COMPRESSED_PREFIXES = ("Compressed ", "Batch Compressed ")
+# In-game "All Entities" preset export, captured on game version v24.01.
+REFERENCE_GROUPS_YAML = "scripts/reference/All_Entities_v24.01.yaml"
 
 
 def group_allowed(cid, gid):
@@ -57,6 +76,24 @@ def group_allowed(cid, gid):
     if allow is not None and gid not in allow:
         return False
     return gid not in GROUP_BLOCKLIST.get(cid, set())
+
+
+def type_allowed(cid, name):
+    """True unless the type is a hangar-only variant inside a valid group."""
+    return not (cid == 25 and name.startswith(COMPRESSED_PREFIXES))
+
+
+def reference_group_ids():
+    """Group ids from the committed in-game 'All Entities' preset export."""
+    import re
+
+    try:
+        with open(REFERENCE_GROUPS_YAML, "r", encoding="utf-8") as f:
+            text = f.read()
+    except OSError:
+        return None
+    ids = re.findall(r"^\s*(?:- )+(\d+)\s*$", text.split("- - groups", 1)[-1], re.M)
+    return {int(i) for i in ids} or None
 
 
 def download_and_extract_sde():
@@ -137,8 +174,21 @@ def process_and_minify():
             clean_name = (
                 raw_name.replace("<font size=14>", "").replace("</font>", "").strip()
             )
+            if not type_allowed(groups[str(gid)]["categoryId"], clean_name):
+                continue
             types[str(tid)] = {"name": clean_name, "groupId": gid}
             groups[str(gid)]["types"].append(tid)
+
+    # Drift check against the committed in-game "All Entities" preset export:
+    # a mismatch means the game gained/lost overview groups since the
+    # reference was captured — worth a look, not a failure.
+    reference = reference_group_ids()
+    if reference:
+        got = {int(g) for g in groups}
+        for gid in sorted(got - reference):
+            print(f"[~] Drift: group {gid} ({groups[str(gid)]['name']}) not in the in-game reference")
+        for gid in sorted(reference - got):
+            print(f"[~] Drift: in-game group {gid} missing from the matrix")
 
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:

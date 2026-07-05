@@ -1,37 +1,37 @@
 <!--
   @component
   First-run chooser shown when no saved session exists. Offers the four
-  starting points (Z-S Core / Fenris Default / import / blank); every path
+  starting points (Z-S Full / Fenris Default / import / blank); every path
   dismisses the welcome flag so it never reappears once a session is saved.
   `onimport` lets App.svelte chain straight into the ImportDialog.
 -->
 <script>
-  import { t } from "$lib/i18n/strings.svelte.js";
-  import { customiser } from "$lib/stores/customiserStore.svelte";
-  import Modal from "./Modal.svelte";
+import { t } from "$lib/i18n/strings.svelte.js";
+import { customiser } from "$lib/stores/customiserStore.svelte";
+import Modal from "./Modal.svelte";
 
-  let { onclose, onimport } = $props();
+let { onclose, onimport } = $props();
 
-  function choose(action) {
-    if (action === "zs") customiser.loadPreset("zs_core");
-    else if (action === "fenris") customiser.loadPreset("fenris_default");
-    else if (action === "blank") customiser.clearAll();
-    customiser.dismissWelcome();
-    if (action === "import") {
-      onimport?.();
-    } else {
-      onclose?.();
-    }
-  }
+function choose(action) {
+	if (action === "zsFull") customiser.loadPreset("zs_full_v10.06.09");
+	else if (action === "fenris") customiser.loadPreset("fenris_default_v24.01");
+	else if (action === "blank") customiser.clearAll();
+	customiser.dismissWelcome();
+	if (action === "import") {
+		onimport?.();
+	} else {
+		onclose?.();
+	}
+}
 
-  // Key-based so captions resolve through t() at render time and follow the
-  // active locale.
-  const OPTIONS = [
-    ["zs", "🛰️", "welcome.zs", "welcome.zsDesc"],
-    ["fenris", "🪐", "welcome.fenris", "welcome.fenrisDesc"],
-    ["import", "⬆️", "welcome.import", "welcome.importDesc"],
-    ["blank", "📄", "welcome.blank", "welcome.blankDesc"],
-  ];
+// Key-based so captions resolve through t() at render time and follow the
+// active locale.
+const OPTIONS = [
+	["zsFull", "🚀", "welcome.zsFull", "welcome.zsFullDesc"],
+	["fenris", "🪐", "welcome.fenris", "welcome.fenrisDesc"],
+	["import", "⬆️", "welcome.import", "welcome.importDesc"],
+	["blank", "📄", "welcome.blank", "welcome.blankDesc"],
+];
 </script>
 
 <Modal

@@ -11,79 +11,98 @@
   (built-in samples included) via the store's rosterSets.
 -->
 <script>
-  import { STATES } from '$lib/data/stateMatrix';
-  import { t } from '$lib/i18n/strings.svelte.js';
-  import { customiser } from '$lib/stores/customiserStore.svelte';
-  import Modal from './Modal.svelte';
+import { STATES } from "$lib/data/stateMatrix";
+import { t } from "$lib/i18n/strings.svelte.js";
+import { customiser } from "$lib/stores/customiserStore.svelte";
+import Modal from "./Modal.svelte";
 
-  const STATE_OPTIONS = [9, 10, 11, 12, 13, 14, 18, 19, 44, 45, 50, 51, 52];
+const STATE_OPTIONS = [9, 10, 11, 12, 13, 14, 18, 19, 44, 45, 50, 51, 52];
 
-  let editing = $state(null); // entity ref (edit) or draft (add)
-  let isNew = $state(false);
-  let typeQuery = $state(''); // live SDE search text; '' = dropdown closed
-  let newSetName = $state('');
+let editing = $state(null); // entity ref (edit) or draft (add)
+let isNew = $state(false);
+let typeQuery = $state(""); // live SDE search text; '' = dropdown closed
+let newSetName = $state("");
 
-  // Up to 25 SDE types whose name contains the query (across all categories).
-  const typeMatches = $derived.by(() => {
-    const m = customiser.sdeMatrix;
-    const q = typeQuery.toLowerCase().trim();
-    if (!m || q.length < 2) return [];
-    const out = [];
-    for (const [tid, tp] of Object.entries(m.types)) {
-      if (tp.name.toLowerCase().includes(q)) {
-        const g = m.groups[tp.groupId];
-        out.push({ tid: Number(tid), name: tp.name, groupId: tp.groupId, groupName: g?.name ?? String(tp.groupId) });
-        if (out.length >= 25) break;
-      }
-    }
-    return out;
-  });
+// Up to 25 SDE types whose name contains the query (across all categories).
+const typeMatches = $derived.by(() => {
+	const m = customiser.sdeMatrix;
+	const q = typeQuery.toLowerCase().trim();
+	if (!m || q.length < 2) return [];
+	const out = [];
+	for (const [tid, tp] of Object.entries(m.types)) {
+		if (tp.name.toLowerCase().includes(q)) {
+			const g = m.groups[tp.groupId];
+			out.push({
+				tid: Number(tid),
+				name: tp.name,
+				groupId: tp.groupId,
+				groupName: g?.name ?? String(tp.groupId),
+			});
+			if (out.length >= 25) break;
+		}
+	}
+	return out;
+});
 
-  const groupName = $derived(
-    customiser.sdeMatrix?.groups[editing?.groupId]?.name ?? `#${editing?.groupId}`
-  );
+const groupName = $derived(
+	customiser.sdeMatrix?.groups[editing?.groupId]?.name ??
+		`#${editing?.groupId}`,
+);
 
-  function pickType(match) {
-    editing.type = match.name;
-    editing.typeId = match.tid;
-    editing.groupId = match.groupId;
-    typeQuery = '';
-  }
+function pickType(match) {
+	editing.type = match.name;
+	editing.typeId = match.tid;
+	editing.groupId = match.groupId;
+	typeQuery = "";
+}
 
-  function openAdd() {
-    isNew = true;
-    typeQuery = '';
-    editing = {
-      pilotName: 'New Pilot', shipName: '', type: 'Rifter', typeId: 587, groupId: 25,
-      corp: '—', alliance: '—', faction: '—', militia: '—', size: 'S',
-      states: [], distance: 10000, velocity: 0, radial: 0, transversal: 0, angular: 0,
-    };
-  }
-  function openEdit(entity) {
-    isNew = false;
-    typeQuery = '';
-    editing = entity;
-  }
-  function close() {
-    editing = null;
-  }
-  function confirmAdd() {
-    customiser.addEntity(editing);
-    close();
-  }
-  function toggleState(id) {
-    const i = editing.states.indexOf(id);
-    if (i > -1) editing.states.splice(i, 1);
-    else editing.states.push(id);
-  }
+function openAdd() {
+	isNew = true;
+	typeQuery = "";
+	editing = {
+		pilotName: "New Pilot",
+		shipName: "",
+		type: "Rifter",
+		typeId: 587,
+		groupId: 25,
+		corp: "—",
+		alliance: "—",
+		faction: "—",
+		militia: "—",
+		size: "S",
+		states: [],
+		distance: 10000,
+		velocity: 0,
+		radial: 0,
+		transversal: 0,
+		angular: 0,
+	};
+}
+function openEdit(entity) {
+	isNew = false;
+	typeQuery = "";
+	editing = entity;
+}
+function close() {
+	editing = null;
+}
+function confirmAdd() {
+	customiser.addEntity(editing);
+	close();
+}
+function toggleState(id) {
+	const i = editing.states.indexOf(id);
+	if (i > -1) editing.states.splice(i, 1);
+	else editing.states.push(id);
+}
 
-  function saveNewSet() {
-    if (customiser.saveRosterSet(newSetName)) newSetName = '';
-  }
-  function renameSet(set) {
-    const name = prompt(t('preview.renameSet'), set.name);
-    if (name != null) customiser.renameRosterSet(set.name, name);
-  }
+function saveNewSet() {
+	if (customiser.saveRosterSet(newSetName)) newSetName = "";
+}
+function renameSet(set) {
+	const name = prompt(t("preview.renameSet"), set.name);
+	if (name != null) customiser.renameRosterSet(set.name, name);
+}
 </script>
 
 <div class="flex flex-col h-full min-h-0">

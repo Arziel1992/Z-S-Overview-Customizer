@@ -6,75 +6,84 @@
   the clipboard (no third-party paste services by design).
 -->
 <script>
-  import { t } from '$lib/i18n/strings.svelte.js';
-  import { customiser } from '$lib/stores/customiserStore.svelte';
-  import { deleteSnapshot, listSnapshots, renameSnapshot, saveSnapshot } from '$lib/utils/history';
-  import Modal from './Modal.svelte';
+import { t } from "$lib/i18n/strings.svelte.js";
+import { customiser } from "$lib/stores/customiserStore.svelte";
+import {
+	deleteSnapshot,
+	listSnapshots,
+	renameSnapshot,
+	saveSnapshot,
+} from "$lib/utils/history";
+import Modal from "./Modal.svelte";
 
-  let { onclose, onimport } = $props();
+let { onclose, onimport } = $props();
 
-  let snapshots = $state([]);
-  let newName = $state('');
-  let toast = $state('');
+let snapshots = $state([]);
+let newName = $state("");
+let toast = $state("");
 
-  async function refresh() {
-    snapshots = await listSnapshots();
-  }
-  $effect(() => {
-    refresh();
-  });
+async function refresh() {
+	snapshots = await listSnapshots();
+}
+$effect(() => {
+	refresh();
+});
 
-  function flash(msg) {
-    toast = msg;
-    setTimeout(() => (toast = ''), 1800);
-  }
+function flash(msg) {
+	toast = msg;
+	setTimeout(() => (toast = ""), 1800);
+}
 
-  async function saveCurrent() {
-    await saveSnapshot(newName || `${customiser.baseProfile} ${new Date().toLocaleString()}`, customiser.exportYaml(), customiser.baseProfile);
-    newName = '';
-    flash(t('history.saved'));
-    refresh();
-  }
+async function saveCurrent() {
+	await saveSnapshot(
+		newName || `${customiser.baseProfile} ${new Date().toLocaleString()}`,
+		customiser.exportYaml(),
+		customiser.baseProfile,
+	);
+	newName = "";
+	flash(t("history.saved"));
+	refresh();
+}
 
-  function load(rec, mode) {
-    customiser.importYaml(rec.yaml, mode, rec.name);
-    onclose?.();
-  }
+function load(rec, mode) {
+	customiser.importYaml(rec.yaml, mode, rec.name);
+	onclose?.();
+}
 
-  async function rename(rec) {
-    const name = prompt(t('history.rename'), rec.name);
-    if (name != null) {
-      await renameSnapshot(rec.id, name);
-      refresh();
-    }
-  }
+async function rename(rec) {
+	const name = prompt(t("history.rename"), rec.name);
+	if (name != null) {
+		await renameSnapshot(rec.id, name);
+		refresh();
+	}
+}
 
-  async function remove(rec) {
-    await deleteSnapshot(rec.id);
-    refresh();
-  }
+async function remove(rec) {
+	await deleteSnapshot(rec.id);
+	refresh();
+}
 
-  function exportRec(rec) {
-    const blob = new Blob([rec.yaml], { type: 'text/yaml;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${rec.name.replace(/[^a-z0-9_-]+/gi, '_')}.yaml`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
+function exportRec(rec) {
+	const blob = new Blob([rec.yaml], { type: "text/yaml;charset=utf-8" });
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement("a");
+	a.href = url;
+	a.download = `${rec.name.replace(/[^a-z0-9_-]+/gi, "_")}.yaml`;
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+	URL.revokeObjectURL(url);
+}
 
-  async function share(rec) {
-    try {
-      await navigator.clipboard.writeText(rec.yaml);
-      flash(t('history.shared'));
-    } catch (e) {
-      console.warn('clipboard write failed', e);
-      flash(t('history.shareFail'));
-    }
-  }
+async function share(rec) {
+	try {
+		await navigator.clipboard.writeText(rec.yaml);
+		flash(t("history.shared"));
+	} catch (e) {
+		console.warn("clipboard write failed", e);
+		flash(t("history.shareFail"));
+	}
+}
 </script>
 
 <Modal title={t('history.title')} {onclose} maxWidth="max-w-2xl">

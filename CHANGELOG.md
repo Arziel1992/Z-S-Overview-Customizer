@@ -1,5 +1,47 @@
 # Changelog
 
+## 2026-07-05 - 17:40
+
+### Compare panel, new base profiles, show-all brackets, exact in-game group parity
+
+- **New "Compare" panel.** Load one or more overview `.yaml` files and diff
+  their settings side by side against the current profile — rows that differ
+  are highlighted. A preset-vs-preset sub-view lets you pick one preset per
+  profile (they rarely map 1:1) and shows the union of every selected group
+  with a per-profile ✓/— matrix, plus each preset's filtered / always-shown
+  states.
+- **Base profiles reworked and version-suffixed.** New first-load default:
+  **Z-S Full v10.06.09** (in-game-only release). **Fenris Default v24.01**
+  replaces the old stock profile (full default preset set, re-exported from
+  the current client). **Z-S Full v9.00.0347** — the last git-tracked pack —
+  stays for compatibility/history. Z-S Core has been retired.
+- **"Show all brackets" tab option** (`_BracketFilterShowAll`). The client
+  sentinel used by the new default tabs is now a selectable option in the tab
+  editor's bracket dropdown, and the tactical preview renders every roster
+  entity when it's active.
+- **SDE matrix now matches the in-game group set 1:1** (validated against an
+  in-game "every group" preset export, game v24.01, committed under
+  `scripts/reference/`; the weekly build warns on drift). Compressed /
+  batch-compressed ore, ice and moon-ore variants — hangar items sharing a
+  group with real asteroids (e.g. *Batch Compressed Veldspar II-Grade*) — are
+  filtered at type level; 33 unloadable groups dropped (legacy POS modules,
+  fighter-drone relics, unreleased Upwell hulls, Station Services…); 3 valid
+  groups restored/added, including *Homefront Operations Commodity* (new
+  Commodity category). Net: **678 → 648 groups, 12,075 → 11,730 types**.
+- **Equal-width state chips.** The filtered / always-shown state badges in the
+  preset editor now sit in a uniform grid (sized to the longest label), so
+  each state keeps a stable position at every viewport width.
+- **Bracket-label fidelity fixes.** The null "spacer" segment now renders its
+  pre/post text — real Z-S exports use it to carry the `]` that closes the
+  corp ticker, which the tactical preview was silently dropping. Literal
+  newlines inside segment pre/post strings (how the game encodes the Z-S
+  1BL/2BL bracket-line variants) now render as line breaks too.
+- **Rotating preview cast.** The seed roster's friendly and war-target slots
+  now draw randomly from the sample cast on every load.
+- README: features, base-profile list, SDE pipeline and project layout
+  updated; Spanish locale covers all new strings. Repo-wide Biome formatting
+  pass — every component now formats clean.
+
 ## 2026-07-04 - 00:39
 
 ### SDE matrix cleaned of inventory-only and render-only entities
@@ -19,7 +61,7 @@
   in the group browser. On-planet PI pins stay excluded.
 - Net effect: **766 → 678 groups, 16,288 → 12,075 types (−26%)** across 14
   categories; smaller payload, faster startup fetch. Every group referenced
-  by the bundled profiles still resolves (except two ids CCP has removed from
+  by the bundled profiles still resolves (except two ids Fenris has removed from
   the game).
 - README: SDE pipeline section documents the filtering.
 

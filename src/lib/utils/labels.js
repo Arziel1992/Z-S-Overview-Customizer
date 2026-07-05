@@ -6,12 +6,22 @@
  * may themselves contain EVE inline markup (renderEveMarkup handles the
  * stateful open/close balancing), plus segment-level styling: bold / italic /
  * underline flags, a pixel font size, and an [r,g,b] float-triplet colour.
- * `linebreak` segments emit <br/>; `null` entries are spacers and contribute
- * nothing visible; segments whose field resolves to an empty value are skipped
- * entirely (so their pre/post brackets don't render around nothing).
+ * `linebreak` segments emit <br/>; `null` entries render their config's
+ * pre/post as literal text with no field value — real Z-S exports use the
+ * null segment to carry closing brackets/tags for earlier segments (e.g. the
+ * `]` that closes the corp ticker), so skipping it drops visible characters.
+ * The game also encodes line breaks as literal `\n` inside pre/post strings
+ * (that is the only difference between the Z-S "1BL" and "2BL" variants), so
+ * those render as <br/> too. Segments whose field resolves to an empty value
+ * are skipped entirely (so their pre/post brackets don't render around
+ * nothing).
  */
 
-import { floatTripletToCss, renderEveMarkup } from "$lib/utils/eveFormat";
+import {
+	floatTripletToCss,
+	NULL_LABEL_KEY,
+	renderEveMarkup,
+} from "$lib/utils/eveFormat";
 
 /** Maps a shipLabels segment key/type to the roster-entity field it displays. */
 const FIELD = {
@@ -42,19 +52,24 @@ export function buildShipLabelHtml(entity, order, labels) {
 	const parts = [];
 
 	for (const key of order) {
-		if (key == null) continue; // explicit spacer
 		if (key === "linebreak") {
 			parts.push("<br/>");
 			continue;
 		}
-		const cfg = labels?.[key];
+		const cfg = labels?.[key == null ? NULL_LABEL_KEY : key];
 		if (!cfg) continue;
 
-		const getter = FIELD[key] ?? FIELD[cfg.type];
-		const value = getter ? getter(entity) : "";
-		if (EMPTY_FIELD.has(value)) continue;
+		let value = "";
+		if (key != null) {
+			const getter = FIELD[key] ?? FIELD[cfg.type];
+			value = getter ? getter(entity) : "";
+			if (EMPTY_FIELD.has(value)) continue;
+		}
 
-		const inner = renderEveMarkup(`${cfg.pre ?? ""}${value}${cfg.post ?? ""}`);
+		const inner = renderEveMarkup(
+			`${cfg.pre ?? ""}${value}${cfg.post ?? ""}`,
+		).replace(/\n/g, "<br/>");
+		if (!inner) continue;
 		const style = segmentStyle(cfg);
 		parts.push(style ? `<span style="${style}">${inner}</span>` : inner);
 	}

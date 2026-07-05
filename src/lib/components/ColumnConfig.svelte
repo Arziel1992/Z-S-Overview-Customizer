@@ -6,25 +6,25 @@
   columnOrder.
 -->
 <script>
-  import { ALL_COLUMNS, COLUMN_DEFS } from '$lib/data/stateMatrix';
-  import { t } from '$lib/i18n/strings.svelte.js';
-  import { customiser } from '$lib/stores/customiserStore.svelte';
-  import DragList from './DragList.svelte';
+import { ALL_COLUMNS, COLUMN_DEFS } from "$lib/data/stateMatrix";
+import { t } from "$lib/i18n/strings.svelte.js";
+import { customiser } from "$lib/stores/customiserStore.svelte";
+import DragList from "./DragList.svelte";
 
-  // Master ordered list = columnOrder, with any columns missing from it appended.
-  const ordered = $derived.by(() => {
-    const seen = new Set(customiser.columnOrder);
-    const extra = ALL_COLUMNS.filter((c) => !seen.has(c));
-    return [...customiser.columnOrder, ...extra];
-  });
+// Master ordered list = columnOrder, with any columns missing from it appended.
+const ordered = $derived.by(() => {
+	const seen = new Set(customiser.columnOrder);
+	const extra = ALL_COLUMNS.filter((c) => !seen.has(c));
+	return [...customiser.columnOrder, ...extra];
+});
 
-  function commitOrder(values) {
-    customiser.columnOrder = values;
-  }
-  function toggleActive(col) {
-    if (!customiser.columnOrder.includes(col)) customiser.columnOrder.push(col);
-    customiser.toggleMember(customiser.overviewColumns, col);
-  }
+function commitOrder(values) {
+	customiser.columnOrder = values;
+}
+function toggleActive(col) {
+	if (!customiser.columnOrder.includes(col)) customiser.columnOrder.push(col);
+	customiser.toggleMember(customiser.overviewColumns, col);
+}
 </script>
 
 <div class="space-y-3">

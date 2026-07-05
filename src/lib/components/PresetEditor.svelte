@@ -8,43 +8,43 @@
   "id · name" so the numeric ids stay visible alongside their meaning.
 -->
 <script>
-  import { ALL_STATE_IDS, STATES } from '$lib/data/stateMatrix';
-  import { t } from '$lib/i18n/strings.svelte.js';
-  import { customiser } from '$lib/stores/customiserStore.svelte';
-  import { stripEveMarkup } from '$lib/utils/eveFormat';
-  import MarkupInput from './MarkupInput.svelte';
-  import MatrixSelector from './MatrixSelector.svelte';
+import { ALL_STATE_IDS, STATES } from "$lib/data/stateMatrix";
+import { t } from "$lib/i18n/strings.svelte.js";
+import { customiser } from "$lib/stores/customiserStore.svelte";
+import { stripEveMarkup } from "$lib/utils/eveFormat";
+import MarkupInput from "./MarkupInput.svelte";
+import MatrixSelector from "./MatrixSelector.svelte";
 
-  const preset = $derived(customiser.activePreset);
+const preset = $derived(customiser.activePreset);
 
-  // Rename works on a draft committed via the store (NOT bind:value on
-  // preset.name) because tabs reference presets by name — a live binding
-  // would desync tab.overview/tab.bracket on every keystroke.
-  let nameDraft = $state('');
-  let nameError = $state('');
-  $effect(() => {
-    nameDraft = preset?.name ?? '';
-    nameError = '';
-  });
+// Rename works on a draft committed via the store (NOT bind:value on
+// preset.name) because tabs reference presets by name — a live binding
+// would desync tab.overview/tab.bracket on every keystroke.
+let nameDraft = $state("");
+let nameError = $state("");
+$effect(() => {
+	nameDraft = preset?.name ?? "";
+	nameError = "";
+});
 
-  function commitRename() {
-    nameError = '';
-    if (!preset || nameDraft === preset.name) return;
-    if (!customiser.renamePreset(preset.name, nameDraft)) {
-      nameError = nameDraft.trim() ? t('presets.nameTaken') : '';
-      nameDraft = preset.name; // restore the valid name
-    }
-  }
+function commitRename() {
+	nameError = "";
+	if (!preset || nameDraft === preset.name) return;
+	if (!customiser.renamePreset(preset.name, nameDraft)) {
+		nameError = nameDraft.trim() ? t("presets.nameTaken") : "";
+		nameDraft = preset.name; // restore the valid name
+	}
+}
 
-  function removeCurrent() {
-    if (!customiser.removePreset()) nameError = t('presets.lastPreset');
-  }
+function removeCurrent() {
+	if (!customiser.removePreset()) nameError = t("presets.lastPreset");
+}
 
-  function toggle(list, id) {
-    const i = list.indexOf(id);
-    if (i > -1) list.splice(i, 1);
-    else list.push(id);
-  }
+function toggle(list, id) {
+	const i = list.indexOf(id);
+	if (i > -1) list.splice(i, 1);
+	else list.push(id);
+}
 </script>
 
 <div class="space-y-3">
@@ -104,7 +104,9 @@
     <div class="grid grid-cols-1 gap-3">
       <div class="bg-app-panel2 border border-app-border rounded p-2.5">
         <h4 class="text-[10px] uppercase tracking-wider text-red-400 mb-1.5">{t('presets.filtered')}</h4>
-        <div class="flex flex-wrap gap-1">
+        <!-- Equal-width cells (sized to the longest label) keep each state at
+             a stable grid position across viewport sizes — easier to find. -->
+        <div class="grid gap-1 grid-cols-[repeat(auto-fill,minmax(min(280px,100%),1fr))]">
           {#each ALL_STATE_IDS as id}
             {@const on = preset.filteredStates.includes(id)}
             <button onclick={() => toggle(preset.filteredStates, id)}
@@ -115,7 +117,7 @@
 
       <div class="bg-app-panel2 border border-app-border rounded p-2.5">
         <h4 class="text-[10px] uppercase tracking-wider text-emerald-400 mb-1.5">{t('presets.alwaysShown')}</h4>
-        <div class="flex flex-wrap gap-1">
+        <div class="grid gap-1 grid-cols-[repeat(auto-fill,minmax(min(280px,100%),1fr))]">
           {#each ALL_STATE_IDS as id}
             {@const on = preset.alwaysShownStates.includes(id)}
             <button onclick={() => toggle(preset.alwaysShownStates, id)}

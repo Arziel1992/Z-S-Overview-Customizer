@@ -7,37 +7,47 @@
   inside the viewport.
 -->
 <script>
-  import { t } from '$lib/i18n/strings.svelte.js';
-  import { customiser } from '$lib/stores/customiserStore.svelte';
-  import { buildShipLabelHtml } from '$lib/utils/labels';
+import { t } from "$lib/i18n/strings.svelte.js";
+import { customiser } from "$lib/stores/customiserStore.svelte";
+import { BRACKET_SHOW_ALL } from "$lib/utils/eveFormat";
+import { buildShipLabelHtml } from "$lib/utils/labels";
 
-  const bracketPreset = $derived(
-    customiser.activeTab?.bracket ? customiser.presetByName(customiser.activeTab.bracket) : null
-  );
+// "Show all brackets" tab option: every roster entity renders, no preset.
+const showAll = $derived(customiser.activeTab?.bracket === BRACKET_SHOW_ALL);
+const bracketPreset = $derived(
+	customiser.activeTab?.bracket && !showAll
+		? customiser.presetByName(customiser.activeTab.bracket)
+		: null,
+);
 
-  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
-  // Place visible entities on a radial grid; radius scales with (log) distance.
-  // Positions are clamped (biased left) so brackets + their right-side labels
-  // stay inside the viewport.
-  const marks = $derived.by(() => {
-    if (!bracketPreset) return [];
-    const visible = customiser.roster
-      .map((e) => ({ entity: e, res: customiser.resolveEntity(e, bracketPreset) }))
-      .filter((r) => r.res.visible);
-    const maxLog = Math.log10(Math.max(1000, ...visible.map((v) => v.entity.distance || 1000)));
-    return visible.map((v, i) => {
-      const angle = (v.entity.id * 67 + i * 29) % 360;
-      const rad = (angle * Math.PI) / 180;
-      const dLog = Math.log10(Math.max(100, v.entity.distance || 100));
-      const r = 10 + (dLog / maxLog) * 26; // % from centre
-      return {
-        ...v,
-        x: clamp(46 + Math.cos(rad) * r * 0.85, 9, 52),
-        y: clamp(50 + Math.sin(rad) * r, 16, 84),
-      };
-    });
-  });
+// Place visible entities on a radial grid; radius scales with (log) distance.
+// Positions are clamped (biased left) so brackets + their right-side labels
+// stay inside the viewport.
+const marks = $derived.by(() => {
+	if (!bracketPreset && !showAll) return [];
+	const visible = customiser.roster
+		.map((e) => ({
+			entity: e,
+			res: customiser.resolveEntity(e, bracketPreset),
+		}))
+		.filter((r) => showAll || r.res.visible);
+	const maxLog = Math.log10(
+		Math.max(1000, ...visible.map((v) => v.entity.distance || 1000)),
+	);
+	return visible.map((v, i) => {
+		const angle = (v.entity.id * 67 + i * 29) % 360;
+		const rad = (angle * Math.PI) / 180;
+		const dLog = Math.log10(Math.max(100, v.entity.distance || 100));
+		const r = 10 + (dLog / maxLog) * 26; // % from centre
+		return {
+			...v,
+			x: clamp(46 + Math.cos(rad) * r * 0.85, 9, 52),
+			y: clamp(50 + Math.sin(rad) * r, 16, 84),
+		};
+	});
+});
 </script>
 
 <div class="relative overflow-hidden h-full rounded-lg border border-eve-border bg-gradient-to-br from-[#0a0f1a] via-[#0b1220] to-[#070a12]">

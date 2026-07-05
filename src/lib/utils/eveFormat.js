@@ -11,6 +11,13 @@
 
 import yaml from "js-yaml";
 
+/**
+ * Client sentinel stored in tabSetup's `bracket` slot instead of a preset
+ * name: the tab's in-space brackets show ALL entities ("Show all brackets"
+ * in the in-game tab options), bypassing preset filtering entirely.
+ */
+export const BRACKET_SHOW_ALL = "_BracketFilterShowAll";
+
 /* ------------------------------------------------------------------ */
 /* Ordered-map (list-of-pairs) helpers                                 */
 /* ------------------------------------------------------------------ */
@@ -63,7 +70,10 @@ export function cssToArgbHex(css) {
 export function floatTripletToCss(triplet) {
 	if (!Array.isArray(triplet) || triplet.length < 3) return "#ffffff";
 	const [r, g, b] = triplet;
-	const hex = (n) => clampByte(n * 255).toString(16).padStart(2, "0");
+	const hex = (n) =>
+		clampByte(n * 255)
+			.toString(16)
+			.padStart(2, "0");
 	return `#${hex(r)}${hex(g)}${hex(b)}`;
 }
 
@@ -71,7 +81,8 @@ export function floatTripletToCss(triplet) {
 export function cssToFloatTriplet(css) {
 	const h = String(css).trim().replace(/^#/, "");
 	if (h.length !== 6) return [1, 1, 1];
-	const part = (i) => Number((parseInt(h.slice(i, i + 2), 16) / 255).toFixed(3));
+	const part = (i) =>
+		Number((parseInt(h.slice(i, i + 2), 16) / 255).toFixed(3));
 	return [part(0), part(2), part(4)];
 }
 
@@ -186,10 +197,7 @@ export function stripEveMarkup(raw) {
 }
 
 function escapeHtml(s) {
-	return s
-		.replace(/&/g, "&amp;")
-		.replace(/</g, "&lt;")
-		.replace(/>/g, "&gt;");
+	return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 /* ------------------------------------------------------------------ */

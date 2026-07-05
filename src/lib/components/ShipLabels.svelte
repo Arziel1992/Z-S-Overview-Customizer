@@ -7,29 +7,39 @@
   utils/labels.buildShipLabelHtml for the live preview.
 -->
 <script>
-  import { t } from '$lib/i18n/strings.svelte.js';
-  import { customiser } from '$lib/stores/customiserStore.svelte';
-  import { cssToFloatTriplet, floatTripletToCss } from '$lib/utils/eveFormat';
-  import DragList from './DragList.svelte';
-  import MarkupHint from './MarkupHint.svelte';
+import { t } from "$lib/i18n/strings.svelte.js";
+import { customiser } from "$lib/stores/customiserStore.svelte";
+import { cssToFloatTriplet, floatTripletToCss } from "$lib/utils/eveFormat";
+import DragList from "./DragList.svelte";
+import MarkupHint from "./MarkupHint.svelte";
 
-  const FIELD_TYPES = ['ship type', 'ship name', 'pilot name', 'alliance', 'corporation', 'faction', 'militia'];
+const FIELD_TYPES = [
+	"ship type",
+	"ship name",
+	"pilot name",
+	"alliance",
+	"corporation",
+	"faction",
+	"militia",
+];
 
-  const availableFields = $derived(FIELD_TYPES.filter((f) => !customiser.shipLabelOrder.includes(f)));
+const availableFields = $derived(
+	FIELD_TYPES.filter((f) => !customiser.shipLabelOrder.includes(f)),
+);
 
-  function configKey(value) {
-    return value == null ? '__null__' : value;
-  }
-  function title(value) {
-    if (value == null) return t('ships.addSpacer');
-    if (value === 'linebreak') return t('ships.addBreak');
-    return value;
-  }
-  function addField(e) {
-    const v = e.currentTarget.value;
-    if (v) customiser.addShipLabel(v);
-    e.currentTarget.value = '';
-  }
+function configKey(value) {
+	return value == null ? "__null__" : value;
+}
+function title(value) {
+	if (value == null) return t("ships.addSpacer");
+	if (value === "linebreak") return t("ships.addBreak");
+	return value;
+}
+function addField(e) {
+	const v = e.currentTarget.value;
+	if (v) customiser.addShipLabel(v);
+	e.currentTarget.value = "";
+}
 </script>
 
 <div class="space-y-3">

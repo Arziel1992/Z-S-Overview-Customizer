@@ -40,7 +40,8 @@ export function mergeModel(current, incoming) {
 	// Columns: overwrite when provided.
 	if (incoming.overviewColumns?.length) {
 		out.overviewColumns = deep(incoming.overviewColumns);
-		if (incoming.columnOrder?.length) out.columnOrder = deep(incoming.columnOrder);
+		if (incoming.columnOrder?.length)
+			out.columnOrder = deep(incoming.columnOrder);
 	}
 
 	// Priority orders / authorized states: overwrite when provided.
@@ -65,7 +66,8 @@ export function mergeModel(current, incoming) {
 		out.shipLabels = deep(incoming.shipLabels);
 	}
 
-	if (incoming.userSettings?.length) out.userSettings = deep(incoming.userSettings);
+	if (incoming.userSettings?.length)
+		out.userSettings = deep(incoming.userSettings);
 
 	return out;
 }

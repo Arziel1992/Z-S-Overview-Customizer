@@ -6,11 +6,17 @@
   commit through the store so tab order matches the in-game strip.
 -->
 <script>
-  import { t } from '$lib/i18n/strings.svelte.js';
-  import { customiser, MAX_TABS } from '$lib/stores/customiserStore.svelte';
-  import { cssToFloatTriplet, floatTripletToCss, renderEveMarkup, stripEveMarkup } from '$lib/utils/eveFormat';
-  import DragList from './DragList.svelte';
-  import MarkupInput from './MarkupInput.svelte';
+import { t } from "$lib/i18n/strings.svelte.js";
+import { customiser, MAX_TABS } from "$lib/stores/customiserStore.svelte";
+import {
+	BRACKET_SHOW_ALL,
+	cssToFloatTriplet,
+	floatTripletToCss,
+	renderEveMarkup,
+	stripEveMarkup,
+} from "$lib/utils/eveFormat";
+import DragList from "./DragList.svelte";
+import MarkupInput from "./MarkupInput.svelte";
 </script>
 
 <div class="space-y-3">
@@ -62,6 +68,7 @@
         <span class="text-[9px] uppercase text-app-muted">{t('tabs.bracketPreset')}</span>
         <select bind:value={tab.bracket} class="bg-app-bg border border-app-border rounded px-2 py-1 text-xs focus:outline-none focus:border-app-accent">
           <option value={null}>{t('tabs.bracketNone')}</option>
+          <option value={BRACKET_SHOW_ALL}>{t('tabs.bracketShowAll')}</option>
           {#each customiser.presetNames as name}
             <option value={name}>{stripEveMarkup(name)}</option>
           {/each}

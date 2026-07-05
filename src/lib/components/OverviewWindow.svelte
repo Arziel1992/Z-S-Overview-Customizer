@@ -13,69 +13,99 @@
   can move focus to the Tab Setup section.
 -->
 <script>
-  import { COLUMN_DEFS } from '$lib/data/stateMatrix';
-  import { t } from '$lib/i18n/strings.svelte.js';
-  import { customiser, MAX_TABS } from '$lib/stores/customiserStore.svelte';
-  import { floatTripletToCss, renderEveMarkup, stripEveMarkup } from '$lib/utils/eveFormat';
+import { COLUMN_DEFS } from "$lib/data/stateMatrix";
+import { t } from "$lib/i18n/strings.svelte.js";
+import { customiser, MAX_TABS } from "$lib/stores/customiserStore.svelte";
+import {
+	floatTripletToCss,
+	renderEveMarkup,
+	stripEveMarkup,
+} from "$lib/utils/eveFormat";
 
-  let { onaddtab } = $props();
+let { onaddtab } = $props();
 
-  // Right-click context target: the tab index whose presets are being picked.
-  let ctxIndex = $state(null);
-  const ctxTab = $derived(customiser.tabs.find((tb) => tb.index === ctxIndex) ?? null);
+// Right-click context target: the tab index whose presets are being picked.
+let ctxIndex = $state(null);
+const ctxTab = $derived(
+	customiser.tabs.find((tb) => tb.index === ctxIndex) ?? null,
+);
 
-  function openContext(e, tab) {
-    e.preventDefault();
-    ctxIndex = tab.index;
-  }
+function openContext(e, tab) {
+	e.preventDefault();
+	ctxIndex = tab.index;
+}
 
-  function addTab() {
-    customiser.addTab();
-    onaddtab?.();
-  }
+function addTab() {
+	customiser.addTab();
+	onaddtab?.();
+}
 
-  // Columns shown, in master order, filtered to the active set.
-  const visibleColumns = $derived.by(() => {
-    const order = customiser.columnOrder.length ? customiser.columnOrder : customiser.overviewColumns;
-    const active = new Set(customiser.overviewColumns);
-    const cols = order.filter((c) => active.has(c));
-    return cols.length ? cols : customiser.overviewColumns;
-  });
+// Columns shown, in master order, filtered to the active set.
+const visibleColumns = $derived.by(() => {
+	const order = customiser.columnOrder.length
+		? customiser.columnOrder
+		: customiser.overviewColumns;
+	const active = new Set(customiser.overviewColumns);
+	const cols = order.filter((c) => active.has(c));
+	return cols.length ? cols : customiser.overviewColumns;
+});
 
-  const overviewPreset = $derived(customiser.presetByName(customiser.activeTab?.overview));
+const overviewPreset = $derived(
+	customiser.presetByName(customiser.activeTab?.overview),
+);
 
-  const rows = $derived.by(() =>
-    customiser.roster
-      .map((e) => ({ entity: e, res: customiser.resolveEntity(e, overviewPreset) }))
-      .filter((r) => r.res.visible)
-  );
+const rows = $derived.by(() =>
+	customiser.roster
+		.map((e) => ({
+			entity: e,
+			res: customiser.resolveEntity(e, overviewPreset),
+		}))
+		.filter((r) => r.res.visible),
+);
 
-  function fmtDistance(m) {
-    if (m == null) return '';
-    if (m >= 1000) return `${(m / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 })} km`;
-    return `${Math.round(m).toLocaleString()} m`;
-  }
-  function tabStyle(tab) {
-    return Array.isArray(tab.color) ? `color:${floatTripletToCss(tab.color)}` : '';
-  }
-  function cellValue(col, e) {
-    switch (col) {
-      case 'NAME': return e.pilotName;
-      case 'TYPE': return e.type;
-      case 'TAG': return e.tag ?? '';
-      case 'DISTANCE': return fmtDistance(e.distance);
-      case 'CORPORATION': return e.corp;
-      case 'ALLIANCE': return e.alliance;
-      case 'FACTION': return e.faction;
-      case 'MILITIA': return e.militia;
-      case 'SIZE': return e.size;
-      case 'VELOCITY': return `${e.velocity} m/s`;
-      case 'RADIALVELOCITY': return `${e.radial} m/s`;
-      case 'TRANSVERSALVELOCITY': return `${e.transversal} m/s`;
-      case 'ANGULARVELOCITY': return `${e.angular} rad/s`;
-      default: return '';
-    }
-  }
+function fmtDistance(m) {
+	if (m == null) return "";
+	if (m >= 1000)
+		return `${(m / 1000).toLocaleString(undefined, { maximumFractionDigits: 1 })} km`;
+	return `${Math.round(m).toLocaleString()} m`;
+}
+function tabStyle(tab) {
+	return Array.isArray(tab.color)
+		? `color:${floatTripletToCss(tab.color)}`
+		: "";
+}
+function cellValue(col, e) {
+	switch (col) {
+		case "NAME":
+			return e.pilotName;
+		case "TYPE":
+			return e.type;
+		case "TAG":
+			return e.tag ?? "";
+		case "DISTANCE":
+			return fmtDistance(e.distance);
+		case "CORPORATION":
+			return e.corp;
+		case "ALLIANCE":
+			return e.alliance;
+		case "FACTION":
+			return e.faction;
+		case "MILITIA":
+			return e.militia;
+		case "SIZE":
+			return e.size;
+		case "VELOCITY":
+			return `${e.velocity} m/s`;
+		case "RADIALVELOCITY":
+			return `${e.radial} m/s`;
+		case "TRANSVERSALVELOCITY":
+			return `${e.transversal} m/s`;
+		case "ANGULARVELOCITY":
+			return `${e.angular} rad/s`;
+		default:
+			return "";
+	}
+}
 </script>
 
 <div class="bg-eve-panel border border-eve-border rounded-lg flex flex-col overflow-hidden font-mono text-[11px] text-eve-text h-full relative">

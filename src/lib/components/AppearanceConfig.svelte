@@ -7,10 +7,10 @@
   evaluation priority (first match wins).
 -->
 <script>
-  import { STATES } from '$lib/data/stateMatrix';
-  import { t } from '$lib/i18n/strings.svelte.js';
-  import { customiser } from '$lib/stores/customiserStore.svelte';
-  import DragList from './DragList.svelte';
+import { STATES } from "$lib/data/stateMatrix";
+import { t } from "$lib/i18n/strings.svelte.js";
+import { customiser } from "$lib/stores/customiserStore.svelte";
+import DragList from "./DragList.svelte";
 </script>
 
 {#snippet stateRow(kind, authorized, id)}
