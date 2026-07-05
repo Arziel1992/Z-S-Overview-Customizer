@@ -13,7 +13,7 @@ import { customiser } from "$lib/stores/customiserStore.svelte";
 const ALL = "all";
 
 let searchQuery = $state("");
-let activeCategory = $state("6"); // Ships by default
+let activeCategory = $state(ALL); // search everything by default
 
 const preset = $derived(customiser.activePreset);
 // Stable, keyed category list so the nav doesn't re-render while typing.

@@ -20,7 +20,11 @@
  */
 
 import { resolveStateColor, STATES } from "$lib/data/stateMatrix";
-import { parseOverviewYaml, serializeOverviewYaml } from "$lib/utils/eveFormat";
+import {
+	parseOverviewYaml,
+	serializeOverviewYaml,
+	stripEveMarkup,
+} from "$lib/utils/eveFormat";
 import { mergeModel } from "$lib/utils/merge";
 
 // localStorage keys. SESSION_KEY holds the full working profile as YAML —
@@ -786,8 +790,16 @@ class CustomiserStore {
 		return this.presets.find((p) => p.name === name) ?? null;
 	}
 
+	/**
+	 * Preset names for dropdowns, sorted by their *visible* (markup-stripped)
+	 * name — matching the client, which sorts its preset menus at display
+	 * time. The model/export keeps the file's own preset order untouched
+	 * (in-game exports serialise presets unsorted).
+	 */
 	get presetNames() {
-		return this.presets.map((p) => p.name);
+		return this.presets
+			.map((p) => p.name)
+			.sort((a, b) => stripEveMarkup(a).localeCompare(stripEveMarkup(b)));
 	}
 
 	/* -------------------------- appearance helpers -------------------------- */

@@ -1,5 +1,38 @@
 # Changelog
 
+## 2026-07-05 - 18:02
+
+### Compare panel polish + multi-file drag-and-drop imports
+
+- **Compare: bundled bases loadable.** An "Add bundled base…" selector loads
+  any of the three shipped profiles straight into the comparison, next to
+  file upload.
+- **Compare: drag & drop.** A dashed drop zone accepts one or many `.yaml`
+  files at once; files already loaded (same name) are skipped, so nothing
+  loads twice.
+- **Compare: columns never drift.** The settings table and the
+  preset-vs-preset tables now share one horizontal scroll container with
+  identical fixed column widths — a single scrollbar, perfectly aligned
+  columns, and each preset dropdown is captioned with its profile's file
+  name. The group-union list keeps its own vertical scroll without spawning
+  a second horizontal bar.
+- **Compare: loads survive section switches.** Loaded files live in module
+  state now — leaving and re-entering the Compare tab keeps everything; only
+  a page reload starts fresh (comparisons are deliberately temporary,
+  unlike profile imports).
+- **Compare: "Show more".** Long value lists (e.g. 68 preset names in a big
+  pack) clamp to two lines with a per-row Show more / Show less toggle.
+- **Import dialog: multiple files + drag & drop.** The base-profile importer
+  accepts several `.yaml` files at once (queued as removable chips, applied
+  in order — the in-game multi-piece pack workflow) and doubles as a drop
+  target; pasted YAML still works and applies last.
+- **Preset dropdowns sort like the client.** All preset selectors now sort by
+  the visible (markup-stripped) name at display time — in-game exports
+  serialise presets unsorted (the v10.06.09 pack showed up jumbled), while
+  the client sorts its menus for display. Export order stays untouched.
+- **Authorised Groups opens on "All"** instead of the Ship category, so a
+  search covers everything by default.
+
 ## 2026-07-05 - 17:40
 
 ### Compare panel, new base profiles, show-all brackets, exact in-game group parity

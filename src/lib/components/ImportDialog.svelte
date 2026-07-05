@@ -1,8 +1,10 @@
 <!--
   @component
-  YAML import dialog: file picker or pasted text, validated through the codec
-  before anything is applied. The mode radio mirrors the in-game workflow —
-  "Apply on top" (merge, for pack pieces) vs "Overwrite" (full replace).
+  YAML import dialog: multi-file picker / drag-and-drop or pasted text,
+  validated through the codec before anything is applied. The mode radio
+  mirrors the in-game workflow — "Apply on top" (merge, for pack pieces) vs
+  "Overwrite" (full replace). Multiple files apply in queue order (the
+  in-game multi-piece pack workflow); pasted text applies last.
 -->
 <script>
 import { t } from "$lib/i18n/strings.svelte.js";
@@ -15,44 +17,90 @@ let { onclose, presetLabel = "custom" } = $props();
 let text = $state("");
 let mode = $state("merge");
 let error = $state("");
-let fileName = $state("");
+/** [{ name, text }] — selected/dropped files, applied in this order. */
+let queue = $state([]);
+let dragOver = $state(false);
 
-async function onFile(e) {
-	const file = e.currentTarget.files?.[0];
-	if (!file) return;
-	fileName = file.name;
-	text = await file.text();
+async function addFiles(list) {
 	error = "";
+	for (const file of list) {
+		if (queue.some((q) => q.name === file.name)) continue; // already queued
+		queue.push({ name: file.name, text: await file.text() });
+	}
+}
+
+async function onFiles(e) {
+	const input = e.currentTarget;
+	await addFiles(input.files);
+	input.value = "";
+}
+
+async function onDrop(e) {
+	e.preventDefault();
+	dragOver = false;
+	await addFiles(
+		[...e.dataTransfer.files].filter((f) => /\.ya?ml$/i.test(f.name)),
+	);
 }
 
 function apply() {
-	if (!text.trim()) {
+	const pieces = [
+		...queue.map((q) => ({ ...q })),
+		...(text.trim() ? [{ name: null, text }] : []),
+	];
+	if (pieces.length === 0) {
 		error = t("importer.invalid");
 		return;
 	}
 	try {
-		parseOverviewYaml(text); // validate first
-		customiser.importYaml(
-			text,
-			mode,
-			fileName ? fileName.replace(/\.ya?ml$/i, "") : presetLabel,
-		);
-		onclose?.();
+		for (const p of pieces) parseOverviewYaml(p.text); // validate all first
 	} catch (e) {
 		console.warn(e);
 		error = t("importer.invalid");
+		return;
 	}
+	for (const p of pieces) {
+		customiser.importYaml(
+			p.text,
+			mode,
+			p.name ? p.name.replace(/\.ya?ml$/i, "") : presetLabel,
+		);
+	}
+	onclose?.();
 }
 </script>
 
 <Modal title={t('importer.title')} {onclose} maxWidth="max-w-xl">
   <div class="space-y-4 text-sm">
-    <div>
+    <!-- Multi-file picker doubling as a drag-and-drop target -->
+    <div
+      role="region"
+      aria-label={t('importer.dropHint')}
+      ondragover={(e) => { e.preventDefault(); dragOver = true; }}
+      ondragleave={() => (dragOver = false)}
+      ondrop={onDrop}
+      class="border-2 border-dashed rounded p-3 text-center transition-colors {dragOver ? 'border-app-accent bg-app-accent/5' : 'border-app-border'}"
+    >
       <label class="inline-flex items-center gap-2 cursor-pointer text-xs bg-app-panel2 border border-app-border rounded px-3 py-2 hover:border-app-accent transition-colors">
-        <input type="file" accept=".yaml,.yml,text/yaml" onchange={onFile} class="hidden" />
+        <input type="file" accept=".yaml,.yml,text/yaml" multiple onchange={onFiles} class="hidden" />
         <span>📄 {t('importer.file')}</span>
-        {#if fileName}<span class="text-app-muted">{fileName}</span>{/if}
       </label>
+      <p class="text-[11px] text-app-muted mt-2">{t('importer.dropHint')}</p>
+      {#if queue.length > 0}
+        <div class="flex flex-wrap justify-center gap-1.5 mt-2">
+          {#each queue as q, i}
+            <span class="flex items-center gap-1 text-[11px] border border-app-border rounded px-2 py-1 font-mono">
+              {q.name}
+              <button
+                onclick={() => queue.splice(i, 1)}
+                class="text-red-400 hover:text-red-300 px-0.5"
+                aria-label={t('importer.removeFile')}
+                title={t('importer.removeFile')}
+              >✕</button>
+            </span>
+          {/each}
+        </div>
+      {/if}
     </div>
 
     <label class="flex flex-col gap-1">
