@@ -52,8 +52,8 @@
   --color-eve-text: #c8d4e3;
   --color-eve-muted: #8295ac;
 
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --font-sans: "Inter Variable", "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", monospace;
 }
 
 html {

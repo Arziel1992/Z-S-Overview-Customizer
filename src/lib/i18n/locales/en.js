@@ -127,6 +127,7 @@ export default {
 		bracketPreset: "Brackets",
 		bracketNone: "None (no brackets)",
 		bracketShowAll: "Show all brackets",
+		presetSearch: "Search presets…",
 		add: "Add tab",
 		max: "Maximum of 20 tabs reached.",
 		remove: "Remove tab",
@@ -263,5 +264,54 @@ export default {
 		deleteSet: "Delete grouping",
 		setName: "Grouping name",
 		saveSet: "Save current",
+	},
+	privacy: {
+		banner:
+			"This tool stores your work and preferences in this browser only — no cookies, no analytics, no tracking. No data ever leaves your device.",
+		details: "Details",
+		gotIt: "Got it",
+		title: "Privacy, data & licences",
+		openPanel: "Privacy, data & licences",
+		intro:
+			"This is a fully client-side tool: no accounts, no forms, no cookies, no analytics, no ads and no tracking of any kind. Everything you build here is saved in your own browser and is never transmitted anywhere.",
+		noConsent:
+			"There is no accept/reject choice to make because there is nothing optional to consent to: every stored item below is strictly necessary to provide something you explicitly asked for (saving your work, remembering a preference you set). Such storage is exempt from consent under the ePrivacy rules (Directive 2002/58/EC Art. 5(3)) and equivalent laws.",
+		storageHeading: "What is stored in your browser",
+		storageNote:
+			"All items are first-party, never leave this device, and persist until you delete them (button below, or your browser's site-data settings).",
+		colKey: "Item",
+		colType: "Type",
+		colPurpose: "Purpose",
+		stTheme: "Your light/dark theme choice",
+		stLocale: "Your language choice",
+		stScale: "Your interface scale choice",
+		stSession:
+			"Autosave of the overview profile you are editing (as YAML), so a reload resumes where you left off",
+		stBase: "Which base profile your session started from",
+		stSets: "Your saved preview-roster groupings",
+		stAck: "Remembers that you dismissed the privacy notice, and when",
+		stHistory: 'Profile snapshots you save under "Saved versions"',
+		networkHeading: "Network requests",
+		network1:
+			"Every request this app makes goes to this site's own origin: the app itself, its fonts (self-hosted — no Google Fonts CDN, so your IP is not sent to Google) and the EVE ship database (SDE), which is refreshed at build time, not from your browser.",
+		network2:
+			"The site is hosted on GitHub Pages. Like any web host, GitHub may process technical request logs (such as your IP address) to operate and secure the service — see the GitHub Privacy Statement.",
+		githubPrivacy: "GitHub Privacy Statement",
+		rightsHeading: "Your data, your control",
+		rights1:
+			"Nothing is stored server-side, so access, portability and erasure are entirely in your hands: your profile exports as YAML at any time, and the button below removes everything this tool has stored on this device.",
+		clearData: "Delete all locally stored data",
+		clearDataConfirm:
+			"Delete everything this tool has stored in this browser (working profile, saved versions, preferences) and reload?",
+		ackOn: "Notice dismissed on {date}.",
+		licencesHeading: "Licences & attribution",
+		licApp:
+			"This tool is free software under the GNU AGPL-3.0 licence — full source code on GitHub.",
+		licDeps:
+			"Bundled open-source libraries: Svelte, js-yaml and svelte-dnd-action; built with Vite and Tailwind CSS. All are MIT-licensed, which is AGPL-3.0-compatible.",
+		licFonts:
+			"Fonts: Inter and JetBrains Mono, bundled under the SIL Open Font License 1.1.",
+		licCcp:
+			"EVE Online and the ship/type data used here (the Static Data Export) are the intellectual property of Fenris hf. EVE Online® is a registered trademark of Fenris hf. This is a fan-made tool, not affiliated with or endorsed by Fenris hf.",
 	},
 };

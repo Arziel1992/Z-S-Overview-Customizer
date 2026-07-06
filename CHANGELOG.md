@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-07-06 - 14:56
+
+### Preset search, privacy & licences panel, self-hosted fonts
+
+- **Preset search in the preview's right-click menu.** The tab context menu
+  (re-pointing a tab's list / bracket presets) gains a search box that filters
+  both preset columns by their visible (markup-stripped) names — big preset
+  packs no longer mean endless scrolling. Auto-focused on open; Escape closes.
+- **Privacy, data & licences panel.** New first-visit notice (bottom banner)
+  plus a full in-app privacy panel, reopenable any time via the new shield
+  button in the header. It inventories every locally stored item (localStorage
+  keys + the IndexedDB snapshot store) with its purpose, explains the network
+  posture (everything same-origin; GitHub Pages hosting), offers one-click
+  **"Delete all locally stored data"**, and carries the third-party licence
+  attribution (MIT libraries, OFL fonts, Fenris hf. SDE data — all verified
+  AGPL-3.0-compatible). Fully localised (EN/ES). No accept/reject pair by
+  design: nothing optional is stored, so there is nothing to consent to — the
+  panel says so and cites the ePrivacy strict-necessity exemption.
+- **Fonts self-hosted.** Inter and JetBrains Mono now ship in the bundle via
+  Fontsource (SIL OFL 1.1) instead of loading from the Google Fonts CDN —
+  visitor IPs no longer reach Google (GDPR: LG München I, 3 O 17493/20). Zero
+  third-party requests remain at runtime.
+- **SDE badge on mobile.** The SDE freshness / SDE-offline badge was hidden on
+  small screens; it now shows alongside the version badge on all viewports.
+- Bundled base-profile YAMLs re-serialised so the defaults load better.
+
 ## 2026-07-05 - 18:02
 
 ### Compare panel polish + multi-file drag-and-drop imports

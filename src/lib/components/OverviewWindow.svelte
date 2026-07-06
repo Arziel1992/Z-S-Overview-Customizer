@@ -26,13 +26,28 @@ let { onaddtab } = $props();
 
 // Right-click context target: the tab index whose presets are being picked.
 let ctxIndex = $state(null);
+let ctxQuery = $state("");
 const ctxTab = $derived(
 	customiser.tabs.find((tb) => tb.index === ctxIndex) ?? null,
 );
+// Search matches on the visible (markup-stripped) preset name.
+const ctxPresets = $derived.by(() => {
+	const q = ctxQuery.trim().toLowerCase();
+	if (!q) return customiser.presetNames;
+	return customiser.presetNames.filter((n) =>
+		stripEveMarkup(n).toLowerCase().includes(q),
+	);
+});
 
 function openContext(e, tab) {
 	e.preventDefault();
+	ctxQuery = "";
 	ctxIndex = tab.index;
+}
+
+/** Focus the search box as soon as the context menu renders it. */
+function focusOnMount(el) {
+	el.focus();
 }
 
 function addTab() {
@@ -142,11 +157,22 @@ function cellValue(col, e) {
         <button onclick={() => ctxIndex = null} class="text-eve-muted hover:text-eve-text px-1" aria-label={t('common.close')}>✕</button>
       </div>
 
+      <!-- Search: filters both preset columns by visible name -->
+      <input
+        type="search"
+        bind:value={ctxQuery}
+        use:focusOnMount
+        onkeydown={(e) => { if (e.key === 'Escape') ctxIndex = null; }}
+        placeholder={t('tabs.presetSearch')}
+        aria-label={t('tabs.presetSearch')}
+        class="w-full mb-1.5 bg-eve-panel border border-eve-border rounded px-2 py-1 text-[11px] text-eve-text placeholder:text-eve-muted focus:outline-none focus:border-eve-accent"
+      />
+
       <div class="grid grid-cols-2 gap-2">
         <div class="min-w-0">
           <div class="text-[9px] uppercase tracking-wider text-eve-muted px-1 mb-1">{t('tabs.listPreset')}</div>
           <div class="max-h-44 overflow-y-auto space-y-0.5 pr-0.5">
-            {#each customiser.presetNames as name}
+            {#each ctxPresets as name}
               <button
                 role="menuitemradio"
                 aria-checked={ctxTab.overview === name}
@@ -166,7 +192,7 @@ function cellValue(col, e) {
               onclick={() => { ctxTab.bracket = null; ctxIndex = null; }}
               class="w-full text-left text-[11px] px-1.5 py-1 rounded truncate transition-colors {ctxTab.bracket === null ? 'bg-eve-accent/20 text-eve-text' : 'text-eve-muted hover:text-eve-text hover:bg-white/5'}"
             >{t('tabs.bracketNone')}</button>
-            {#each customiser.presetNames as name}
+            {#each ctxPresets as name}
               <button
                 role="menuitemradio"
                 aria-checked={ctxTab.bracket === name}

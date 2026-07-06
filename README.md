@@ -36,6 +36,7 @@ parameter the game exposes, watch a live in-game-style preview react, and export
 - [Using the app](#using-the-app)
 - [Contributing translations](#contributing-translations)
 - [Community & support](#community--support)
+- [Privacy & data](#privacy--data)
 - [License](#license)
 - [Copyright notice](#copyright-notice)
 
@@ -86,6 +87,8 @@ behind a Z-S overview. Fly safe. o7
   The entity editor's Type field searches the **entire SDE database** (ships,
   NPCs, asteroids, Upwell/sov structures, drones, deployables, wrecks…), so any
   real space object can join the preview with its correct group wired up.
+  Right-click a preview tab to re-point its list / bracket presets in-place —
+  with a **search box** to cut through large preset packs.
 - **Rapid populate & saved groupings.** One click swaps the whole preview
   roster for a named entity grouping — built-in samples (fleet skirmish, mining
   fleet, structure bash, NPC site) ship out of the box, and you can save your
@@ -99,6 +102,12 @@ behind a Z-S overview. Fly safe. o7
 - **Version history** saved in your browser (IndexedDB): name, reload, rename,
   delete, re-export, or **share** (copies the YAML to your clipboard — no
   third-party services).
+- **Privacy by design.** No cookies, no analytics, no tracking, no third-party
+  requests at all — fonts are self-hosted and every byte of your work stays in
+  your browser. An in-app **privacy, data & licences panel** (shield icon in
+  the header) inventories every locally stored item, offers one-click erasure
+  of all of it, and carries the full third-party attribution. See
+  [Privacy & data](#privacy--data).
 - **Drag-and-drop reordering** (mouse and touch) with a ghost drop-slot and live
   reflow, plus up/down arrows as a mobile-friendly fallback — for columns, state
   priorities, tabs and bracket-label segments.
@@ -451,6 +460,10 @@ For full disclosure, the libraries and tooling this project depends on:
   the EVE overview codec.
 - [svelte-dnd-action](https://github.com/isaacHagoel/svelte-dnd-action) (`^0.9`)
   — accessible, touch-friendly drag-and-drop reordering.
+- [@fontsource-variable/inter](https://fontsource.org/fonts/inter) +
+  [@fontsource-variable/jetbrains-mono](https://fontsource.org/fonts/jetbrains-mono)
+  — the UI fonts, **self-hosted** and bundled (SIL OFL 1.1); no font CDN, no
+  visitor IP ever sent to Google.
 
 ### Build / dev tooling
 
@@ -477,8 +490,9 @@ For full disclosure, the libraries and tooling this project depends on:
 - Fenris' [Static Data Export](https://developers.eveonline.com/) — ship / group /
   category data (fetched at build time only, never from the browser).
 
-> No analytics, accounts, backend, or third-party APIs — everything runs
-> client-side in your browser.
+> No analytics, accounts, backend, third-party APIs, or CDNs (fonts included)
+> — everything runs client-side in your browser. See
+> [Privacy & data](#privacy--data).
 
 ---
 
@@ -581,6 +595,29 @@ same; keep strings concise — several render inside compact controls.
 
 ---
 
+## Privacy & data
+
+This tool is **private by architecture**: it is a static site with no backend,
+no accounts, no forms, no cookies, no analytics, and no tracking of any kind.
+Everything you build is stored only in your own browser (localStorage +
+IndexedDB) and never transmitted anywhere. All requests go to the site's own
+origin — the fonts are self-hosted (no Google Fonts CDN, so your IP is never
+sent to Google) and the SDE ship database is refreshed at build time by CI,
+not from your browser.
+
+The full details live **in the app itself**: a first-visit notice links to the
+**privacy, data & licences panel** (shield icon in the header), which lists
+every stored item and its purpose, explains the hosting posture (GitHub Pages
+— see the
+[GitHub General Privacy Statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement)),
+and provides a one-click **"Delete all locally stored data"** button. Because
+none of the stored items are optional — each one only ever records something
+you explicitly did — this storage is consent-exempt under the ePrivacy rules
+(Directive 2002/58/EC Art. 5(3)) and equivalent laws, which is why the notice
+has no accept/reject theatre.
+
+---
+
 ## License
 
 This project is free software, released under the
@@ -588,6 +625,21 @@ This project is free software, released under the
 for the full text. In short: you may use, study, modify and redistribute it,
 provided derivative works (including network-hosted ones) remain open under the
 same license.
+
+### Third-party licences
+
+All bundled third-party components are AGPL-3.0-compatible:
+
+- **Svelte, js-yaml, svelte-dnd-action** (bundled) and **Vite, Tailwind CSS,
+  Biome** (build-time only) — MIT licence.
+- **Inter** and **JetBrains Mono** fonts (bundled) —
+  [SIL Open Font License 1.1](https://openfontlicense.org/).
+- **EVE Static Data Export** ship/group/category data — © Fenris hf., used
+  under its third-party developer licence; see the
+  [Copyright notice](#copyright-notice) below.
+
+The same attribution list is shown to users in the app's privacy, data &
+licences panel.
 
 ---
 

@@ -17,6 +17,7 @@ import ImportDialog from "$lib/components/ImportDialog.svelte";
 import MiscConfig from "$lib/components/MiscConfig.svelte";
 import OverviewWindow from "$lib/components/OverviewWindow.svelte";
 import PresetEditor from "$lib/components/PresetEditor.svelte";
+import PrivacyPanel from "$lib/components/PrivacyPanel.svelte";
 import ShipLabels from "$lib/components/ShipLabels.svelte";
 import SpaceBrackets from "$lib/components/SpaceBrackets.svelte";
 import TabManager from "$lib/components/TabManager.svelte";
@@ -46,6 +47,7 @@ const REPO = "https://github.com/Arziel1992/Z-S-Overview-Customizer/";
 let section = $state("tabs");
 let showImport = $state(false);
 let showHistory = $state(false);
+let showPrivacy = $state(false);
 
 // Autosave the working profile (debounced) so a reload resumes where it left off.
 let saveTimer;
@@ -127,13 +129,13 @@ function onBaseChange(e) {
       <!-- SDE freshness: shows the tool self-updates; warns when the pull failed -->
       {#if customiser.sdeError}
         <span
-          class="text-[10px] font-mono text-amber-400 border border-amber-500/50 bg-amber-500/10 rounded px-1.5 py-0.5 shrink-0 hidden sm:inline-flex items-center gap-1"
+          class="text-[10px] font-mono text-amber-400 border border-amber-500/50 bg-amber-500/10 rounded px-1.5 py-0.5 shrink-0 inline-flex items-center gap-1"
           title={t("app.sdeErrorHelp")}
           role="status"
         >⚠ {t("app.sdeError")}</span>
       {:else if sdeDate}
         <span
-          class="text-[10px] font-mono text-app-muted border border-app-border rounded px-1.5 py-0.5 shrink-0 hidden sm:inline-flex items-center gap-1"
+          class="text-[10px] font-mono text-app-muted border border-app-border rounded px-1.5 py-0.5 shrink-0 inline-flex items-center gap-1"
           title={t("app.sdeUpdatedHelp", { date: sdeDate })}
         >🛰 {t("app.sdeUpdated", { date: sdeDate })}</span>
       {/if}
@@ -222,6 +224,18 @@ function onBaseChange(e) {
         title={t("app.toggleTheme")}
       >
         <span aria-hidden="true">{customiser.theme === "dark" ? "🌙" : "☀️"}</span>
+      </button>
+
+      <!-- Privacy, data & licences -->
+      <button
+        onclick={() => (showPrivacy = true)}
+        class="border border-app-border hover:border-app-accent rounded p-1.5 flex items-center transition-colors text-app-muted hover:text-app-text"
+        aria-label={t("privacy.openPanel")}
+        title={t("privacy.openPanel")}
+      >
+        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
       </button>
 
       <!-- GitHub -->
@@ -333,4 +347,5 @@ function onBaseChange(e) {
     }}
   />
 {/if}
+<PrivacyPanel bind:open={showPrivacy} />
 </div>

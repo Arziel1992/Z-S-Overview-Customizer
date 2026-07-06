@@ -125,6 +125,7 @@ export default {
 		bracketPreset: "Brackets",
 		bracketNone: "Ninguno (sin brackets)",
 		bracketShowAll: "Mostrar todos los brackets",
+		presetSearch: "Buscar presets…",
 		add: "Añadir pestaña",
 		max: "Se alcanzó el máximo de 20 pestañas.",
 		remove: "Eliminar pestaña",
@@ -261,5 +262,54 @@ export default {
 		deleteSet: "Eliminar agrupación",
 		setName: "Nombre de la agrupación",
 		saveSet: "Guardar actual",
+	},
+	privacy: {
+		banner:
+			"Esta herramienta guarda tu trabajo y tus preferencias solo en este navegador: sin cookies, sin analítica, sin rastreo. Ningún dato sale de tu dispositivo.",
+		details: "Detalles",
+		gotIt: "Entendido",
+		title: "Privacidad, datos y licencias",
+		openPanel: "Privacidad, datos y licencias",
+		intro:
+			"Es una herramienta totalmente del lado del cliente: sin cuentas, sin formularios, sin cookies, sin analítica, sin publicidad y sin ningún tipo de rastreo. Todo lo que construyas aquí se guarda en tu propio navegador y nunca se transmite a ninguna parte.",
+		noConsent:
+			"No hay ninguna elección de aceptar/rechazar porque no hay nada opcional que consentir: cada elemento almacenado listado abajo es estrictamente necesario para prestar algo que pediste explícitamente (guardar tu trabajo, recordar una preferencia que configuraste). Ese almacenamiento está exento de consentimiento según las normas ePrivacy (Directiva 2002/58/CE, art. 5.3) y leyes equivalentes.",
+		storageHeading: "Qué se guarda en tu navegador",
+		storageNote:
+			"Todos los elementos son de origen propio, nunca salen de este dispositivo y persisten hasta que los borres (botón de abajo o los ajustes de datos de sitios de tu navegador).",
+		colKey: "Elemento",
+		colType: "Tipo",
+		colPurpose: "Finalidad",
+		stTheme: "Tu elección de tema claro/oscuro",
+		stLocale: "Tu elección de idioma",
+		stScale: "Tu elección de escala de la interfaz",
+		stSession:
+			"Autoguardado del perfil de overview que estás editando (como YAML), para que al recargar continúes donde lo dejaste",
+		stBase: "Desde qué perfil base comenzó tu sesión",
+		stSets: "Tus agrupaciones guardadas de entidades de vista previa",
+		stAck: "Recuerda que descartaste el aviso de privacidad, y cuándo",
+		stHistory: "Instantáneas de perfil que guardas en «Versiones guardadas»",
+		networkHeading: "Peticiones de red",
+		network1:
+			"Todas las peticiones de esta app van al propio origen del sitio: la app, sus fuentes (autoalojadas — sin CDN de Google Fonts, así que tu IP no se envía a Google) y la base de datos de naves de EVE (SDE), que se actualiza al compilar, no desde tu navegador.",
+		network2:
+			"El sitio se aloja en GitHub Pages. Como cualquier alojamiento web, GitHub puede procesar registros técnicos de las peticiones (como tu dirección IP) para operar y proteger el servicio; consulta la Declaración de privacidad de GitHub.",
+		githubPrivacy: "Declaración de privacidad de GitHub",
+		rightsHeading: "Tus datos, tu control",
+		rights1:
+			"Nada se guarda en servidores, así que el acceso, la portabilidad y el borrado están completamente en tus manos: tu perfil se exporta como YAML en cualquier momento, y el botón de abajo elimina todo lo que esta herramienta ha guardado en este dispositivo.",
+		clearData: "Borrar todos los datos guardados localmente",
+		clearDataConfirm:
+			"¿Borrar todo lo que esta herramienta ha guardado en este navegador (perfil de trabajo, versiones guardadas, preferencias) y recargar?",
+		ackOn: "Aviso descartado el {date}.",
+		licencesHeading: "Licencias y atribución",
+		licApp:
+			"Esta herramienta es software libre bajo la licencia GNU AGPL-3.0; código fuente completo en GitHub.",
+		licDeps:
+			"Bibliotecas de código abierto incluidas: Svelte, js-yaml y svelte-dnd-action; construida con Vite y Tailwind CSS. Todas con licencia MIT, compatible con la AGPL-3.0.",
+		licFonts:
+			"Fuentes: Inter y JetBrains Mono, incluidas bajo la SIL Open Font License 1.1.",
+		licCcp:
+			"EVE Online y los datos de naves/tipos usados aquí (el Static Data Export) son propiedad intelectual de Fenris hf. EVE Online® es una marca registrada de Fenris hf. Esta es una herramienta hecha por fans, no afiliada a Fenris hf. ni respaldada por ella.",
 	},
 };
