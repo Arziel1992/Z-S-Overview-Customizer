@@ -47,9 +47,15 @@ let ctxPos = $state({ x: 0, y: 0 });
 function openContext(e, tab) {
 	e.preventDefault();
 	ctxQuery = "";
+	// Anchor just under the clicked tab. The app zooms via App.svelte's
+	// `zoom` wrapper and this fixed menu lives inside it, so its style px are
+	// multiplied by the zoom while getBoundingClientRect()/innerWidth are in
+	// real viewport px — divide everything back into zoomed units.
+	const z = customiser.uiScale || 1;
+	const r = e.currentTarget.getBoundingClientRect();
 	ctxPos = {
-		x: Math.max(8, Math.min(e.clientX, window.innerWidth - 296)),
-		y: Math.max(8, Math.min(e.clientY, window.innerHeight - 340)),
+		x: Math.max(8, Math.min(r.left / z, window.innerWidth / z - 296)),
+		y: Math.max(8, Math.min(r.bottom / z + 2, window.innerHeight / z - 340)),
 	};
 	ctxIndex = tab.index;
 }

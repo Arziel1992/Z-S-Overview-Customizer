@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-07-09 - 22:55
+
+- **Right-click preset menu anchoring fixed.** The menu now opens directly
+  under the clicked tab and compensates for the app's UI-scale zoom wrapper
+  (fixed-position pixels are multiplied by `zoom`, so coordinates are divided
+  back into zoomed units) — previously it appeared severely offset at any
+  scale other than 100 %.
+
 ## 2026-07-09 - 22:47
 
 ### Game-accurate brackets, preset-copy arrow, pnpm migration
