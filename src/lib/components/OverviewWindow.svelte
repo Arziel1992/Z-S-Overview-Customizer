@@ -17,6 +17,7 @@ import { COLUMN_DEFS } from "$lib/data/stateMatrix";
 import { t } from "$lib/i18n/strings.svelte.js";
 import { customiser, MAX_TABS } from "$lib/stores/customiserStore.svelte";
 import {
+	BRACKET_SHOW_ALL,
 	floatTripletToCss,
 	renderEveMarkup,
 	stripEveMarkup,
@@ -39,9 +40,17 @@ const ctxPresets = $derived.by(() => {
 	);
 });
 
+// Fixed-position coordinates so the menu escapes the panel's overflow-hidden
+// and never clips; clamped to keep the whole menu inside the viewport.
+let ctxPos = $state({ x: 0, y: 0 });
+
 function openContext(e, tab) {
 	e.preventDefault();
 	ctxQuery = "";
+	ctxPos = {
+		x: Math.max(8, Math.min(e.clientX, window.innerWidth - 296)),
+		y: Math.max(8, Math.min(e.clientY, window.innerHeight - 340)),
+	};
 	ctxIndex = tab.index;
 }
 
@@ -146,9 +155,10 @@ function cellValue(col, e) {
 
   <!-- In-game-style tab context menu: pick this tab's list + bracket presets -->
   {#if ctxTab}
-    <button class="fixed inset-0 z-20 cursor-default" aria-label={t('common.close')} onclick={() => ctxIndex = null} oncontextmenu={(e) => { e.preventDefault(); ctxIndex = null; }}></button>
+    <button class="fixed inset-0 z-40 cursor-default" aria-label={t('common.close')} onclick={() => ctxIndex = null} oncontextmenu={(e) => { e.preventDefault(); ctxIndex = null; }}></button>
     <div
-      class="absolute z-30 top-8 left-2 w-72 max-w-[calc(100%-1rem)] bg-eve-panel2 border border-eve-border rounded-lg shadow-2xl p-2 font-sans"
+      style="left:{ctxPos.x}px; top:{ctxPos.y}px"
+      class="fixed z-50 w-72 max-w-[calc(100vw-1rem)] bg-eve-panel2 border border-eve-border rounded-lg shadow-2xl p-2 font-sans"
       role="menu"
       aria-label={stripEveMarkup(ctxTab.name)}
     >
@@ -188,10 +198,10 @@ function cellValue(col, e) {
           <div class="max-h-44 overflow-y-auto space-y-0.5 pr-0.5">
             <button
               role="menuitemradio"
-              aria-checked={ctxTab.bracket === null}
-              onclick={() => { ctxTab.bracket = null; ctxIndex = null; }}
-              class="w-full text-left text-[11px] px-1.5 py-1 rounded truncate transition-colors {ctxTab.bracket === null ? 'bg-eve-accent/20 text-eve-text' : 'text-eve-muted hover:text-eve-text hover:bg-white/5'}"
-            >{t('tabs.bracketNone')}</button>
+              aria-checked={ctxTab.bracket === BRACKET_SHOW_ALL}
+              onclick={() => { ctxTab.bracket = BRACKET_SHOW_ALL; ctxIndex = null; }}
+              class="w-full text-left text-[11px] px-1.5 py-1 rounded truncate transition-colors {ctxTab.bracket === BRACKET_SHOW_ALL ? 'bg-eve-accent/20 text-eve-text' : 'text-eve-muted hover:text-eve-text hover:bg-white/5'}"
+            >{t('tabs.bracketShowAll')}</button>
             {#each ctxPresets as name}
               <button
                 role="menuitemradio"

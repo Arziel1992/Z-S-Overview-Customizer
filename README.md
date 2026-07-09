@@ -76,7 +76,9 @@ behind a Z-S overview. Fly safe. o7
   filtered states / always-shown states — Columns, Appearance (colortag +
   background priority, colour pickers, blink), Ship Labels, Misc, and a live
   YAML view. Tab brackets support the client's **"Show all brackets"** mode
-  (`_BracketFilterShowAll`) alongside per-preset bracket filtering.
+  (`_BracketFilterShowAll`, the default — the game has no "no brackets" state)
+  alongside per-preset bracket filtering, and a **→** button copies a tab's
+  list preset straight into its brackets slot.
 - **Compare profiles.** Load one or more overview `.yaml` files and diff their
   settings side by side against your current profile (differing rows are
   highlighted), then drill into **preset vs preset**: pick one preset per
@@ -87,8 +89,9 @@ behind a Z-S overview. Fly safe. o7
   The entity editor's Type field searches the **entire SDE database** (ships,
   NPCs, asteroids, Upwell/sov structures, drones, deployables, wrecks…), so any
   real space object can join the preview with its correct group wired up.
-  Right-click a preview tab to re-point its list / bracket presets in-place —
-  with a **search box** to cut through large preset packs.
+  Right-click a preview tab to re-point its list / bracket presets in-place
+  (the menu opens at the cursor, above all panels) — with a **search box** to
+  cut through large preset packs.
 - **Rapid populate & saved groupings.** One click swaps the whole preview
   roster for a named entity grouping — built-in samples (fleet skirmish, mining
   fleet, structure bash, NPC site) ship out of the box, and you can save your
@@ -479,7 +482,7 @@ For full disclosure, the libraries and tooling this project depends on:
 - **Clipboard API** — copy / share YAML.
 - **localStorage** — theme, UI scale, and session restore.
 
-### Data pipeline (`npm run sde:build`)
+### Data pipeline (`pnpm run sde:build`)
 
 - **Python 3** with [PyYAML](https://pyyaml.org/) and
   [Requests](https://requests.readthedocs.io/) — downloads Fenris' official Static
@@ -498,14 +501,17 @@ For full disclosure, the libraries and tooling this project depends on:
 
 ## Setup
 
+Node and [pnpm](https://pnpm.io/) are pinned per project via
+[Volta](https://volta.sh/) (see the `volta` field in `package.json`).
+
 ```bash
-npm install
+pnpm install
 ```
 
 ### Build the SDE lookup (optional refresh)
 
 ```bash
-npm run sde:build
+pnpm run sde:build
 ```
 
 Downloads Fenris' official SDE zip, extracts `categories.yaml`, `groups.yaml`,
@@ -524,9 +530,9 @@ is reported in the build log.
 ### Develop
 
 ```bash
-npm run dev      # Vite dev server (http://localhost:3000/Z-S-Overview-Customizer/)
-npm run build    # production build to dist/
-npm run preview  # preview the production build
+pnpm run dev      # Vite dev server (http://localhost:3000/Z-S-Overview-Customizer/)
+pnpm run build    # production build to dist/
+pnpm run preview  # preview the production build
 ```
 
 ---

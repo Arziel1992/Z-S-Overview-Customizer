@@ -21,6 +21,7 @@
 
 import { resolveStateColor, STATES } from "$lib/data/stateMatrix";
 import {
+	BRACKET_SHOW_ALL,
 	parseOverviewYaml,
 	serializeOverviewYaml,
 	stripEveMarkup,
@@ -497,7 +498,7 @@ class CustomiserStore {
 	// --- profile model (mirrors the YAML root keys 1:1) ---
 	/** [{ name, alwaysShownStates:[int], filteredStates:[int], groups:[int] }] */
 	presets = $state([]);
-	/** [{ index:0–19, name (EVE markup), color:[r,g,b]|null, overview, bracket|null }] */
+	/** [{ index:0–19, name (EVE markup), color:[r,g,b]|null, overview, bracket (preset name or BRACKET_SHOW_ALL) }] */
 	tabs = $state([]);
 	activeTabId = $state(0);
 	/** Master left-to-right column order (superset of the active set). */
@@ -636,7 +637,7 @@ class CustomiserStore {
 					name: "Tab 1",
 					color: null,
 					overview: "New Preset",
-					bracket: null,
+					bracket: BRACKET_SHOW_ALL,
 				},
 			],
 			columnOrder: ["ICON", "DISTANCE", "NAME", "TYPE"],
@@ -914,8 +915,8 @@ class CustomiserStore {
 	/**
 	 * Delete a preset. Refusing to delete the last one (a profile must keep at
 	 * least one preset for its tabs). Tabs that used it fall back: list views
-	 * to the first remaining preset, brackets to none (null), matching how a
-	 * missing preset would degrade in the client.
+	 * to the first remaining preset, brackets to "show all" (the game's
+	 * unfiltered default — it has no "no brackets" state).
 	 */
 	removePreset(name = this.activePresetName) {
 		if (this.presets.length <= 1) return false;
@@ -926,7 +927,7 @@ class CustomiserStore {
 		const fallback = this.presets[0].name;
 		for (const tab of this.tabs) {
 			if (tab.overview === name) tab.overview = fallback;
-			if (tab.bracket === name) tab.bracket = null;
+			if (tab.bracket === name) tab.bracket = BRACKET_SHOW_ALL;
 		}
 		if (this.activePresetName === name) this.activePresetName = fallback;
 		return true;
@@ -943,7 +944,7 @@ class CustomiserStore {
 			name: `<b> ${index + 1} </b>`,
 			color: null,
 			overview: this.presets[0]?.name ?? null,
-			bracket: null,
+			bracket: BRACKET_SHOW_ALL,
 		});
 		this.activeTabId = index;
 	}

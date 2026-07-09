@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-07-09 - 22:47
+
+### Game-accurate brackets, preset-copy arrow, pnpm migration
+
+- **"None (no brackets)" removed.** The game has no such tab state — its YAML
+  stores either a preset name or `_BracketFilterShowAll`. Both bracket pickers
+  (Tab Setup panel and the preview's right-click menu) now default to **"Show
+  all brackets"**; profiles whose tabs carried a null bracket (older sessions,
+  deleted presets) are coerced to "show all" on load and export.
+- **Copy-preset arrow (player QoL request).** A **→** button between the two
+  Tab Setup dropdowns copies the selected list (overview) preset straight into
+  the brackets slot — no more hunting for the same name in a long list.
+- **Right-click preset menu un-clipped.** The preview's tab context menu now
+  opens at the cursor and renders above everything else instead of being cut
+  off by the overview panel's bounds.
+- **npm → pnpm migration.** Lockfile converted (`pnpm import`), Node 24.18 and
+  pnpm 11.10 pinned via Volta (+ `packageManager` field), CI deploy workflow
+  and README switched to pnpm. `pnpm audit`: no known vulnerabilities.
+- `.gitattributes` added (`* text=auto eol=lf`) — line endings normalised.
+- Biome updated 2.4.16 → 2.5.3. **Deferred:** js-yaml 5.x (major rewrite that
+  changes the default loader schema to YAML 1.2 CORE; the EVE client emits
+  YAML 1.1, so the round-trip codec stays on 4.x until verified).
+
 ## 2026-07-06 - 14:56
 
 ### Preset search, privacy & licences panel, self-hosted fonts

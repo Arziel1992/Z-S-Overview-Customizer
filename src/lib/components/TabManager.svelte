@@ -55,8 +55,8 @@ import MarkupInput from "./MarkupInput.svelte";
       oncolor={(css) => tab.color = css ? cssToFloatTriplet(css) : null}
     />
 
-    <div class="grid grid-cols-2 gap-2">
-      <label class="flex flex-col gap-1">
+    <div class="grid grid-cols-[1fr_auto_1fr] gap-1.5 items-end">
+      <label class="flex flex-col gap-1 min-w-0">
         <span class="text-[9px] uppercase text-app-muted">{t('tabs.listPreset')}</span>
         <select bind:value={tab.overview} class="bg-app-bg border border-app-border rounded px-2 py-1 text-xs focus:outline-none focus:border-app-accent">
           {#each customiser.presetNames as name}
@@ -64,10 +64,15 @@ import MarkupInput from "./MarkupInput.svelte";
           {/each}
         </select>
       </label>
-      <label class="flex flex-col gap-1">
+      <button
+        onclick={() => tab.bracket = tab.overview}
+        class="border border-app-border rounded px-1.5 py-1 text-xs text-app-muted hover:text-app-text hover:border-app-accent transition-colors"
+        aria-label={t('tabs.copyToBracket')}
+        title={t('tabs.copyToBracket')}
+      >→</button>
+      <label class="flex flex-col gap-1 min-w-0">
         <span class="text-[9px] uppercase text-app-muted">{t('tabs.bracketPreset')}</span>
         <select bind:value={tab.bracket} class="bg-app-bg border border-app-border rounded px-2 py-1 text-xs focus:outline-none focus:border-app-accent">
-          <option value={null}>{t('tabs.bracketNone')}</option>
           <option value={BRACKET_SHOW_ALL}>{t('tabs.bracketShowAll')}</option>
           {#each customiser.presetNames as name}
             <option value={name}>{stripEveMarkup(name)}</option>

@@ -64,10 +64,6 @@ const marks = $derived.by(() => {
 
   <div class="absolute top-2 left-3 text-[10px] uppercase tracking-wider text-eve-muted z-10">{t('preview.spaceView')}</div>
 
-  {#if !customiser.activeTab?.bracket}
-    <div class="absolute inset-0 flex items-center justify-center text-eve-muted text-[10px]">{t('preview.bracketsDisabled')}</div>
-  {/if}
-
   <!-- centre marker -->
   <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none">
     <div class="w-3 h-3 rounded-full border border-eve-accent animate-pulse"></div>

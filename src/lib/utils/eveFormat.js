@@ -247,7 +247,8 @@ export function parseOverviewYaml(text) {
 			name: b.name ?? "",
 			color: Array.isArray(b.color) ? b.color : null,
 			overview: b.overview ?? null,
-			bracket: b.bracket ?? null,
+			// The game has no "no brackets" tab state — absent/null means show all.
+			bracket: b.bracket ?? BRACKET_SHOW_ALL,
 		};
 	});
 
@@ -351,7 +352,7 @@ export function serializeOverviewYaml(model) {
 	out.tabSetup = model.tabs.map((t) => [
 		t.index,
 		[
-			["bracket", t.bracket ?? null],
+			["bracket", t.bracket ?? BRACKET_SHOW_ALL],
 			["color", t.color ?? null],
 			["name", t.name ?? ""],
 			["overview", t.overview ?? null],
