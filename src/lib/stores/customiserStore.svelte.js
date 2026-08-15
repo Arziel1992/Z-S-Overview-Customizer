@@ -37,6 +37,8 @@ export const MAX_TABS = 20;
 
 const THEME_KEY = "zs-overview-theme";
 const SCALE_KEY = "zs-overview-scale";
+// Workspace layout: the settings/preview split and which panels are collapsed.
+const LAYOUT_KEY = "zs-overview-layout";
 const SESSION_KEY = "zs-overview-session";
 const BASE_KEY = "zs-overview-base";
 // v3: sample rosters reworked again (signature hulls, mining-fleet logi).
@@ -494,11 +496,33 @@ function sampleSets() {
 	];
 }
 
+/**
+ * Rewrite a master column order from a new sequence of the *visible* columns.
+ *
+ * The visible ones are dealt back into the positions they already occupied, so
+ * columns that are switched off keep their slots instead of drifting to the
+ * end. If the master doesn't describe the visible set at all (a hand-edited
+ * profile), it is rebuilt from the drag result with the rest kept behind it.
+ */
+function dealIntoSlots(master, visible) {
+	const slots = [];
+	master.forEach((c, i) => {
+		if (visible.includes(c)) slots.push(i);
+	});
+	if (slots.length !== visible.length)
+		return [...visible, ...master.filter((c) => !visible.includes(c))];
+	const next = [...master];
+	slots.forEach((slot, k) => {
+		next[slot] = visible[k];
+	});
+	return next;
+}
+
 class CustomiserStore {
 	// --- profile model (mirrors the YAML root keys 1:1) ---
 	/** [{ name, alwaysShownStates:[int], filteredStates:[int], groups:[int] }] */
 	presets = $state([]);
-	/** [{ index:0–19, name (EVE markup), color:[r,g,b]|null, overview, bracket (preset name or BRACKET_SHOW_ALL) }] */
+	/** [{ index:0–19, name (EVE markup), color:[r,g,b]|null, overview, bracket (preset name or BRACKET_SHOW_ALL), tabColumns:[string]|null, tabColumnOrder:[string]|null }] */
 	tabs = $state([]);
 	activeTabId = $state(0);
 	/** Master left-to-right column order (superset of the active set). */
@@ -533,6 +557,15 @@ class CustomiserStore {
 	// --- UI ---
 	theme = $state("dark");
 	uiScale = $state(1); // zoom factor applied to the whole app
+	/** Width of the settings panel, in % of the workspace (wide screens only). */
+	splitPct = $state(58);
+	/** Panels the user has collapsed to a bar; each can be brought back. */
+	hiddenPanels = $state({
+		settings: false,
+		brackets: false,
+		overview: false,
+		roster: false,
+	});
 	fontFamily = $state("'Inter', sans-serif");
 	baseProfile = $state("zs_full_v10.06.09");
 	showWelcome = $state(false);
@@ -541,6 +574,19 @@ class CustomiserStore {
 		const ls = typeof localStorage !== "undefined" ? localStorage : null;
 		if (ls) this.theme = ls.getItem(THEME_KEY) || "dark";
 		if (ls) this.uiScale = Number(ls.getItem(SCALE_KEY)) || 1;
+		const layout = ls?.getItem(LAYOUT_KEY);
+		if (layout) {
+			try {
+				const { splitPct, hiddenPanels } = JSON.parse(layout);
+				if (splitPct) this.setSplit(splitPct);
+				// Spread over the defaults so a key added in a later version still
+				// starts visible rather than undefined.
+				if (hiddenPanels)
+					this.hiddenPanels = { ...this.hiddenPanels, ...hiddenPanels };
+			} catch (e) {
+				console.warn("[!] Could not restore workspace layout.", e);
+			}
+		}
 		this.applyTheme();
 		this.fetchSdeMatrix();
 
@@ -605,6 +651,35 @@ class CustomiserStore {
 			localStorage.setItem(SCALE_KEY, String(value));
 	}
 
+	/* -------------------------- workspace layout -------------------------- */
+
+	/** Move the settings/preview divider, clamped so neither side vanishes. */
+	setSplit(pct) {
+		this.splitPct = Math.max(25, Math.min(75, Math.round(pct)));
+		this.persistLayout();
+	}
+
+	/** Collapse a panel to a bar, or bring it back. */
+	togglePanel(key) {
+		this.hiddenPanels[key] = !this.hiddenPanels[key];
+		this.persistLayout();
+	}
+
+	persistLayout() {
+		if (typeof localStorage === "undefined") return;
+		try {
+			localStorage.setItem(
+				LAYOUT_KEY,
+				JSON.stringify({
+					splitPct: this.splitPct,
+					hiddenPanels: this.hiddenPanels,
+				}),
+			);
+		} catch (e) {
+			console.warn("[!] Layout save failed.", e);
+		}
+	}
+
 	/** Persist the current working profile so a reload resumes where it left off. */
 	saveSession() {
 		if (typeof localStorage === "undefined") return;
@@ -638,6 +713,8 @@ class CustomiserStore {
 					color: null,
 					overview: "New Preset",
 					bracket: BRACKET_SHOW_ALL,
+					tabColumns: null,
+					tabColumnOrder: null,
 				},
 			],
 			columnOrder: ["ICON", "DISTANCE", "NAME", "TYPE"],
@@ -933,6 +1010,119 @@ class CustomiserStore {
 		return true;
 	}
 
+	/* -------------------------- columns -------------------------- */
+	// Two levels, exactly like the client: the profile-wide pair
+	// (columnOrder = master left-to-right order, overviewColumns = the set
+	// actually shown) and an optional per-tab override (tabColumnOrder /
+	// tabColumns, set in-game by right-clicking a tab -> Columns). A tab whose
+	// override is null inherits the profile pair — null, not a copy, is what
+	// "inherit" looks like in the model, so it round-trips as an absent key.
+	//
+	// Ordering follows the *Order key, not the set: real client exports write
+	// overviewColumns alphabetically sorted while columnOrder carries the true
+	// left-to-right sequence, so the set is a set. The per-tab pair is treated
+	// the same way. A tab carrying tabColumns without tabColumnOrder therefore
+	// renders in the profile order — both keys still round-trip verbatim, so
+	// this affects only the preview, never the exported file.
+
+	/** Toggle a column in the profile-wide set, keeping it in the master order. */
+	toggleColumn(col) {
+		if (!this.columnOrder.includes(col)) this.columnOrder.push(col);
+		this.toggleMember(this.overviewColumns, col);
+	}
+
+	/** The column set a tab shows — its own override, else the profile's. */
+	columnsForTab(tab) {
+		return tab?.tabColumns ?? this.overviewColumns;
+	}
+
+	/** The master column order a tab uses — its own override, else the profile's. */
+	columnOrderForTab(tab) {
+		return tab?.tabColumnOrder?.length
+			? tab.tabColumnOrder
+			: this.columnOrder.length
+				? this.columnOrder
+				: this.columnsForTab(tab);
+	}
+
+	/**
+	 * Columns a tab actually renders, left to right: its active set sequenced by
+	 * its master order. Falls back to the raw set if the order mentions none of
+	 * it (a hand-edited profile), so a tab never renders as a blank grid.
+	 */
+	visibleColumnsForTab(tab) {
+		const active = new Set(this.columnsForTab(tab));
+		const cols = this.columnOrderForTab(tab).filter((c) => active.has(c));
+		return cols.length ? cols : [...active];
+	}
+
+	/** True when this tab carries its own columns instead of inheriting. */
+	tabHasOwnColumns(tab) {
+		return Array.isArray(tab?.tabColumns);
+	}
+
+	/**
+	 * Commit a new left-to-right sequence for the columns a tab *shows* — what
+	 * dragging the preview's column header produces.
+	 *
+	 * `scope` is which order the drop lands in:
+	 *  - "tab" — this tab only. A tab that was still inheriting is given its own
+	 *    columns here, seeded from what it already showed, so no other tab moves.
+	 *  - "profile" — the shared columnOrder every inheriting tab follows. A tab
+	 *    that has its own order is dealt the same sequence too, otherwise the
+	 *    drag would appear to do nothing in the very preview it was made in.
+	 */
+	reorderVisibleColumns(tab, visible, scope = "tab") {
+		if (!tab) return;
+		if (scope === "profile") {
+			this.columnOrder = dealIntoSlots(this.columnOrder, visible);
+			if (this.tabHasOwnColumns(tab))
+				tab.tabColumnOrder = dealIntoSlots(
+					this.columnOrderForTab(tab),
+					visible,
+				);
+			return;
+		}
+		if (!this.tabHasOwnColumns(tab)) this.setTabColumnsOverride(tab, true);
+		tab.tabColumnOrder = dealIntoSlots(this.columnOrderForTab(tab), visible);
+	}
+
+	/**
+	 * Turn a tab's column override on or off. Switching it on seeds the tab with
+	 * exactly what it shows right now, so enabling the checkbox never changes the
+	 * preview; switching it off drops both keys back to "inherit".
+	 */
+	setTabColumnsOverride(tab, on) {
+		if (!tab) return;
+		if (!on) {
+			tab.tabColumns = null;
+			tab.tabColumnOrder = null;
+			return;
+		}
+		tab.tabColumnOrder = [...this.columnOrderForTab(tab)];
+		tab.tabColumns = [...this.columnsForTab(tab)];
+	}
+
+	/** Toggle one column in a tab's own set (no-op while the tab inherits). */
+	toggleTabColumn(tab, col) {
+		if (!this.tabHasOwnColumns(tab)) return;
+		// A column missing from the effective order would stay invisible however
+		// it is ticked, so pin an explicit per-tab order that includes it.
+		if (!this.columnOrderForTab(tab).includes(col))
+			tab.tabColumnOrder = [...this.columnOrderForTab(tab), col];
+		this.toggleMember(tab.tabColumns, col);
+	}
+
+	/** Copy the column choice + order of another tab onto this one. */
+	copyTabColumns(fromIndex, tab) {
+		const src = this.tabs.find((t) => t.index === fromIndex);
+		if (!tab || !src || src === tab) return;
+		// Copying from a tab that inherits hands over the profile columns as this
+		// tab's own set — the user asked for these columns, explicitly.
+		tab.tabColumnOrder = [...this.columnOrderForTab(src)];
+		tab.tabColumns = [...this.columnsForTab(src)];
+	}
+
 	/* -------------------------- tabs -------------------------- */
 	addTab() {
 		if (this.tabs.length >= MAX_TABS) return;
@@ -945,6 +1135,8 @@ class CustomiserStore {
 			color: null,
 			overview: this.presets[0]?.name ?? null,
 			bracket: BRACKET_SHOW_ALL,
+			tabColumns: null, // inherit the profile columns
+			tabColumnOrder: null,
 		});
 		this.activeTabId = index;
 	}

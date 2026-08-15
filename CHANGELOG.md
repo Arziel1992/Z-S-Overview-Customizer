@@ -1,5 +1,107 @@
 # Changelog
 
+## 2026-08-16 - 00:31
+
+### Fixes
+
+- **Build is warning-free again.** The new panel divider raised two
+  `vite-plugin-svelte` a11y warnings (`a11y_no_noninteractive_tabindex`,
+  `a11y_no_noninteractive_element_interactions`). The markup implements the ARIA
+  *window splitter* pattern — a separator that is focusable, which the spec
+  treats as a widget — and Svelte's rules model `separator` as always
+  non-interactive, flagging the correct shape (and flagging
+  `<button role="separator">` from the other side). The two rules are now
+  silenced on that one element with a comment explaining why, and the splitter
+  gained the `aria-controls` the pattern asks for.
+
+## 2026-08-15 - 23:21
+
+### An arrangeable workspace
+
+- **Resizable split.** The divider between the settings panel and the preview
+  column can be dragged to rebalance them — double-click resets it, and it is
+  keyboard-operable (focus it, then arrow keys; Home/End for the extremes).
+  Clamped so neither side can be squeezed away.
+- **Hide any panel.** All four panels — settings, tactical brackets, overview
+  list, preview entities — carry an **👁 eye** that collapses them to a labelled
+  bar (a rail, for the settings panel) that brings them straight back. The
+  remaining panels take the freed space.
+- Both the split and the hidden panels persist per browser under a new
+  `zs-overview-layout` item, which is listed in the in-app privacy panel's
+  storage inventory like every other stored item.
+- The decorative "Z-S Client Engine" badge is gone from the settings header;
+  the panel's eye now sits in its place.
+
+## 2026-08-15 - 23:01
+
+### Reorder tabs and columns straight from the preview
+
+- **Reorder lock in the overview preview.** A small 🔒/🔓 button at the end of
+  the preview's tab strip opens direct dragging of **both** the tab strip and
+  the column header, so the layout can be arranged where you are looking at it
+  instead of in the settings sections. Locked by default, so a stray drag can't
+  rearrange a profile while you click around the preview.
+- **Two views, one source.** Dragging in the preview commits through the same
+  store methods the Tabs and Columns sections use, so both stay in step in both
+  directions — reorder a tab in the preview and its Tab Setup card moves too,
+  and vice versa.
+- **Two controls, not one.** The tab strip keeps a plain lock. The column
+  header gets its own **tri-state** control, because a column drag has two
+  useful meanings: 🔒 locked · 🔓 **this tab** — the drop gives this tab its own
+  column set (seeded from what it already showed), leaving every other tab
+  alone · 🌐 **whole profile** — the drop rearranges the shared `columnOrder`
+  that every tab without its own set follows, and the tab you are looking at
+  keeps in step so the drag never looks like it did nothing.
+- Columns switched **off** keep their slots in the master order in every mode,
+  rather than drifting to the end.
+- Both controls carry a tooltip spelling all of this out, with the live state
+  highlighted, shown on hover **and** on keyboard focus (a native `title`
+  never reaches keyboard users).
+
+## 2026-08-15 - 22:35
+
+### Per-tab columns, dependency & security sweep
+
+- **Per-tab columns (player request).** Tabs can now carry their own column set
+  and order — the client's `tabColumns` / `tabColumnOrder` keys, written in game
+  by right-clicking a tab and using its **Columns** menu. Previously the tool
+  parsed neither key, so a profile with per-tab columns lost them on export and
+  had to be patched back by hand in a text editor.
+  - Each card in **Tab Setup** gains a **Columns** button showing whether that
+    tab inherits the profile columns or carries its own; it opens a picker with
+    the same tick-and-drag editing as the global Columns section.
+  - **Copy from another tab** in that dialog clones a tab's whole column choice
+    and order in one step.
+  - The live overview preview now renders the active tab's own columns, so the
+    layout you see per tab is the layout the client will show.
+  - Tabs left untouched export with no column keys at all — writing them
+    everywhere would pin every tab's columns in game. A round-trip self-check
+    (`pnpm test`, `node --test` — no test framework added) covers both
+    directions.
+  - The profile-wide **Columns** section flags how many tabs override it.
+- **Security: 5 advisories cleared, 0 remaining** (`pnpm audit`).
+  - `js-yaml` 4.3.0 → **4.3.1**, fixing quadratic CPU consumption in `!!omap`
+    resolution (GHSA-5p4m-2wfm-xmqj, high) — patched *inside* 4.x, so the
+    deferred 5.x major (YAML 1.2 CORE loader vs. the client's YAML 1.1) stays
+    deferred.
+  - `vite` 8.1.3 → **8.2.1** pulls patched transitive `postcss`
+    (GHSA-r28c-9q8g-f849 path traversal, high; GHSA-fxqj-rqcc-2cmp source-map
+    read, moderate) and `nanoid` (GHSA-28wg-ghj8-5hjv and GHSA-2v37-7h3g-55p8,
+    both high). No overrides needed.
+- **Toolchain:** Volta pins move to Node **24.19.0** (from 24.18.0, picking up
+  the 24.18.1 security release) and pnpm **11.21.0** (`packageManager` pin
+  updated to match).
+- **Dependencies refreshed:** svelte 5.56.4 → 5.56.9, svelte-dnd-action 0.9.70 →
+  0.9.78, Inter/JetBrains Mono 5.2.8 → 5.3.0, Biome 2.5.3 → 2.5.8 (schema
+  pinned to match), Tailwind + `@tailwindcss/vite` 4.3.2 → 4.3.3,
+  `@sveltejs/vite-plugin-svelte` 7.2.0 → 7.3.0.
+- Column editing moved into a shared `ColumnPicker` component used by both the
+  profile-wide section and the per-tab dialog, so the two can't drift.
+- Docs: README documents `tabColumns` / `tabColumnOrder`, and the tab-variable
+  table no longer claims `bracket: null` disables brackets (it resolves to
+  "show all"). `.markdownlintignore` added so the gitignored `notes/` drafts
+  stop reporting prose warnings.
+
 ## 2026-07-09 - 22:55
 
 - **Right-click preset menu anchoring fixed.** The menu now opens directly

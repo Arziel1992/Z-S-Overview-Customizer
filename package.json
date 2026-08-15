@@ -1,31 +1,32 @@
 {
 	"name": "z-s-overview-customiser",
 	"private": true,
-	"version": "2026.7.9-2255",
+	"version": "2026.8.16-0031",
 	"type": "module",
-	"packageManager": "pnpm@11.10.0",
+	"packageManager": "pnpm@11.21.0",
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build",
 		"preview": "vite preview",
+		"test": "node --test",
 		"sde:build": "python scripts/build_sde_matrix.py"
 	},
 	"dependencies": {
-		"@fontsource-variable/inter": "^5.2.8",
-		"@fontsource-variable/jetbrains-mono": "^5.2.8",
-		"js-yaml": "^4.2.0",
-		"svelte": "^5.56.3",
-		"svelte-dnd-action": "^0.9.69"
+		"@fontsource-variable/inter": "^5.3.0",
+		"@fontsource-variable/jetbrains-mono": "^5.3.0",
+		"js-yaml": "^4.3.1",
+		"svelte": "^5.56.9",
+		"svelte-dnd-action": "^0.9.78"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.5.3",
-		"@sveltejs/vite-plugin-svelte": "^7.1.2",
-		"@tailwindcss/vite": "^4.3.0",
-		"tailwindcss": "^4.3.0",
-		"vite": "^8.0.16"
+		"@biomejs/biome": "2.5.8",
+		"@sveltejs/vite-plugin-svelte": "^7.3.0",
+		"@tailwindcss/vite": "^4.3.3",
+		"tailwindcss": "^4.3.3",
+		"vite": "^8.2.1"
 	},
 	"volta": {
-		"node": "24.18.0",
-		"pnpm": "11.10.0"
+		"node": "24.19.0",
+		"pnpm": "11.21.0"
 	}
 }

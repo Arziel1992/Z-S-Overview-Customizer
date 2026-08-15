@@ -46,6 +46,7 @@ const STORAGE_ITEMS = [
 	["zs-overview-theme", "localStorage", "privacy.stTheme"],
 	["zs-overview-locale", "localStorage", "privacy.stLocale"],
 	["zs-overview-scale", "localStorage", "privacy.stScale"],
+	["zs-overview-layout", "localStorage", "privacy.stLayout"],
 	["zs-overview-session", "localStorage", "privacy.stSession"],
 	["zs-overview-base", "localStorage", "privacy.stBase"],
 	["zs-overview-rostersets-v3", "localStorage", "privacy.stSets"],

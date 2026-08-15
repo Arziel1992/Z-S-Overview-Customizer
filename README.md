@@ -79,6 +79,12 @@ behind a Z-S overview. Fly safe. o7
   (`_BracketFilterShowAll`, the default — the game has no "no brackets" state)
   alongside per-preset bracket filtering, and a **→** button copies a tab's
   list preset straight into its brackets slot.
+- **Per-tab columns.** Any tab can carry its own column set and order
+  (`tabColumns` / `tabColumnOrder` — the in-game tab right-click → *Columns*
+  menu) instead of the profile-wide set: a **Columns** button on each tab card
+  opens a picker with the same tick-and-drag editing, and can **copy another
+  tab's columns** in one step. Tabs you don't touch stay on the profile
+  columns and export without those keys, exactly as the client writes them.
 - **Compare profiles.** Load one or more overview `.yaml` files and diff their
   settings side by side against your current profile (differing rows are
   highlighted), then drill into **preset vs preset**: pick one preset per
@@ -113,7 +119,18 @@ behind a Z-S overview. Fly safe. o7
   [Privacy & data](#privacy--data).
 - **Drag-and-drop reordering** (mouse and touch) with a ghost drop-slot and live
   reflow, plus up/down arrows as a mobile-friendly fallback — for columns, state
-  priorities, tabs and bracket-label segments.
+  priorities, tabs and bracket-label segments. The live preview reorders too,
+  through two controls that explain themselves on hover or keyboard focus: a
+  **lock on the tab strip**, and a **tri-state control on the column header** —
+  🔒 locked, 🔓 this tab (the tab gets its own column set, nothing else moves),
+  🌐 whole profile (the shared order every inheriting tab follows). Both write
+  to the same settings the Tabs and Columns sections edit, so the two views
+  never disagree, and both start locked so no stray drag rearranges a profile.
+- **A workspace you can arrange.** Drag the divider between the settings panel
+  and the preview column to rebalance them (double-click to reset, arrow keys
+  to nudge it), and give any of the four panels — settings, tactical brackets,
+  overview list, preview entities — its **👁 eye** to collapse it to a bar and
+  bring it back. Both the split and the hidden panels persist in your browser.
 - **Dark / light theme**, S/M/L/XL UI scale, session restore (resume where you
   left off), first-run welcome, mobile-responsive layout.
 - **Multilingual UI** (English and Español so far) with a language selector in
@@ -191,8 +208,15 @@ The overview window supports up to **20 tabs** (the client's current cap; it was
 historically 8). Each tab points at **two**
 presets: `overview` (the flat list) and `bracket` (the floating icons in 3D
 space) — independently. A logistics pilot can list only friendlies while still
-seeing hostile brackets in space to dodge incoming fire. `bracket: null`
-disables space brackets for that tab entirely (a common anti-lag trick).
+seeing hostile brackets in space to dodge incoming fire. A tab whose `bracket`
+is `_BracketFilterShowAll` shows every bracket unfiltered (the client's
+default; it has no "no brackets" state).
+
+A tab may also override the profile's columns with `tabColumns` (the set it
+shows) and `tabColumnOrder` (its own left-to-right master order) — what the
+in-game tab right-click → *Columns* menu writes. Both keys are absent on a tab
+that simply inherits the profile-wide `overviewColumns` / `columnOrder`, so a
+narrow "SYSTEM" tab can show four columns while a combat tab carries a dozen.
 
 ### 4. The state matrix: colortags, backgrounds, priority
 
@@ -234,7 +258,8 @@ The complete reference of every key the client parses in an overview `.yaml`.
 
 ### Telemetry column values
 
-Exact strings accepted inside `overviewColumns` (misspelling breaks rendering):
+Exact strings accepted inside `overviewColumns` — and inside a tab's
+`tabColumns` / `tabColumnOrder` (misspelling breaks rendering):
 `ICON`, `NAME`, `TYPE`, `TAG`, `DISTANCE`, `CORPORATION`, `ALLIANCE`, `FACTION`,
 `MILITIA`, `SIZE`, `VELOCITY`, `RADIALVELOCITY`, `TRANSVERSALVELOCITY`,
 `ANGULARVELOCITY`.
@@ -249,12 +274,14 @@ Exact strings accepted inside `overviewColumns` (misspelling breaks rendering):
 
 ### Tab setup variables
 
-| Key        | Effect                                                           |
-| ---------- | ---------------------------------------------------------------- |
-| `name`     | Tab caption; supports markup like `<color=0xFFFFFFFF>✈</color>`. |
-| `overview` | Preset used for the flat list view.                              |
-| `bracket`  | Preset used for in-space icons; `null` disables brackets.        |
-| `color`    | Optional `[r, g, b]` float triplet tinting the tab text.         |
+| Key              | Effect                                                                            |
+| ---------------- | --------------------------------------------------------------------------------- |
+| `name`           | Tab caption; supports markup like `<color=0xFFFFFFFF>✈</color>`.                  |
+| `overview`       | Preset used for the flat list view.                                               |
+| `bracket`        | Preset used for in-space icons, or `_BracketFilterShowAll` to show every bracket. |
+| `color`          | Optional `[r, g, b]` float triplet tinting the tab text.                          |
+| `tabColumns`     | Optional per-tab column set, overriding `overviewColumns` for this tab only.      |
+| `tabColumnOrder` | Optional per-tab master column order, overriding `columnOrder` for this tab only. |
 
 ### The state ID table
 
@@ -370,10 +397,11 @@ Z-S-Overview-Customizer/
         │   ├── history.js          # IndexedDB snapshots (clipboard sharing)
         │   └── labels.js           # shipLabels → styled bracket-label HTML
         └── components/
-            ├── TabManager.svelte        # tab setup (names, presets, colours)
+            ├── TabManager.svelte        # tab setup (names, presets, colours, columns)
             ├── PresetEditor.svelte      # filter logic per preset
             ├── MatrixSelector.svelte    # SDE group browser/search
-            ├── ColumnConfig.svelte      # telemetry columns
+            ├── ColumnConfig.svelte      # profile-wide telemetry columns
+            ├── ColumnPicker.svelte      # shared column tick/reorder list
             ├── AppearanceConfig.svelte  # colortag/background priorities
             ├── ShipLabels.svelte        # bracket-label composer
             ├── MiscConfig.svelte        # profile stats + userSettings
@@ -431,7 +459,9 @@ balances it into safe styled HTML.
 
 #### 6. Reordering UX
 
-One reusable DragList drives columns, priorities, tabs and label segments:
+One reusable DragList drives columns, priorities, tabs and label segments — and
+the preview's reorder lock drives the tab strip and column header through the
+same store methods, so preview and settings can't disagree:
 drag by the handle (ghost drop-slot + live reflow) or use the arrow buttons.
 
 ![Reordering UX](./images/6_reordering-ux.png)
@@ -533,6 +563,7 @@ is reported in the build log.
 pnpm run dev      # Vite dev server (http://localhost:3000/Z-S-Overview-Customizer/)
 pnpm run build    # production build to dist/
 pnpm run preview  # preview the production build
+pnpm test         # codec round-trip self-check (node --test, no framework)
 ```
 
 ---
@@ -544,7 +575,9 @@ pnpm run preview  # preview the production build
    `.yaml`, or a blank profile. Your work autosaves to the browser, so later
    visits **resume where you left off**.
 2. Configure tabs, presets, columns, appearance, and ship labels in the left
-   panel — every applicable EVE parameter is mirrored 1:1.
+   panel — every applicable EVE parameter is mirrored 1:1. A tab that needs a
+   different column layout from the rest gets one from the **Columns** button
+   on its card in Tab Setup (and can copy another tab's columns wholesale).
 3. Add entities in **Preview Entities** (search any SDE type, set distance and
    relationship states) to see colortags, row backgrounds, blink, and bracket
    labels resolve live under each tab's presets — or use **Rapid populate** to

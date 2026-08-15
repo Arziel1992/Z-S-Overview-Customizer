@@ -3,9 +3,14 @@
   Application shell. Owns the header (branding, version, base-profile
   selector, history/import + clear-all actions, language / scale / theme
   controls, GitHub link), the two-pane workspace (settings panel with section
-  nav | live preview column), and the top-level dialogs (welcome, import,
+  nav | live preview column) and the top-level dialogs (welcome, import,
   history). Also runs the debounced session autosave that makes reloads
   resume where the user left off.
+
+  The workspace is the user's to arrange: a draggable (and arrow-key nudgeable)
+  divider sets how much width the settings panel takes, and every one of the
+  four panels carries an eye that collapses it to a bar it can be restored
+  from. Both live in the store, so both survive a reload.
 -->
 <script>
 import AppearanceConfig from "$lib/components/AppearanceConfig.svelte";
@@ -48,6 +53,35 @@ let section = $state("tabs");
 let showImport = $state(false);
 let showHistory = $state(false);
 let showPrivacy = $state(false);
+
+// Draggable settings/preview divider. The split is a % of the workspace width
+// held in the store (persisted), applied through a CSS variable so it only
+// takes effect at lg — below that the two stack and the divider is hidden.
+let workspace;
+const hidden = $derived(customiser.hiddenPanels);
+
+function dragSplit(e) {
+	if (!workspace) return;
+	e.preventDefault();
+	e.currentTarget.setPointerCapture?.(e.pointerId);
+	const rect = workspace.getBoundingClientRect();
+	const move = (ev) => {
+		customiser.setSplit(((ev.clientX - rect.left) / rect.width) * 100);
+	};
+	const up = () => {
+		window.removeEventListener("pointermove", move);
+		window.removeEventListener("pointerup", up);
+	};
+	window.addEventListener("pointermove", move);
+	window.addEventListener("pointerup", up);
+}
+
+function nudgeSplit(e) {
+	const step = { ArrowLeft: -2, ArrowRight: 2, Home: -100, End: 100 }[e.key];
+	if (step == null) return;
+	e.preventDefault();
+	customiser.setSplit(customiser.splitPct + step);
+}
 
 // Autosave the working profile (debounced) so a reload resumes where it left off.
 let saveTimer;
@@ -262,10 +296,18 @@ function onBaseChange(e) {
 
   <!-- Workspace -->
   <div class="flex-1 min-h-0 lg:overflow-hidden">
-    <div class="h-full grid grid-cols-1 lg:grid-cols-12 gap-3 p-3">
+    <div
+      bind:this={workspace}
+      class="h-full flex flex-col lg:flex-row gap-3 p-3"
+      style="--split: {customiser.splitPct}%"
+    >
       <!-- Settings panel -->
+      {#if hidden.settings}
+        {@render collapsed("settings", t("settings.windowTitle"), true)}
+      {:else}
       <section
-        class="lg:col-span-7 flex flex-col bg-app-panel border border-app-border rounded-lg overflow-hidden min-h-0 lg:h-full"
+        id="workspace-settings"
+        class="flex-1 lg:flex-none lg:basis-[var(--split)] lg:min-w-[16rem] flex flex-col bg-app-panel border border-app-border rounded-lg overflow-hidden min-h-0 lg:h-full"
       >
         <div
           class="bg-app-panel2 px-4 py-2 border-b border-app-border flex items-center justify-between shrink-0"
@@ -273,10 +315,7 @@ function onBaseChange(e) {
           <span class="text-xs font-bold uppercase tracking-wider text-app-text"
             >{t("settings.windowTitle")}</span
           >
-          <span
-            class="text-[10px] text-app-muted font-mono bg-app-bg px-2 py-0.5 rounded border border-app-border"
-            >{t("settings.engine")}</span
-          >
+          {@render eye("settings")}
         </div>
 
         <nav
@@ -308,23 +347,103 @@ function onBaseChange(e) {
         </div>
       </section>
 
-      <!-- Live preview -->
-      <aside class="lg:col-span-5 flex flex-col gap-3 min-h-0 lg:h-full">
-        <div class="shrink-0 h-[220px] lg:h-[32%] lg:min-h-[150px]">
-          <SpaceBrackets />
-        </div>
-        <div class="h-[320px] lg:h-auto lg:flex-1 min-h-0">
-          <OverviewWindow onaddtab={() => (section = "tabs")} />
-        </div>
+      <!-- Divider: drag (or arrow-key) to rebalance settings vs preview.
+
+           This is the ARIA window-splitter pattern: a separator that is
+           focusable, which the spec defines as a widget (hence the tabindex,
+           the value range and the key handling). Svelte's a11y rules model
+           `separator` as always non-interactive, so they flag this shape — and
+           flag `<button role="separator">` just as loudly from the other side.
+           The pattern is correct as written, so the two rules are silenced
+           here, deliberately and only here. -->
+      <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+      <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+      <div
+        role="separator"
+        aria-orientation="vertical"
+        aria-label={t("app.resizePanels")}
+        title={t("app.resizePanels")}
+        aria-controls="workspace-settings"
+        aria-valuenow={customiser.splitPct}
+        aria-valuemin="25"
+        aria-valuemax="75"
+        tabindex="0"
+        onpointerdown={dragSplit}
+        ondblclick={() => customiser.setSplit(58)}
+        onkeydown={nudgeSplit}
+        class="hidden lg:flex w-1.5 shrink-0 -mx-1 items-center justify-center cursor-col-resize group focus:outline-none"
+      >
         <div
-          class="shrink-0 h-[200px] lg:h-[28%] lg:min-h-[140px] bg-app-panel border border-app-border rounded-lg p-3 flex flex-col min-h-0"
-        >
-          <EntityRoster />
-        </div>
+          class="w-0.5 h-10 rounded-full bg-app-border group-hover:bg-app-accent group-focus:bg-app-accent transition-colors"
+        ></div>
+      </div>
+      {/if}
+
+      <!-- Live preview -->
+      <aside class="flex-1 min-w-0 flex flex-col gap-3 min-h-0 lg:h-full">
+        {#if hidden.brackets}
+          {@render collapsed("brackets", t("preview.spaceView"))}
+        {:else}
+          <div class="h-[220px] lg:h-auto lg:basis-[32%] lg:grow lg:min-h-[150px] shrink-0 lg:shrink">
+            <SpaceBrackets onhide={() => customiser.togglePanel("brackets")} />
+          </div>
+        {/if}
+        {#if hidden.overview}
+          {@render collapsed("overview", t("preview.listView"))}
+        {:else}
+          <div class="h-[320px] lg:h-auto lg:basis-[40%] lg:grow min-h-0">
+            <OverviewWindow
+              onaddtab={() => (section = "tabs")}
+              onhide={() => customiser.togglePanel("overview")}
+            />
+          </div>
+        {/if}
+        {#if hidden.roster}
+          {@render collapsed("roster", t("preview.roster"))}
+        {:else}
+          <div
+            class="h-[200px] lg:h-auto lg:basis-[28%] lg:grow lg:min-h-[140px] shrink-0 lg:shrink bg-app-panel border border-app-border rounded-lg p-3 flex flex-col min-h-0"
+          >
+            <EntityRoster onhide={() => customiser.togglePanel("roster")} />
+          </div>
+        {/if}
       </aside>
     </div>
   </div>
 </main>
+
+<!-- Eye toggle carried by every panel's own chrome -->
+{#snippet eye(key)}
+  <button
+    onclick={() => customiser.togglePanel(key)}
+    aria-label={t("app.hidePanel")}
+    title={t("app.hidePanel")}
+    class="text-app-muted hover:text-app-text transition-colors p-0.5 -m-0.5"
+  >
+    <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" /><circle cx="12" cy="12" r="3" />
+    </svg>
+  </button>
+{/snippet}
+
+<!-- A hidden panel keeps a bar (a rail beside the preview on wide screens) so
+     it is always one click from coming back. -->
+{#snippet collapsed(key, label, isSettings = false)}
+  <button
+    onclick={() => customiser.togglePanel(key)}
+    aria-label={t("app.showPanel", { panel: label })}
+    title={t("app.showPanel", { panel: label })}
+    class="shrink-0 flex items-center gap-2 bg-app-panel border border-app-border rounded-lg text-app-muted hover:text-app-text hover:border-app-accent transition-colors px-3 py-1.5 {isSettings
+      ? 'lg:flex-col lg:w-10 lg:h-full lg:px-0 lg:py-3 lg:justify-start'
+      : ''}"
+  >
+    <svg viewBox="0 0 24 24" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+      <line x1="1" y1="1" x2="23" y2="23" />
+    </svg>
+    <span class="text-[10px] uppercase tracking-wider truncate {isSettings ? 'lg:hidden' : ''}">{label}</span>
+  </button>
+{/snippet}
 
 {#if customiser.showWelcome}
   <WelcomeModal

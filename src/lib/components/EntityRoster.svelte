@@ -16,6 +16,9 @@ import { t } from "$lib/i18n/strings.svelte.js";
 import { customiser } from "$lib/stores/customiserStore.svelte";
 import Modal from "./Modal.svelte";
 
+// onhide — collapses this panel to a bar in the workspace shell.
+let { onhide } = $props();
+
 const STATE_OPTIONS = [9, 10, 11, 12, 13, 14, 18, 19, 44, 45, 50, 51, 52];
 
 let editing = $state(null); // entity ref (edit) or draft (add)
@@ -108,7 +111,19 @@ function renameSet(set) {
 <div class="flex flex-col h-full min-h-0">
   <div class="flex items-center justify-between mb-2 shrink-0">
     <h3 class="text-xs font-semibold uppercase tracking-wider text-app-muted">{t('preview.roster')}</h3>
-    <button onclick={openAdd} class="text-[11px] font-semibold bg-app-accent hover:bg-app-accentHover text-white px-2.5 py-1 rounded transition-colors">+ {t('preview.addEntity')}</button>
+    <div class="flex items-center gap-2">
+      <button onclick={openAdd} class="text-[11px] font-semibold bg-app-accent hover:bg-app-accentHover text-white px-2.5 py-1 rounded transition-colors">+ {t('preview.addEntity')}</button>
+      <button
+        onclick={onhide}
+        aria-label={t('app.hidePanel')}
+        title={t('app.hidePanel')}
+        class="text-app-muted hover:text-app-text transition-colors p-0.5"
+      >
+        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" /><circle cx="12" cy="12" r="3" />
+        </svg>
+      </button>
+    </div>
   </div>
 
   <details class="shrink-0 mb-2 text-xs">

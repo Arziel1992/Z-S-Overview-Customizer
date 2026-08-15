@@ -3,16 +3,24 @@
   Game-accurate overview list preview. Renders the profile's tab strip (EVE
   markup + optional tab colours, a "+" to add a tab while under the game's
   20-tab cap, and an in-game-style right-click menu to re-point a tab's list /
-  bracket presets), the active column set in columnOrder order, and one row
+  bracket presets), the active tab's column set (its own per-tab columns when
+  it overrides them, else the profile-wide set) in master order, and one row
   per roster entity that the active tab's *overview* preset lets through —
   with the winning colortag stripe, row background tint and blink resolved by
   customiserStore.resolveEntity(). Deliberately keeps the game's dark chrome
   in both app themes.
 
+  Two reorder controls live in the chrome: a lock on the tab strip, and a
+  tri-state control on the column header (locked / this tab / whole profile)
+  that decides where a column drop lands. Both explain themselves through a
+  tooltip shown on hover and keyboard focus.
+
   Props: onaddtab — optional; invoked after "+" creates a tab so the shell
-  can move focus to the Tab Setup section.
+  can move focus to the Tab Setup section. onhide — collapses this panel.
 -->
 <script>
+import { flip } from "svelte/animate";
+import { dndzone, SHADOW_ITEM_MARKER_PROPERTY_NAME } from "svelte-dnd-action";
 import { COLUMN_DEFS } from "$lib/data/stateMatrix";
 import { t } from "$lib/i18n/strings.svelte.js";
 import { customiser, MAX_TABS } from "$lib/stores/customiserStore.svelte";
@@ -23,7 +31,64 @@ import {
 	stripEveMarkup,
 } from "$lib/utils/eveFormat";
 
-let { onaddtab } = $props();
+let { onaddtab, onhide } = $props();
+
+// Direct reordering of the tab strip and the column header, each with its own
+// control and both off by default, so a stray drag can't rearrange the profile
+// while clicking around the preview. Every drop commits through the store —
+// the same thing the Tabs and Columns sections read and write — so the two
+// views stay in lockstep.
+//
+// The column control is tri-state because a column drag has two useful
+// meanings: rearrange THIS tab (giving it its own columns) or rearrange the
+// shared profile order. One button cycling locked -> tab -> profile keeps both
+// within reach without a second widget in the preview chrome.
+let locked = $state(true);
+const COL_MODES = ["locked", "tab", "profile"];
+const COL_ICONS = { locked: "🔒", tab: "🔓", profile: "🌐" };
+let colMode = $state("locked");
+const FLIP_MS = 150;
+
+function cycleColMode() {
+	colMode = COL_MODES[(COL_MODES.indexOf(colMode) + 1) % COL_MODES.length];
+}
+
+// svelte-dnd-action wants items carrying an `id`; tabs and column names are
+// wrapped so the store keeps owning the real values.
+let tabItems = $state([]);
+let colItems = $state([]);
+let dragging = $state(false);
+
+$effect(() => {
+	if (dragging) return; // never stomp an in-flight drag
+	tabItems = customiser.tabs.map((tb) => ({ id: tb.index, v: tb }));
+});
+$effect(() => {
+	if (dragging) return;
+	colItems = visibleColumns.map((col) => ({ id: col, v: col }));
+});
+
+function consider(e, which) {
+	dragging = true;
+	if (which === "tabs") tabItems = e.detail.items;
+	else colItems = e.detail.items;
+}
+
+function finalizeTabs(e) {
+	tabItems = e.detail.items;
+	dragging = false;
+	customiser.reorderTabs(e.detail.items.map((i) => i.v));
+}
+
+function finalizeCols(e) {
+	colItems = e.detail.items;
+	dragging = false;
+	customiser.reorderVisibleColumns(
+		customiser.activeTab,
+		e.detail.items.map((i) => i.v),
+		colMode, // "tab" or "profile" — never "locked", the zone is disabled then
+	);
+}
 
 // Right-click context target: the tab index whose presets are being picked.
 let ctxIndex = $state(null);
@@ -70,15 +135,11 @@ function addTab() {
 	onaddtab?.();
 }
 
-// Columns shown, in master order, filtered to the active set.
-const visibleColumns = $derived.by(() => {
-	const order = customiser.columnOrder.length
-		? customiser.columnOrder
-		: customiser.overviewColumns;
-	const active = new Set(customiser.overviewColumns);
-	const cols = order.filter((c) => active.has(c));
-	return cols.length ? cols : customiser.overviewColumns;
-});
+// Columns shown, in master order, filtered to the active set — the active
+// tab's own columns when it overrides them, otherwise the profile-wide pair.
+const visibleColumns = $derived(
+	customiser.visibleColumnsForTab(customiser.activeTab),
+);
 
 const overviewPreset = $derived(
 	customiser.presetByName(customiser.activeTab?.overview),
@@ -139,24 +200,65 @@ function cellValue(col, e) {
 </script>
 
 <div class="bg-eve-panel border border-eve-border rounded-lg flex flex-col overflow-hidden font-mono text-[11px] text-eve-text h-full relative">
-  <!-- Tab strip (left-click activates, right-click opens the preset menu) -->
-  <div class="flex bg-eve-header border-b border-eve-border overflow-x-auto whitespace-nowrap shrink-0">
-    {#each customiser.tabs as tab (tab.index)}
+  <!-- Tab strip (left-click activates, right-click opens the preset menu; drag
+       to reorder once the lock is open) -->
+  <div class="flex bg-eve-header border-b border-eve-border shrink-0">
+    <div class="flex overflow-x-auto whitespace-nowrap flex-1 min-w-0">
+      <div
+        class="flex"
+        use:dndzone={{ items: tabItems, dragDisabled: locked, flipDurationMs: FLIP_MS, dropTargetStyle: {} }}
+        onconsider={(e) => consider(e, 'tabs')}
+        onfinalize={finalizeTabs}
+      >
+        {#each tabItems as item (item.id)}
+          {@const tab = item.v}
+          <button
+            animate:flip={{ duration: FLIP_MS }}
+            onclick={() => customiser.activeTabId = tab.index}
+            oncontextmenu={(e) => openContext(e, tab)}
+            style={tabStyle(tab)}
+            class="px-3 py-1.5 text-xs border-b-2 transition-colors shrink-0 {customiser.activeTabId === tab.index ? 'border-eve-accent bg-eve-panel' : 'border-transparent hover:bg-white/5'} {locked ? '' : 'cursor-grab active:cursor-grabbing'} {item[SHADOW_ITEM_MARKER_PROPERTY_NAME] ? 'opacity-40' : ''}"
+          >{@html renderEveMarkup(tab.name)}</button>
+        {/each}
+      </div>
+      {#if customiser.tabs.length < MAX_TABS}
+        <button
+          onclick={addTab}
+          class="px-2.5 py-1.5 text-xs text-eve-muted hover:text-eve-text hover:bg-white/5 transition-colors shrink-0"
+          aria-label={t('tabs.add')}
+          title={t('tabs.add')}
+        >+</button>
+      {/if}
+    </div>
+
+    <!-- Tab reorder lock. The tooltip shows on hover *and* keyboard focus
+         (focus-within), since a native title attribute never reaches keyboard
+         users. -->
+    <div class="relative group shrink-0 flex">
       <button
-        onclick={() => customiser.activeTabId = tab.index}
-        oncontextmenu={(e) => openContext(e, tab)}
-        style={tabStyle(tab)}
-        class="px-3 py-1.5 text-xs border-b-2 transition-colors shrink-0 {customiser.activeTabId === tab.index ? 'border-eve-accent bg-eve-panel' : 'border-transparent hover:bg-white/5'}"
-      >{@html renderEveMarkup(tab.name)}</button>
-    {/each}
-    {#if customiser.tabs.length < MAX_TABS}
-      <button
-        onclick={addTab}
-        class="px-2.5 py-1.5 text-xs text-eve-muted hover:text-eve-text hover:bg-white/5 transition-colors shrink-0"
-        aria-label={t('tabs.add')}
-        title={t('tabs.add')}
-      >+</button>
-    {/if}
+        onclick={() => locked = !locked}
+        aria-pressed={!locked}
+        aria-label={locked ? t('preview.unlockTabs') : t('preview.lockTabs')}
+        aria-describedby="reorder-tip-tabs"
+        class="px-2.5 py-1.5 text-xs border-l border-eve-border transition-colors {locked ? 'text-eve-muted hover:text-eve-text hover:bg-white/5' : 'text-eve-accent bg-eve-accent/10'}"
+      ><span aria-hidden="true">{locked ? '🔒' : '🔓'}</span></button>
+
+      {@render tip('reorder-tip-tabs', t('preview.tipTabsTitle'), [
+        [t('preview.tipTabs'), false],
+        [t('preview.tipSync'), false],
+      ])}
+    </div>
+
+    <button
+      onclick={onhide}
+      aria-label={t('app.hidePanel')}
+      title={t('app.hidePanel')}
+      class="px-2 py-1.5 shrink-0 border-l border-eve-border text-eve-muted hover:text-eve-text hover:bg-white/5 transition-colors"
+    >
+      <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" /><circle cx="12" cy="12" r="3" />
+      </svg>
+    </button>
   </div>
 
   <!-- In-game-style tab context menu: pick this tab's list + bracket presets -->
@@ -223,13 +325,43 @@ function cellValue(col, e) {
     </div>
   {/if}
 
-  <!-- Column header -->
+  <!-- Column header. Its own control decides whether a drop rearranges just
+       this tab (giving it its own columns) or the shared profile order; the
+       trailing gutter is mirrored by every row below so the grid stays aligned. -->
   <div class="flex bg-eve-panel2 border-b border-eve-border text-eve-muted uppercase text-[9px] tracking-wide select-none shrink-0">
-    {#each visibleColumns as col (col)}
-      <div class="px-1.5 py-1 truncate {col === 'ICON' ? 'w-7 shrink-0 text-center' : 'flex-1 min-w-0'}" title={COLUMN_DEFS[col]?.desc ?? col}>
-        {col === 'ICON' ? '' : (COLUMN_DEFS[col]?.label ?? col)}
-      </div>
-    {/each}
+    <div
+      class="flex flex-1 min-w-0"
+      use:dndzone={{ items: colItems, dragDisabled: colMode === 'locked', flipDurationMs: FLIP_MS, dropTargetStyle: {} }}
+      onconsider={(e) => consider(e, 'cols')}
+      onfinalize={finalizeCols}
+    >
+      {#each colItems as item (item.id)}
+        {@const col = item.v}
+        <div
+          animate:flip={{ duration: FLIP_MS }}
+          class="px-1.5 py-1 truncate {col === 'ICON' ? 'w-7 shrink-0 text-center' : 'flex-1 min-w-0'} {colMode === 'locked' ? '' : 'cursor-grab active:cursor-grabbing'} {item[SHADOW_ITEM_MARKER_PROPERTY_NAME] ? 'opacity-40' : ''}"
+          title={COLUMN_DEFS[col]?.desc ?? col}
+        >
+          {col === 'ICON' ? '' : (COLUMN_DEFS[col]?.label ?? col)}
+        </div>
+      {/each}
+    </div>
+
+    <div class="relative group shrink-0 flex">
+      <button
+        onclick={cycleColMode}
+        aria-label={t(`preview.colMode.${colMode}`)}
+        aria-describedby="reorder-tip-cols"
+        class="w-7 py-1 text-[11px] leading-none border-l border-eve-border transition-colors {colMode === 'locked' ? 'text-eve-muted hover:text-eve-text hover:bg-white/5' : 'text-eve-accent bg-eve-accent/10'}"
+      ><span aria-hidden="true">{COL_ICONS[colMode]}</span></button>
+
+      {@render tip('reorder-tip-cols', t('preview.tipColsTitle'), [
+        [t('preview.tipColLocked'), colMode === 'locked'],
+        [t('preview.tipColTab'), colMode === 'tab'],
+        [t('preview.tipColProfile'), colMode === 'profile'],
+        [t('preview.tipHidden'), false],
+      ])}
+    </div>
   </div>
 
   <!-- Rows -->
@@ -253,9 +385,29 @@ function cellValue(col, e) {
             </div>
           {/if}
         {/each}
+        <!-- Gutter matching the header's column-mode button, so cells line up -->
+        <div class="w-7 shrink-0" aria-hidden="true"></div>
       </div>
     {:else}
       <div class="text-center text-eve-muted text-[10px] py-8">{t('preview.noEntities')}</div>
     {/each}
   </div>
 </div>
+
+<!-- Hover/focus tooltip used by both reorder controls. `lines` is
+     [text, isCurrentState] — the live state is highlighted so a tri-state
+     button explains itself. -->
+{#snippet tip(id, title, lines)}
+  <div
+    {id}
+    role="tooltip"
+    class="pointer-events-none absolute right-0 top-full mt-1 z-50 w-72 max-w-[calc(100vw-2rem)] rounded-lg border border-eve-border bg-eve-panel2 p-2.5 shadow-2xl font-sans text-[11px] normal-case tracking-normal leading-snug text-eve-muted opacity-0 invisible transition-opacity group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible"
+  >
+    <p class="text-eve-text font-semibold mb-1">{title}</p>
+    <ul class="space-y-1 list-disc pl-3.5">
+      {#each lines as [text, active]}
+        <li class={active ? 'text-eve-text font-medium' : ''}>{text}</li>
+      {/each}
+    </ul>
+  </div>
+{/snippet}

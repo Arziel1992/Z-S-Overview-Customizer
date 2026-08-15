@@ -12,6 +12,9 @@ import { customiser } from "$lib/stores/customiserStore.svelte";
 import { BRACKET_SHOW_ALL } from "$lib/utils/eveFormat";
 import { buildShipLabelHtml } from "$lib/utils/labels";
 
+// onhide — collapses this panel to a bar in the workspace shell.
+let { onhide } = $props();
+
 // "Show all brackets" tab option: every roster entity renders, no preset.
 const showAll = $derived(customiser.activeTab?.bracket === BRACKET_SHOW_ALL);
 const bracketPreset = $derived(
@@ -63,6 +66,17 @@ const marks = $derived.by(() => {
   <div class="absolute top-1/2 left-0 right-0 border-t border-eve-border/25 pointer-events-none"></div>
 
   <div class="absolute top-2 left-3 text-[10px] uppercase tracking-wider text-eve-muted z-10">{t('preview.spaceView')}</div>
+
+  <button
+    onclick={onhide}
+    aria-label={t('app.hidePanel')}
+    title={t('app.hidePanel')}
+    class="absolute top-1.5 right-2 z-10 text-eve-muted hover:text-eve-text transition-colors p-1"
+  >
+    <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" /><circle cx="12" cy="12" r="3" />
+    </svg>
+  </button>
 
   <!-- centre marker -->
   <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none">

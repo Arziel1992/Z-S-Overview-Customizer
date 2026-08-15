@@ -215,6 +215,16 @@ function intList(arr) {
 }
 
 /**
+ * Per-tab column list (`tabColumns` / `tabColumnOrder`) -> string[] or null.
+ * Absent — and an empty list, which would leave the tab with nothing to render
+ * — both mean "inherit the profile-wide columns", which is how the client
+ * treats a tab that was never given its own Columns setting.
+ */
+function colList(arr) {
+	return Array.isArray(arr) && arr.length ? arr.map(String) : null;
+}
+
+/**
  * Parse a raw EVE overview .yaml string into the app's normalized model.
  *
  * The game serialises several sections as ordered maps encoded as lists of
@@ -249,6 +259,11 @@ export function parseOverviewYaml(text) {
 			overview: b.overview ?? null,
 			// The game has no "no brackets" tab state — absent/null means show all.
 			bracket: b.bracket ?? BRACKET_SHOW_ALL,
+			// Per-tab column override (in-game: right-click the tab -> Columns).
+			// `tabColumns` is the set this tab shows, `tabColumnOrder` its own
+			// left-to-right master order; either may be absent (= inherit).
+			tabColumns: colList(b.tabColumns),
+			tabColumnOrder: colList(b.tabColumnOrder),
 		};
 	});
 
@@ -349,15 +364,22 @@ export function serializeOverviewYaml(model) {
 	out.stateBlinks = objectToPairs(model.stateBlinks);
 	out.stateColorsNameList = objectToPairs(model.stateColors);
 
-	out.tabSetup = model.tabs.map((t) => [
-		t.index,
-		[
+	// Tab keys stay alphabetical, matching the client's own tabSetup dumps. The
+	// per-tab column keys are written ONLY for tabs that actually override the
+	// profile columns — emitting them everywhere would pin every tab's columns
+	// in-game, which is not what an untouched tab means.
+	out.tabSetup = model.tabs.map((t) => {
+		const pairs = [
 			["bracket", t.bracket ?? BRACKET_SHOW_ALL],
 			["color", t.color ?? null],
 			["name", t.name ?? ""],
 			["overview", t.overview ?? null],
-		],
-	]);
+		];
+		if (t.tabColumnOrder?.length)
+			pairs.push(["tabColumnOrder", [...t.tabColumnOrder]]);
+		if (t.tabColumns?.length) pairs.push(["tabColumns", [...t.tabColumns]]);
+		return [t.index, pairs];
+	});
 
 	out.userSettings = model.userSettings ?? [];
 

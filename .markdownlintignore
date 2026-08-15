@@ -1,0 +1,6 @@
+# Untracked working drafts (announcements, research dumps, raw key notes) —
+# they are gitignored scratch, not shipped documentation, and are pasted
+# verbatim into Discord/Reddit where markdownlint's prose rules don't apply.
+notes/
+node_modules/
+dist/

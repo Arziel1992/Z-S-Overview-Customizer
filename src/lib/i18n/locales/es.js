@@ -50,6 +50,10 @@ export default {
 		clearAll: "Vaciar todo",
 		clearAllTitle: "Restablecer a un perfil en blanco",
 		historyTitle: "Versiones guardadas e importación",
+		hidePanel: "Ocultar este panel",
+		showPanel: "Mostrar {panel}",
+		resizePanels:
+			"Arrastra para redimensionar los paneles — doble clic para restablecer",
 		sdeUpdated: "SDE {date}",
 		sdeUpdatedHelp:
 			"Base de datos de naves descargada por última vez del Static Data Export de Fenris el {date} — la herramienta se mantiene actualizada automáticamente.",
@@ -114,7 +118,6 @@ export default {
 	},
 	settings: {
 		windowTitle: "Ajustes del Overview",
-		engine: "Motor cliente Z-S",
 	},
 	tabs: {
 		heading: "Configuración de pestañas",
@@ -130,6 +133,16 @@ export default {
 		max: "Se alcanzó el máximo de 20 pestañas.",
 		remove: "Eliminar pestaña",
 		tabColor: "Color del texto de la pestaña",
+		columns: "Columnas",
+		columnsEdit: "Definir las columnas de esta pestaña",
+		columnsInherit: "Columnas del perfil",
+		columnsCustom: "{n} columnas propias",
+		columnsFor: "Columnas — {name}",
+		columnsOwn: "Dar columnas propias a esta pestaña",
+		columnsOwnHelp:
+			"Desactivado, la pestaña muestra las columnas del perfil. Activado, guarda su propio conjunto y orden: lo mismo que el menú Columnas del clic derecho sobre la pestaña en el juego.",
+		columnsCopy: "Copiar de",
+		columnsCopyPick: "Otra pestaña…",
 	},
 	presets: {
 		heading: "Lógica de filtros del preset",
@@ -153,7 +166,9 @@ export default {
 	},
 	columns: {
 		heading: "Columnas",
-		help: "Elige y ordena las columnas de telemetría mostradas de izquierda a derecha en la lista del overview.",
+		help: "Elige y ordena las columnas de telemetría mostradas de izquierda a derecha en la lista del overview. Cada pestaña puede anularlas desde Configuración de pestañas.",
+		tabOverrides:
+			"{n} pestaña(s) muestran sus propias columnas en lugar de estas.",
 	},
 	appearance: {
 		heading: "Apariencia",
@@ -245,6 +260,29 @@ export default {
 		remove: "Eliminar",
 		distance: "Distancia (m)",
 		states: "Estados de relación",
+		unlockTabs:
+			"Desbloquear el reordenamiento de pestañas — arrástralas para reorganizarlas",
+		lockTabs: "Bloquear el reordenamiento de pestañas",
+		tipTabsTitle: "Reordenar pestañas",
+		tipTabs:
+			"Desbloqueado, arrastra las pestañas de arriba en el orden que quieras. Bloqueado, solo responden al clic.",
+		tipSync:
+			"Cada cambio se escribe en el propio perfil, así que las secciones de ajustes lo reflejan al instante — y sus cambios aparecen aquí.",
+		colMode: {
+			locked:
+				"Reordenamiento de columnas bloqueado — pulsa para arrastrar en esta pestaña",
+			tab: "Arrastrar columnas reorganiza esta pestaña — pulsa para reorganizar todo el perfil",
+			profile:
+				"Arrastrar columnas reorganiza todo el perfil — pulsa para bloquear",
+		},
+		tipColsTitle: "Reordenar columnas",
+		tipColLocked: "🔒 Bloqueado — la cabecera solo responde al clic.",
+		tipColTab:
+			"🔓 Esta pestaña — al soltar, la pestaña recibe su propio conjunto de columnas, sin tocar las demás.",
+		tipColProfile:
+			"🌐 Todo el perfil — al soltar se reorganiza el orden compartido que siguen todas las pestañas sin conjunto propio.",
+		tipHidden:
+			"Las columnas desactivadas conservan su posición en el orden: reaparecen donde las dejaste.",
 		hiddenNote: "Oculto por el preset activo",
 		noEntities: "Ninguna entidad coincide con el preset de esta pestaña.",
 		pilot: "Piloto",
@@ -282,6 +320,8 @@ export default {
 		stTheme: "Tu elección de tema claro/oscuro",
 		stLocale: "Tu elección de idioma",
 		stScale: "Tu elección de escala de la interfaz",
+		stLayout:
+			"La disposición de tu espacio de trabajo: dónde arrastraste el divisor de paneles y qué paneles ocultaste",
 		stSession:
 			"Autoguardado del perfil de overview que estás editando (como YAML), para que al recargar continúes donde lo dejaste",
 		stBase: "Desde qué perfil base comenzó tu sesión",

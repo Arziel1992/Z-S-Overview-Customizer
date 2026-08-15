@@ -52,6 +52,9 @@ export default {
 		clearAll: "Clear all",
 		clearAllTitle: "Reset to a blank profile",
 		historyTitle: "Saved versions & import",
+		hidePanel: "Hide this panel",
+		showPanel: "Show {panel}",
+		resizePanels: "Drag to resize the panels — double-click to reset",
 		sdeUpdated: "SDE {date}",
 		sdeUpdatedHelp:
 			"Ship database last pulled from Fenris' Static Data Export on {date} — the tool keeps itself up to date automatically.",
@@ -116,7 +119,6 @@ export default {
 	},
 	settings: {
 		windowTitle: "Overview Settings",
-		engine: "Z-S Client Engine",
 	},
 	tabs: {
 		heading: "Tab Setup",
@@ -132,6 +134,16 @@ export default {
 		max: "Maximum of 20 tabs reached.",
 		remove: "Remove tab",
 		tabColor: "Tab text colour",
+		columns: "Columns",
+		columnsEdit: "Set this tab's columns",
+		columnsInherit: "Profile columns",
+		columnsCustom: "{n} own columns",
+		columnsFor: "Columns — {name}",
+		columnsOwn: "Give this tab its own columns",
+		columnsOwnHelp:
+			"Off, the tab shows the profile-wide columns. On, it stores its own set and order — the same thing as the in-game tab right-click → Columns menu.",
+		columnsCopy: "Copy from",
+		columnsCopyPick: "Another tab…",
 	},
 	presets: {
 		heading: "Preset Filter Logic",
@@ -155,7 +167,8 @@ export default {
 	},
 	columns: {
 		heading: "Columns",
-		help: "Choose and order the telemetry columns shown left-to-right in the overview list.",
+		help: "Choose and order the telemetry columns shown left-to-right in the overview list. Individual tabs can override these from Tab Setup.",
+		tabOverrides: "{n} tab(s) show their own columns instead of these.",
 	},
 	appearance: {
 		heading: "Appearance",
@@ -247,6 +260,26 @@ export default {
 		remove: "Remove",
 		distance: "Distance (m)",
 		states: "Relationship states",
+		unlockTabs: "Unlock tab reordering — drag the tabs to rearrange them",
+		lockTabs: "Lock tab reordering",
+		tipTabsTitle: "Reorder tabs",
+		tipTabs:
+			"Unlocked, drag the tabs above into any order. Locked, they only respond to clicks.",
+		tipSync:
+			"Every drop writes to the profile itself, so the settings sections show the change instantly — and their edits show up here.",
+		colMode: {
+			locked: "Column reordering locked — click to drag for this tab",
+			tab: "Dragging columns rearranges this tab — click to rearrange the whole profile",
+			profile: "Dragging columns rearranges the whole profile — click to lock",
+		},
+		tipColsTitle: "Reorder columns",
+		tipColLocked: "🔒 Locked — the header only responds to clicks.",
+		tipColTab:
+			"🔓 This tab — a drop gives this tab its own column set, leaving every other tab alone.",
+		tipColProfile:
+			"🌐 Whole profile — a drop rearranges the shared column order that every tab without its own set follows.",
+		tipHidden:
+			"Columns you switched off keep their place in the order — they reappear where you left them.",
 		hiddenNote: "Hidden by active preset",
 		noEntities: "No entities match this tab's preset.",
 		pilot: "Pilot",
@@ -284,6 +317,8 @@ export default {
 		stTheme: "Your light/dark theme choice",
 		stLocale: "Your language choice",
 		stScale: "Your interface scale choice",
+		stLayout:
+			"Your workspace layout: where you dragged the panel divider and which panels you hid",
 		stSession:
 			"Autosave of the overview profile you are editing (as YAML), so a reload resumes where you left off",
 		stBase: "Which base profile your session started from",
