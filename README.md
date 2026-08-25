@@ -103,6 +103,13 @@ behind a Z-S overview. Fly safe. o7
   fleet, structure bash, NPC site) ship out of the box, and you can save your
   own from the current roster. Every grouping, samples included, can be
   renamed, overwritten or deleted, and the list persists in your browser.
+- **Nothing is lost between groupings.** The entities you are working on carry
+  an **Unsaved** marker when they differ from the grouping they came from, and
+  loading another grouping *parks* them rather than dropping them — the row is
+  dotted in the list, and coming back restores exactly what you were editing.
+  The roster itself survives a reload too, so cross-checking another grouping,
+  or closing the tab, never costs work. The export view repeats the warning,
+  since preview entities are workbench data and never part of the YAML.
 - **Import any YAML** (file or paste) with a choice of **Overwrite** or
   **Apply on top** — multi-part packs (like the Z-S pieces) merge onto a core
   profile exactly as they do in-game: same-named presets are replaced, new ones
@@ -152,6 +159,11 @@ roster:
 
 ![Live preview column](./images/screenshot-3_live-preview.png)
 
+The entity editor offers **every state the client knows** — the same list the
+preset editor shows, standings (Excellent / Good / Neutral / Bad / Terrible /
+No Standing) included — so a preview entity can reproduce any relationship a
+preset filters on.
+
 Rapid populate — one click swaps the preview roster for a built-in sample or
 one of your own saved groupings:
 
@@ -192,15 +204,28 @@ in-game "every group" preset export (game version v24.01, committed under
 
 ### 2. Presets: the boolean logic engine
 
-A **preset** decides *what renders*. Each one carries three arrays, evaluated
-with strict precedence:
+A **preset** decides *what renders*. Each one carries three arrays forming
+**two independent gates**:
 
-1. **`alwaysShownStates`** — supreme override. If an entity matches any state
-   here, it renders **no matter what** (e.g. always show Fleet Members).
-2. **`filteredStates`** — absolute veto. If an entity matches any state here, it
-   is hidden **even if its group is authorised** (e.g. hide friendlies on a
-   combat tab to prevent misclicks).
-3. **`groups`** — the whitelist of SDE groupIDs the preset may display.
+1. **`groups`** — the whitelist of SDE groupIDs the preset may display. A hull
+   whose group is not listed never renders, and **no state overrides this**: a
+   logi tab stays a logi tab.
+2. Within an authorised hull, the states decide:
+   - **`filteredStates`** — veto. An entity matching any state here is hidden
+     (e.g. hide friendlies on a combat tab to prevent misclicks).
+   - **`alwaysShownStates`** — overrides that veto. An entity matching any
+     state here renders *despite* also matching a filtered state (e.g. veto
+     your corp, but never lose sight of a war target flying in it).
+
+This follows the client's own wording for the always-shown column — *"Entities
+with this state will always be shown regardless of the display setting of
+additional **states** they may have"* ([EVE University][eveuni-overview]) — so
+the override is scoped to states, not to the type filter.
+
+Rows the override rescued from a veto carry a small **`*`** next to the
+colortag in the preview; hover it for the reason.
+
+[eveuni-overview]: https://wiki.eveuniversity.org/Overview_settings
 
 ### 3. Tabs: lists and brackets, decoupled
 
@@ -268,8 +293,8 @@ Exact strings accepted inside `overviewColumns` — and inside a tab's
 
 | Key                 | Effect                                                                                                               |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `alwaysShownStates` | Force-render override — bypasses all other filters.                                                                  |
-| `filteredStates`    | Absolute veto — hides matching entities immediately.                                                                 |
+| `alwaysShownStates` | Overrides the state veto, within hulls the `groups` whitelist already authorises.                                    |
+| `filteredStates`    | State veto — hides matching entities unless `alwaysShownStates` rescues them.                                        |
 | `groups`            | Whitelisted SDE `groupID`s (e.g. `6` Sun, `10` Stargate, `15` Station, `25` Frigate, `26` Cruiser, `27` Battleship). |
 
 ### Tab setup variables
@@ -443,9 +468,10 @@ integer state IDs; serialisation back to game-importable YAML is lossless.
 
 #### 4. Live preview render pipeline
 
-Each roster entity is resolved against the active tab's presets — always-shown
-overrides veto, veto overrides group membership — then the first matching state
-in the priority orders picks the colortag and background.
+Each roster entity is resolved against the active tab's presets — the group
+whitelist first, then the state veto and the always-shown override within it —
+then the first matching state in the priority orders picks the colortag and
+background.
 
 ![Live preview render pipeline](./images/4_live-preview-render-pipeline.png)
 
@@ -510,7 +536,8 @@ For full disclosure, the libraries and tooling this project depends on:
 
 - **IndexedDB** — local, named version history (no backend).
 - **Clipboard API** — copy / share YAML.
-- **localStorage** — theme, UI scale, and session restore.
+- **localStorage** — theme, UI scale, session restore, and the preview roster
+  (including edits parked per grouping).
 
 ### Data pipeline (`pnpm run sde:build`)
 

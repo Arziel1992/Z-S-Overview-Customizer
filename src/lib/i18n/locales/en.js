@@ -248,6 +248,8 @@ export default {
 		download: "Download .yaml",
 		copy: "Copy to clipboard",
 		copied: "Copied!",
+		rosterDirty:
+			"Your preview entities have unsaved changes. They are workbench data and are never part of this export — save the grouping in Preview Entities if you want to keep them.",
 	},
 	preview: {
 		heading: "Live Preview",
@@ -260,6 +262,16 @@ export default {
 		remove: "Remove",
 		distance: "Distance (m)",
 		states: "Relationship states",
+		workingSet: "Working set",
+		unsaved: "Unsaved",
+		unsavedHelp:
+			"These entities differ from the grouping they came from. Click to save them back — nothing is lost meanwhile: switching groupings parks them, and they survive a reload.",
+		parkedHelp:
+			"Has unsaved entities parked — load it to carry on where you left off",
+		setsHelp:
+			"Loading a grouping parks whatever is on screen first, so you can look at another one and come back to your edits.",
+		forcedOverVeto:
+			"Kept on screen by an always-shown state — a filtered state would otherwise have hidden this entity.",
 		unlockTabs: "Unlock tab reordering — drag the tabs to rearrange them",
 		lockTabs: "Lock tab reordering",
 		tipTabsTitle: "Reorder tabs",
@@ -323,6 +335,8 @@ export default {
 			"Autosave of the overview profile you are editing (as YAML), so a reload resumes where you left off",
 		stBase: "Which base profile your session started from",
 		stSets: "Your saved preview-roster groupings",
+		stRoster:
+			"The preview entities you are working on, including unsaved edits parked per grouping, so nothing is lost on a reload",
 		stAck: "Remembers that you dismissed the privacy notice, and when",
 		stHistory: 'Profile snapshots you save under "Saved versions"',
 		networkHeading: "Network requests",

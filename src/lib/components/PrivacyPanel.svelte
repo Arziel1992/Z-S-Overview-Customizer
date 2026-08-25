@@ -50,6 +50,7 @@ const STORAGE_ITEMS = [
 	["zs-overview-session", "localStorage", "privacy.stSession"],
 	["zs-overview-base", "localStorage", "privacy.stBase"],
 	["zs-overview-rostersets-v3", "localStorage", "privacy.stSets"],
+	["zs-overview-roster", "localStorage", "privacy.stRoster"],
 	["zs-overview-privacy", "localStorage", "privacy.stAck"],
 	["zs-overview → snapshots", "IndexedDB", "privacy.stHistory"],
 ];

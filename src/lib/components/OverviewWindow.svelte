@@ -378,6 +378,15 @@ function cellValue(col, e) {
           {#if col === 'ICON'}
             <div class="w-7 shrink-0 text-center py-1">
               <span style="color:{res.flagColor ?? '#9fb2c8'}">▲</span>
+              {#if res.forcedOverVeto}
+                <!-- On screen because an always-shown state outranked a state
+                     that would otherwise have hidden it. -->
+                <span
+                  class="text-eve-accent text-[9px] align-super"
+                  title={t('preview.forcedOverVeto')}
+                  aria-label={t('preview.forcedOverVeto')}
+                >*</span>
+              {/if}
             </div>
           {:else}
             <div class="flex-1 min-w-0 px-1.5 py-1 truncate {col === 'NAME' ? 'text-eve-text' : 'text-eve-muted'}">

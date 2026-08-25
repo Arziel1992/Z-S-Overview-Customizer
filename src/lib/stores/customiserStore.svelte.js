@@ -27,6 +27,12 @@ import {
 	stripEveMarkup,
 } from "$lib/utils/eveFormat";
 import { mergeModel } from "$lib/utils/merge";
+import {
+	ENTITY_DEFAULTS,
+	entitySig,
+	toStoredEntities,
+} from "$lib/utils/roster";
+import { resolveVisibility } from "$lib/utils/visibility";
 
 // localStorage keys. SESSION_KEY holds the full working profile as YAML —
 // reusing the export format means session restore exercises the same codec
@@ -45,6 +51,12 @@ const BASE_KEY = "zs-overview-base";
 // Bumping the key refreshes the built-ins; user-made groupings migrate over.
 const SETS_KEY = "zs-overview-rostersets-v3";
 const SETS_KEYS_OLD = ["zs-overview-rostersets-v2", "zs-overview-rostersets"];
+// The working roster itself: the entities on screen, plus any unsaved edits
+// held per grouping. Editor-style — leaving a grouping (or the tab) never
+// costs work, it just keeps reading as unsaved until it is saved.
+const ROSTER_KEY = "zs-overview-roster";
+/** Draft key for the roster while it belongs to no saved grouping. */
+const WORKING_SET = "";
 
 /**
  * Default preview roster so the renderer is populated on first load.
@@ -552,6 +564,12 @@ class CustomiserStore {
 	roster = $state(seedRoster());
 	/** [{ name, entities:[partial entity] }] — samples + user-saved groupings. */
 	rosterSets = $state(sampleSets());
+	/** Grouping the roster came from; null while it belongs to none. */
+	activeSet = $state(null);
+	/** { groupingName: entities } — unsaved edits parked per grouping. */
+	rosterDrafts = $state({});
+	/** Fingerprint of the roster as last loaded or saved (drives the dot). */
+	rosterBaseline = $state("");
 	activePresetName = $state(null);
 
 	// --- UI ---
@@ -613,6 +631,24 @@ class CustomiserStore {
 				}
 				for (const k of SETS_KEYS_OLD) ls.removeItem(k);
 			}
+		}
+
+		// The working roster, its grouping and any parked drafts.
+		const savedRoster = ls?.getItem(ROSTER_KEY);
+		if (savedRoster) {
+			try {
+				const saved = JSON.parse(savedRoster);
+				if (Array.isArray(saved.roster) && saved.roster.length)
+					this.roster = saved.roster;
+				this.activeSet = saved.activeSet ?? null;
+				this.rosterDrafts = saved.drafts ?? {};
+				this.rosterBaseline = saved.baseline ?? entitySig(this.roster);
+			} catch (e) {
+				console.warn("[!] Could not restore the preview roster.", e);
+			}
+		} else {
+			// A first-run seed is not unsaved work — nothing has been edited yet.
+			this.rosterBaseline = this.rosterSig;
 		}
 
 		// Restore the last working session if present; otherwise greet the user.
@@ -1204,31 +1240,40 @@ class CustomiserStore {
 		const id = this.roster.length
 			? Math.max(...this.roster.map((e) => e.id)) + 1
 			: 1;
-		this.roster.push({
-			id,
-			pilotName: "New Pilot",
-			shipName: "",
-			type: "Rifter",
-			typeId: 587,
-			groupId: 25,
-			corp: "—",
-			alliance: "—",
-			faction: "—",
-			militia: "—",
-			size: "S",
-			states: [],
-			distance: 10000,
-			velocity: 0,
-			radial: 0,
-			transversal: 0,
-			angular: 0,
-			...entity,
-		});
+		this.roster.push({ id, ...ENTITY_DEFAULTS, ...entity });
 	}
 
 	removeEntity(id) {
 		const i = this.roster.findIndex((e) => e.id === id);
 		if (i > -1) this.roster.splice(i, 1);
+	}
+
+	/** Content fingerprint of the entities on screen (ids and key order aside). */
+	get rosterSig() {
+		return entitySig(this.roster);
+	}
+
+	/** True while the roster differs from the grouping it was loaded from. */
+	get rosterDirty() {
+		return this.rosterSig !== this.rosterBaseline;
+	}
+
+	/** Persist the entities on screen, their grouping, and every parked draft. */
+	saveRoster() {
+		if (typeof localStorage === "undefined") return;
+		try {
+			localStorage.setItem(
+				ROSTER_KEY,
+				JSON.stringify({
+					activeSet: this.activeSet,
+					baseline: this.rosterBaseline,
+					roster: this.roster,
+					drafts: this.rosterDrafts,
+				}),
+			);
+		} catch (e) {
+			console.warn("[!] Roster save failed.", e);
+		}
 	}
 
 	/* -------------------------- roster sets -------------------------- */
@@ -1245,28 +1290,57 @@ class CustomiserStore {
 		}
 	}
 
-	/** Replace the whole roster with a set's entities (rapid populate). */
+	/**
+	 * Park the entities on screen under their grouping, so switching away and
+	 * back returns to exactly what was being edited. No-op when nothing has
+	 * changed since the grouping was loaded — a clean grouping needs no draft.
+	 */
+	stashDraft() {
+		if (!this.rosterDirty) return;
+		this.rosterDrafts[this.activeSet ?? WORKING_SET] = toStoredEntities(
+			this.roster,
+		);
+	}
+
+	/**
+	 * Show a grouping's entities. Parked edits win over the saved entities, so
+	 * returning to a grouping resumes where the user left off; pass "" for the
+	 * unnamed working set. Whatever is on screen is parked first — loading a
+	 * grouping to cross-check something must never cost work.
+	 */
 	loadRosterSet(name) {
-		const set = this.rosterSets.find((s) => s.name === name);
-		if (!set) return;
+		const key = name ?? WORKING_SET;
+		const set = key ? this.rosterSets.find((s) => s.name === key) : null;
+		const draft = this.rosterDrafts[key];
+		if (!set && !draft) return;
+		this.stashDraft();
 		this.roster = [];
 		// copy states too, or edits to a loaded entity would mutate the stored set
-		for (const e of set.entities)
+		for (const e of draft ?? set.entities)
 			this.addEntity({ ...e, states: [...(e.states ?? [])] });
+		this.activeSet = set ? set.name : null;
+		// Baseline is the *saved* grouping either way, so a restored draft keeps
+		// reading as unsaved while a clean load does not.
+		this.rosterBaseline = set ? entitySig(set.entities) : "";
+		delete this.rosterDrafts[key]; // it is live now, not parked
+		this.saveRoster();
 	}
 
 	/** Save the current roster under `name` — new set, or overwrite if taken. */
 	saveRosterSet(name) {
 		const trimmed = name?.trim();
 		if (!trimmed) return false;
-		const entities = this.roster.map(({ id, ...rest }) => ({
-			...rest,
-			states: [...rest.states],
-		}));
+		const entities = toStoredEntities(this.roster);
 		const existing = this.rosterSets.find((s) => s.name === trimmed);
 		if (existing) existing.entities = entities;
 		else this.rosterSets.push({ name: trimmed, entities });
 		this.persistRosterSets();
+		// Saved: this grouping owns the entities now, and no draft outranks them.
+		this.activeSet = trimmed;
+		this.rosterBaseline = this.rosterSig;
+		delete this.rosterDrafts[trimmed];
+		delete this.rosterDrafts[WORKING_SET];
+		this.saveRoster();
 		return true;
 	}
 
@@ -1277,7 +1351,13 @@ class CustomiserStore {
 		const set = this.rosterSets.find((s) => s.name === oldName);
 		if (!set) return false;
 		set.name = trimmed;
+		if (this.rosterDrafts[oldName]) {
+			this.rosterDrafts[trimmed] = this.rosterDrafts[oldName];
+			delete this.rosterDrafts[oldName];
+		}
+		if (this.activeSet === oldName) this.activeSet = trimmed;
 		this.persistRosterSets();
+		this.saveRoster();
 		return true;
 	}
 
@@ -1287,39 +1367,42 @@ class CustomiserStore {
 			this.rosterSets.splice(i, 1);
 			this.persistRosterSets();
 		}
+		// The entities stay on screen; they just no longer belong to a grouping.
+		delete this.rosterDrafts[name];
+		if (this.activeSet === name) {
+			this.activeSet = null;
+			this.rosterBaseline = "";
+		}
+		this.saveRoster();
 	}
 
 	/**
 	 * Resolve how an entity renders under a given preset — the heart of the
 	 * preview, mirroring the EVE client's evaluation rules exactly:
 	 *
-	 * Visibility precedence:
-	 *   1. any entity state ∈ preset.alwaysShownStates → ALWAYS visible
-	 *      (supreme override, bypasses everything);
-	 *   2. else any state ∈ preset.filteredStates → hidden (absolute veto,
-	 *      even when the group is authorised);
-	 *   3. else visible iff the entity's groupId ∈ preset.groups.
+	 * Visibility runs two independent gates (see visibility.js for the rule and
+	 * its truth table):
+	 *   1. the entity's groupId must be in preset.groups — the type filter is
+	 *      absolute, and no state overrides it;
+	 *   2. within an authorised hull, a state ∈ preset.filteredStates vetoes,
+	 *      unless a state ∈ preset.alwaysShownStates overrides that veto.
 	 *
 	 * Appearance: the winning colortag/background is the FIRST id in
 	 * flagOrder/backgroundOrder that the entity carries AND that the
 	 * corresponding whitelist (flagStates/backgroundStates) authorises —
 	 * evaluation stops at the first match, so list order is everything.
 	 *
-	 * @returns {{visible:boolean, flagId:?number, bgId:?number,
-	 *            flagColor:?string, bgColor:?string,
+	 * `forcedOverVeto` marks a row an always-shown state rescued from a state
+	 * that would otherwise have hidden it — worth explaining in the preview,
+	 * since the same tab hides its siblings.
+	 *
+	 * @returns {{visible:boolean, forcedOverVeto:boolean, flagId:?number,
+	 *            bgId:?number, flagColor:?string, bgColor:?string,
 	 *            flagBlink:boolean, bgBlink:boolean}}
 	 */
 	resolveEntity(entity, preset) {
 		const states = entity.states ?? [];
-		let visible;
-		const forced = states.some((s) => preset?.alwaysShownStates?.includes(s));
-		if (forced) {
-			visible = true;
-		} else if (states.some((s) => preset?.filteredStates?.includes(s))) {
-			visible = false;
-		} else {
-			visible = preset?.groups?.includes(entity.groupId) ?? false;
-		}
+		const { visible, forcedOverVeto } = resolveVisibility(entity, preset);
 
 		const flagId = this.flagOrder.find(
 			(id) => states.includes(id) && this.flagStates.includes(id),
@@ -1330,6 +1413,7 @@ class CustomiserStore {
 
 		return {
 			visible,
+			forcedOverVeto,
 			flagId: flagId ?? null,
 			bgId: bgId ?? null,
 			flagColor: flagId != null ? this.stateColor("flag", flagId) : null,

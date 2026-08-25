@@ -51,6 +51,14 @@ async function copy() {
     </div>
   </div>
 
+  {#if customiser.rosterDirty}
+    <!-- Preview entities are workbench data, not part of the profile — so this
+         warns rather than blocks: the export is complete either way. -->
+    <p role="status" class="shrink-0 mb-2 text-[11px] text-amber-400 border border-amber-500/40 bg-amber-500/5 rounded px-2.5 py-1.5">
+      <span aria-hidden="true">●</span> {t('yaml.rosterDirty')}
+    </p>
+  {/if}
+
   <div class="flex-1 overflow-auto bg-app-bg border border-app-border rounded py-2 text-[10px] leading-relaxed font-mono text-app-text min-h-0">
     {#each lines as line, i (i)}
       <div class="flex hover:bg-app-panel2/60">

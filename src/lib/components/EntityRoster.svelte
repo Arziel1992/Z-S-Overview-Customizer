@@ -11,20 +11,25 @@
   (built-in samples included) via the store's rosterSets.
 -->
 <script>
-import { STATES } from "$lib/data/stateMatrix";
+import { ALL_STATE_IDS, STATES } from "$lib/data/stateMatrix";
 import { t } from "$lib/i18n/strings.svelte.js";
 import { customiser } from "$lib/stores/customiserStore.svelte";
+import { ENTITY_DEFAULTS } from "$lib/utils/roster";
 import Modal from "./Modal.svelte";
 
 // onhide — collapses this panel to a bar in the workspace shell.
 let { onhide } = $props();
 
-const STATE_OPTIONS = [9, 10, 11, 12, 13, 14, 18, 19, 44, 45, 50, 51, 52];
+// Every state the client knows, straight from the matrix — the preset editor
+// lists the same set, and a second hand-written list only drifts from it.
+const STATE_OPTIONS = ALL_STATE_IDS;
 
 let editing = $state(null); // entity ref (edit) or draft (add)
 let isNew = $state(false);
 let typeQuery = $state(""); // live SDE search text; '' = dropdown closed
 let newSetName = $state("");
+let setsOpen = $state(false); // "Rapid populate" disclosure
+let nameInput = $state(null);
 
 // Up to 25 SDE types whose name contains the query (across all categories).
 const typeMatches = $derived.by(() => {
@@ -62,24 +67,7 @@ function pickType(match) {
 function openAdd() {
 	isNew = true;
 	typeQuery = "";
-	editing = {
-		pilotName: "New Pilot",
-		shipName: "",
-		type: "Rifter",
-		typeId: 587,
-		groupId: 25,
-		corp: "—",
-		alliance: "—",
-		faction: "—",
-		militia: "—",
-		size: "S",
-		states: [],
-		distance: 10000,
-		velocity: 0,
-		radial: 0,
-		transversal: 0,
-		angular: 0,
-	};
+	editing = { ...ENTITY_DEFAULTS, states: [] };
 }
 function openEdit(entity) {
 	isNew = false;
@@ -106,12 +94,38 @@ function renameSet(set) {
 	const name = prompt(t("preview.renameSet"), set.name);
 	if (name != null) customiser.renameRosterSet(set.name, name);
 }
+
+// One-click save of the unsaved dot: straight back into the grouping the
+// entities came from, or — when they belong to none yet — open the groupings
+// list with the name field focused, since saving needs a name first.
+function saveNow() {
+	if (customiser.activeSet) {
+		customiser.saveRosterSet(customiser.activeSet);
+		return;
+	}
+	setsOpen = true;
+	requestAnimationFrame(() => nameInput?.focus());
+}
 </script>
 
 <div class="flex flex-col h-full min-h-0">
   <div class="flex items-center justify-between mb-2 shrink-0">
-    <h3 class="text-xs font-semibold uppercase tracking-wider text-app-muted">{t('preview.roster')}</h3>
-    <div class="flex items-center gap-2">
+    <h3 class="text-xs font-semibold uppercase tracking-wider text-app-muted truncate">
+      {t('preview.roster')}
+      <span class="normal-case tracking-normal text-app-muted/70 font-normal">· {customiser.activeSet ?? t('preview.workingSet')}</span>
+    </h3>
+    <div class="flex items-center gap-2 shrink-0">
+      {#if customiser.rosterDirty}
+        <!-- Unsaved-changes dot, editor style: the entities on screen differ
+             from the grouping they came from. Clicking saves them back. -->
+        <button
+          onclick={saveNow}
+          title={t('preview.unsavedHelp')}
+          class="flex items-center gap-1 text-[11px] text-amber-400 hover:text-amber-300 border border-amber-500/40 hover:border-amber-400 px-2 py-1 rounded transition-colors"
+        >
+          <span aria-hidden="true">●</span> {t('preview.unsaved')}
+        </button>
+      {/if}
       <button onclick={openAdd} class="text-[11px] font-semibold bg-app-accent hover:bg-app-accentHover text-white px-2.5 py-1 rounded transition-colors">+ {t('preview.addEntity')}</button>
       <button
         onclick={onhide}
@@ -126,12 +140,28 @@ function renameSet(set) {
     </div>
   </div>
 
-  <details class="shrink-0 mb-2 text-xs">
+  <details bind:open={setsOpen} class="shrink-0 mb-2 text-xs">
     <summary class="cursor-pointer select-none text-[11px] text-app-muted hover:text-app-text">⚡ {t('preview.rapidPopulate')}</summary>
     <div class="mt-1.5 space-y-1">
+      <p class="text-[10px] text-app-muted leading-snug">{t('preview.setsHelp')}</p>
+      {#if customiser.rosterDrafts['']}
+        <!-- Entities that belonged to no grouping when another was loaded —
+             parked rather than dropped, and one click from coming back. -->
+        <div class="flex items-center gap-1 bg-app-panel2 border border-amber-500/40 rounded px-2 py-1">
+          <button onclick={() => customiser.loadRosterSet('')} title={t('preview.loadSet')} class="flex-1 min-w-0 text-left truncate text-app-text hover:text-app-accent transition-colors">
+            <span class="text-amber-400" aria-hidden="true">●</span>
+            {t('preview.workingSet')} <span class="text-app-muted">({customiser.rosterDrafts[''].length})</span>
+          </button>
+        </div>
+      {/if}
       {#each customiser.rosterSets as set (set.name)}
-        <div class="flex items-center gap-1 bg-app-panel2 border border-app-border rounded px-2 py-1">
-          <button onclick={() => customiser.loadRosterSet(set.name)} title={t('preview.loadSet')} class="flex-1 min-w-0 text-left truncate text-app-text hover:text-app-accent transition-colors">
+        {@const active = customiser.activeSet === set.name}
+        {@const parked = !!customiser.rosterDrafts[set.name]}
+        <div class="flex items-center gap-1 bg-app-panel2 border rounded px-2 py-1 {active ? 'border-app-accent' : parked ? 'border-amber-500/40' : 'border-app-border'}">
+          <button onclick={() => customiser.loadRosterSet(set.name)} title={parked ? t('preview.parkedHelp') : t('preview.loadSet')} class="flex-1 min-w-0 text-left truncate text-app-text hover:text-app-accent transition-colors">
+            {#if parked || (active && customiser.rosterDirty)}
+              <span class="text-amber-400" aria-hidden="true">●</span>
+            {/if}
             {set.name} <span class="text-app-muted">({set.entities.length})</span>
           </button>
           <button onclick={() => renameSet(set)} title={t('preview.renameSet')} aria-label={t('preview.renameSet')} class="text-app-muted hover:text-app-text px-1">✎</button>
@@ -141,6 +171,7 @@ function renameSet(set) {
       {/each}
       <div class="flex gap-1">
         <input
+          bind:this={nameInput}
           bind:value={newSetName}
           placeholder={t('preview.setName')}
           aria-label={t('preview.setName')}
@@ -215,7 +246,9 @@ function renameSet(set) {
 
       <div>
         <span class="text-[9px] uppercase text-app-muted">{t('preview.states')}</span>
-        <div class="flex flex-wrap gap-1 mt-1">
+        <!-- Same equal-width grid the preset editor uses, so a state sits in
+             the same place in both lists and is easy to find. -->
+        <div class="grid gap-1 mt-1 grid-cols-[repeat(auto-fill,minmax(min(280px,100%),1fr))]">
           {#each STATE_OPTIONS as id}
             {@const on = editing.states.includes(id)}
             <button onclick={() => toggleState(id)} class="px-1.5 py-0.5 rounded text-[10px] border transition-colors text-left {on ? 'bg-app-accent border-app-accent text-white' : 'border-app-border text-app-muted hover:text-app-text'}"><span class="font-mono opacity-70">{id}</span> {STATES[id]?.name ?? id}</button>

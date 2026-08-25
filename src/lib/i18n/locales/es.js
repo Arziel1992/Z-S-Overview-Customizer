@@ -248,6 +248,8 @@ export default {
 		download: "Descargar .yaml",
 		copy: "Copiar al portapapeles",
 		copied: "¡Copiado!",
+		rosterDirty:
+			"Tus entidades de prueba tienen cambios sin guardar. Son datos de trabajo y nunca forman parte de esta exportación: guarda la agrupación en Entidades de prueba si quieres conservarlas.",
 	},
 	preview: {
 		heading: "Vista previa en vivo",
@@ -260,6 +262,16 @@ export default {
 		remove: "Eliminar",
 		distance: "Distancia (m)",
 		states: "Estados de relación",
+		workingSet: "Conjunto de trabajo",
+		unsaved: "Sin guardar",
+		unsavedHelp:
+			"Estas entidades difieren de la agrupación de la que provienen. Pulsa para guardarlas: mientras tanto no se pierde nada, cambiar de agrupación las aparca y sobreviven a una recarga.",
+		parkedHelp:
+			"Tiene entidades sin guardar aparcadas: cárgala para seguir donde lo dejaste",
+		setsHelp:
+			"Al cargar una agrupación se aparca primero lo que haya en pantalla, así puedes consultar otra y volver a tus cambios.",
+		forcedOverVeto:
+			"Se mantiene visible por un estado de «mostrar siempre»: un estado filtrado lo habría ocultado.",
 		unlockTabs:
 			"Desbloquear el reordenamiento de pestañas — arrástralas para reorganizarlas",
 		lockTabs: "Bloquear el reordenamiento de pestañas",
@@ -326,6 +338,8 @@ export default {
 			"Autoguardado del perfil de overview que estás editando (como YAML), para que al recargar continúes donde lo dejaste",
 		stBase: "Desde qué perfil base comenzó tu sesión",
 		stSets: "Tus agrupaciones guardadas de entidades de vista previa",
+		stRoster:
+			"Las entidades de prueba en las que trabajas, incluidos los cambios sin guardar aparcados por agrupación, para no perder nada al recargar",
 		stAck: "Recuerda que descartaste el aviso de privacidad, y cuándo",
 		stHistory: "Instantáneas de perfil que guardas en «Versiones guardadas»",
 		networkHeading: "Peticiones de red",

@@ -83,13 +83,20 @@ function nudgeSplit(e) {
 	customiser.setSplit(customiser.splitPct + step);
 }
 
-// Autosave the working profile (debounced) so a reload resumes where it left off.
+// Autosave the working profile and the preview roster (debounced) so a reload
+// resumes where it left off. The roster is tracked through its fingerprint
+// because the entity editor binds straight to the entities — those edits never
+// pass through a store method.
 let saveTimer;
 $effect(() => {
 	customiser.exportYaml(); // read the whole model so this effect tracks it
 	customiser.baseProfile;
+	customiser.rosterSig;
 	clearTimeout(saveTimer);
-	saveTimer = setTimeout(() => customiser.saveSession(), 500);
+	saveTimer = setTimeout(() => {
+		customiser.saveSession();
+		customiser.saveRoster();
+	}, 500);
 });
 
 // Section keys only — captions resolve through t() in the template so they

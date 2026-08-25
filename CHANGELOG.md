@@ -1,5 +1,61 @@
 # Changelog
 
+## 2026-08-25 - 10:57
+
+### Preview entities: nothing is lost, and every state is there
+
+Three reports from players, in order.
+
+- **Unsaved work is no longer thrown away.** Loading a grouping used to replace
+  the roster outright, so clicking one to cross-check something silently
+  discarded whatever had just been added. Now the entities on screen are
+  *parked* under the grouping they came from before another one loads, and
+  restored — verbatim — when you come back. A dot marks the grouping holding
+  them, and an amber **Unsaved** button in the panel header saves them back in
+  one click.
+- **The roster itself persists.** It was rebuilt from a random sample on every
+  page load; it now survives a reload (and a closed tab) under a new
+  `zs-overview-roster` item, listed in the privacy panel's storage inventory
+  like every other stored item.
+- **The export view warns** when preview entities have unsaved changes — as a
+  banner, not a block: they are workbench data and are never part of the
+  exported YAML.
+- **Every state the client knows is offered when editing an entity** — the
+  editor carried a hand-written list of 13 ids that had drifted from the state
+  matrix, missing the standings (15 Excellent, 16 Good, 17 Neutral, 48 No
+  Standing) among others. It now reads the matrix directly, so it cannot drift
+  again, and the badges use the preset editor's equal-width grid so a state
+  sits in the same place in both lists.
+
+### The always-shown override no longer beats the type filter
+
+Reported by a player running ship-specific tabs: war targets and limited
+engagements were showing up on a logi tab whatever hull they were flying.
+
+- **`alwaysShownStates` is now scoped to states**, matching EVE University's
+  description of the always-shown column — *"Entities with this state will
+  always be shown regardless of the display setting of additional **states**
+  they may have"*. The preset's `groups` whitelist is evaluated first and
+  nothing overrides it, so a tab that lists only logistics hulls shows only
+  logistics hulls; within those hulls, an always-shown state still rescues an
+  entity a `filteredStates` entry would have hidden.
+- Previously the override bypassed the group whitelist as well, on the reading
+  in this project's own research notes. No YAML changes: both keys round-trip
+  verbatim, so this only affects what the preview renders.
+- **Rescued rows are marked** with a small `*` next to the colortag — the row
+  is on screen because the override outranked a veto, while its siblings on the
+  same tab are hidden.
+
+### Internal
+
+- Entity defaults and the "has this changed?" fingerprint moved to
+  `src/lib/utils/roster.js`, plain and rune-free, and gained a `node --test`
+  self-check covering both directions: a freshly loaded grouping must not read
+  as unsaved, and every edit the modal can make must be detected.
+- The visibility rule moved to `src/lib/utils/visibility.js`, equally plain,
+  behind a truth table covering every combination of the two gates — so the
+  cell that changed here cannot be flipped back by accident.
+
 ## 2026-08-16 - 00:31
 
 ### Fixes
