@@ -45,7 +45,9 @@ const THEME_KEY = "zs-overview-theme";
 const SCALE_KEY = "zs-overview-scale";
 // Workspace layout: the settings/preview split and which panels are collapsed.
 const LAYOUT_KEY = "zs-overview-layout";
-const SESSION_KEY = "zs-overview-session";
+// Exported so the shell can watch for another tab overwriting it — every tab
+// of this site shares the one slot.
+export const SESSION_KEY = "zs-overview-session";
 const BASE_KEY = "zs-overview-base";
 // v3: sample rosters reworked again (signature hulls, mining-fleet logi).
 // Bumping the key refreshes the built-ins; user-made groupings migrate over.

@@ -117,7 +117,26 @@ behind a Z-S overview. Fly safe. o7
   overwritten when the pack provides them.
 - **Version history** saved in your browser (IndexedDB): name, reload, rename,
   delete, re-export, or **share** (copies the YAML to your clipboard — no
-  third-party services).
+  third-party services). Naming is explicit: type a name and it is used as
+  typed, leave it blank and the version is stamped with the base profile plus
+  the date and time.
+- **Glossary & guide** (book icon in the header, and offered on first run): a
+  six-step walkthrough, the vocabulary of both the tool and the client, what
+  every control does, and the questions players actually ask — searchable, and
+  translated alongside the interface.
+- **Coverage counts on every category.** The group browser shows
+  *authorised / total* per category — `Ship 50/50`, `Charge 7/8` — the same
+  sanity check the client's type tree gives, turning green at full coverage.
+  After an expansion adds a group, the category that fell behind is the one
+  that no longer matches. Groups are listed in responsive columns rather than
+  one long scroll, which matters for Entity's 415 of them.
+- **Built for a phone and a tablet too.** Below `lg` the header's controls move
+  into a menu sheet instead of competing with the title for one row, and the
+  workspace stacks. From `2xl` up the main actions carry a label beside their
+  icon. Verified by a width sweep from 320px to 2560px in both locales.
+- **Multi-tab aware.** Every tab of the site shares one autosave slot, so if a
+  second tab saves over it you get a notice offering to load that version
+  rather than silently losing one workspace to the other.
 - **Privacy by design.** No cookies, no analytics, no tracking, no third-party
   requests at all — fonts are self-hosted and every byte of your work stays in
   your browser. An in-app **privacy, data & licences panel** (shield icon in
@@ -537,7 +556,8 @@ For full disclosure, the libraries and tooling this project depends on:
 - **IndexedDB** — local, named version history (no backend).
 - **Clipboard API** — copy / share YAML.
 - **localStorage** — theme, UI scale, session restore, and the preview roster
-  (including edits parked per grouping).
+  (including edits parked per grouping). Its cross-tab `storage` event is what
+  tells one tab that another has overwritten the shared session.
 
 ### Data pipeline (`pnpm run sde:build`)
 

@@ -50,6 +50,13 @@ export default {
 		clearAll: "Vaciar todo",
 		clearAllTitle: "Restablecer a un perfil en blanco",
 		historyTitle: "Versiones guardadas e importación",
+		menu: "Menú",
+		versionsShort: "Versiones",
+		changelog: "Ver el registro de cambios",
+		multiTab:
+			"Otra pestaña del navegador con esta herramienta acaba de sobrescribir el guardado automático compartido. Cada pestaña edita su propia copia y gana la última que guarda.",
+		multiTabReload: "Cargar esa versión",
+		multiTabDismiss: "Seguir aquí",
 		hidePanel: "Ocultar este panel",
 		showPanel: "Mostrar {panel}",
 		resizePanels:
@@ -73,6 +80,7 @@ export default {
 		importDesc: "Trae un perfil existente (archivo o pegado).",
 		blank: "Empezar en blanco",
 		blankDesc: "Un perfil vacío para construir desde cero.",
+		glossary: "¿Nuevo en los perfiles de overview? Abre el glosario y la guía",
 	},
 	importer: {
 		title: "Importar perfil de Overview",
@@ -103,7 +111,9 @@ export default {
 		share: "Compartir",
 		shared: "YAML copiado al portapapeles — pégalo donde quieras",
 		shareFail: "No se pudo acceder al portapapeles",
-		saveName: "Nombre de la versión",
+		saveName: "Nombre de la versión — vacío usa base + fecha",
+		saveNameHelp:
+			"Si escribes un nombre se usa tal cual. Si lo dejas vacío, la versión se nombra con el perfil base más la fecha y hora actuales. En ambos casos la hora de guardado se registra bajo el nombre.",
 		saved: "Guardado",
 	},
 	tabsNav: {
@@ -150,6 +160,13 @@ export default {
 		select: "Editando preset",
 		groups: "Grupos autorizados",
 		allCategories: "Todos",
+		groupSearch: "Buscar grupo o casco (p. ej. Frigate, Rifter)…",
+		groupSearchLabel: "Buscar grupos",
+		groupId: "Grupo {id}",
+		noGroups: "Ningún grupo coincide.",
+		loadingSde: "Cargando la base de datos de naves…",
+		countHelp:
+			"{on} de {total} grupos de esta categoría están autorizados ({types} tipos detrás). Números iguales significan que el preset cubre la categoría entera.",
 		filtered: "Estados filtrados (veto)",
 		alwaysShown: "Estados siempre visibles (anulación)",
 		groupCount: "{n} grupos autorizados",
@@ -312,6 +329,173 @@ export default {
 		setName: "Nombre de la agrupación",
 		saveSet: "Guardar actual",
 	},
+	glossary: {
+		title: "Glosario y guía",
+		short: "Guía",
+		intro:
+			"Qué significa cada palabra y cada botón, cómo se corresponden con el juego, y las preguntas más frecuentes. Búscala o léela entera una vez.",
+		search: "Buscar en la guía…",
+		hits: "{n} entradas coinciden",
+		noHits: "Nada coincide. Prueba con una palabra más corta.",
+		start: {
+			title: "Primeros pasos",
+			intro:
+				"Seis pasos desde una pestaña vacía hasta un overview cargado en el cliente.",
+			baseT: "Elige un perfil base",
+			baseD:
+				"El selector Base de la cabecera carga un perfil completo y funcional — Z-S Full, el de Fenris por defecto, o el tuyo mediante Importar. Todo lo que hagas después edita tu copia en este navegador; el original no se toca.",
+			tabsT: "Organiza las pestañas",
+			tabsD:
+				"Configuración de pestañas asigna hasta 20 pestañas del cliente. Cada una apunta a dos presets: uno para la lista y otro para los brackets en el espacio. Son independientes: una pestaña de logística puede listar solo amigos y aun así mostrar todos los brackets hostiles.",
+			presetsT: "Construye los presets",
+			presetsD:
+				"El preset es el filtro. Marca los grupos que puede mostrar en Grupos autorizados y usa las dos listas de estados: los filtrados ocultan, los de «mostrar siempre» rescatan. El contador de cada categoría indica cuánto cubre el preset.",
+			lookT: "Elige el aspecto",
+			lookD:
+				"Columnas define la telemetría y su orden. Apariencia fija la prioridad de colortags y fondos — gana el primer estado que coincida, así que el orden lo es todo — además del parpadeo y los colores. Etiquetas de nave compone el texto junto a cada bracket.",
+			previewT: "Compruébalo en la vista previa",
+			previewD:
+				"Los paneles de la derecha renderizan tu perfil con entidades inventadas. Dale a una entidad los estados y el casco que te importan y recorre las pestañas: si aparece algo que no debería, el preset activo es el motivo.",
+			exportT: "Exporta y cárgalo en EVE",
+			exportD:
+				"La sección YAML muestra exactamente lo que leerá el cliente, y Descargar .yaml lo guarda. Pon el archivo en Documentos » EVE » Overview y, en el juego: Ajustes del Overview (el ≡ arriba a la izquierda de la ventana) » Misc » Import Overview Settings » elige el archivo » Check All » Import. Acopla y desacopla una vez si algo se ve desactualizado.",
+		},
+		terms: {
+			title: "El vocabulario",
+			intro:
+				"Las palabras del cliente y las de esta herramienta para lo mismo. Los ids son los enteros que el juego guarda en el archivo.",
+			profileT: "Perfil",
+			profileD:
+				"Un .yaml de overview: todos los presets, pestañas, columnas, colores y etiquetas en un único archivo. Es lo que importas en el juego y lo que edita esta herramienta.",
+			presetT: "Preset",
+			presetD:
+				"Un filtro con nombre que decide qué puede renderizarse. Lleva grupos autorizados, estados filtrados y estados de «mostrar siempre». Las pestañas apuntan a los presets por su nombre, así que renombrar uno actualiza todas las que lo usan.",
+			tabT: "Pestaña",
+			tabD: "Una pestaña de la ventana Overview del juego. Nombra dos presets — el de la lista y el de los brackets — y puede tener sus propias columnas. El cliente permite 20.",
+			categoryT: "Categoría",
+			categoryD:
+				"El nivel superior del árbol de objetos del juego: Ship, Entity, Celestial, Charge, Drone, Structure… Solo sirven para navegar: el archivo nunca las guarda.",
+			groupT: "Grupo",
+			groupD:
+				"El nivel por debajo de la categoría, y lo único que un preset autoriza realmente: Frigate (25), Cruiser (26), Stargate (10), Station (15). Marca un grupo y todos sus cascos pueden aparecer.",
+			typeT: "Tipo",
+			typeD:
+				"Un objeto concreto: un Rifter, una roca de Veldspar, un Astrahus. Es lo que ves en el espacio; hereda la visibilidad de su grupo, y el juego no permite filtrar un tipo suelto.",
+			stateT: "Estado",
+			stateD:
+				"Una relación o condición legal contigo, guardada como entero: 11 en tu flota, 13 en guerra contigo, 52 combate limitado, 15 a 19 reputaciones. Los mismos ids gobiernan filtros, colortags y fondos.",
+			filteredT: "Estados filtrados (veto)",
+			filteredD:
+				"Estados que ocultan una entidad aunque su grupo esté autorizado — la forma habitual de quitar amigos de una pestaña de combate para no clicarlos por error.",
+			alwaysT: "Estados siempre visibles (anulación)",
+			alwaysD:
+				"Estados que anulan el veto: una entidad que coincida se muestra aunque otro de sus estados esté filtrado. Está limitado a los estados: no arrastra un casco a una pestaña cuya lista de grupos lo excluye, así que una pestaña de logística sigue siendo de logística.",
+			colortagT: "Colortag",
+			colortagD:
+				"La marca de color de la fila y su bracket. Gana el primer estado de la lista de prioridad que la entidad tenga y el perfil autorice, así que el orden de esa lista lo decide todo.",
+			backgroundT: "Fondo",
+			backgroundD:
+				"Un color que baña la fila entera, resuelto con su propia lista de prioridad. Para los estados que no puedes pasar por alto: una fila rellena grita mucho más que una marca.",
+			blinkT: "Parpadeo",
+			blinkD:
+				"Hace destellar un colortag o un fondo. Resérvalo para lo verdaderamente urgente: si todo parpadea, es como si no parpadeara nada.",
+			bracketT: "Bracket",
+			bracketD:
+				"El icono y la etiqueta que flotan alrededor de un objeto en el espacio, filtrados por el preset de brackets de la pestaña y no por el de la lista. «Mostrar todos los brackets» es el valor por defecto del cliente y significa sin filtrar.",
+			shipLabelsT: "Etiquetas de nave",
+			shipLabelsD:
+				"El texto junto a un bracket, compuesto por segmentos — nombre del piloto, tipo de nave, ticker de corporación — cada uno con su color, estilo y separadores.",
+			columnsT: "Columnas",
+			columnsD:
+				"La telemetría de la lista y su orden: distancia, nombre, tipo, transversal, angular… El perfil lleva un conjunto compartido.",
+			tabColumnsT: "Columnas por pestaña",
+			tabColumnsD:
+				"Una pestaña puede sustituir el conjunto compartido por el suyo, igual que el menú del juego clic derecho » Columns sobre una pestaña. Las pestañas sin anulación siguen el conjunto del perfil.",
+			sdeT: "SDE",
+			sdeD: "El Static Data Export de Fenris: el volcado oficial de todos los objetos, grupos y categorías del juego. Esta herramienta reconstruye su copia automáticamente, y la insignia de la cabecera muestra la fecha de la última descarga.",
+			yamlT: "YAML",
+			yamlD:
+				"El formato de texto plano que el cliente lee y escribe para los perfiles de overview. Lo que muestra la sección YAML es exactamente lo que analizará el juego: no hay ningún formato intermedio.",
+		},
+		doing: {
+			title: "Qué hace cada control",
+			intro: "Todos los botones que cambian algo, y qué cambian exactamente.",
+			baseSelectT: "Base",
+			baseSelectD:
+				"Carga un perfil incluido como punto de partida y reemplaza el espacio de trabajo. Tus versiones guardadas no se tocan.",
+			importT: "Importar » Sobrescribir",
+			importD:
+				"Lee un .yaml (archivo o texto pegado) y reemplaza con él todo el espacio de trabajo.",
+			mergeT: "Importar » Aplicar encima",
+			mergeD:
+				"Fusiona un archivo sobre lo que ya tienes, como apilar piezas de un pack en el juego. Los presets son aditivos: uno con el mismo nombre se reemplaza, los nuevos se añaden y ninguno se elimina. Las secciones de diseño — pestañas, columnas, apariencia y etiquetas de nave — se sustituyen por completo cuando el archivo entrante las trae. No es un «guardar como».",
+			versionsT: "Versiones guardadas",
+			versionsD:
+				"Instantáneas con nombre del perfil completo, guardadas en este navegador. Guarda una antes de cualquier experimento: es el deshacer que esta herramienta no tiene.",
+			loadT: "Cargar",
+			loadD:
+				"Lee una versión guardada y reemplaza con ella el espacio de trabajo, descartando los cambios sin guardar.",
+			applyOnTopT: "Aplicar encima (sobre una versión guardada)",
+			applyOnTopD:
+				"La misma fusión que en la importación: los presets de la instantánea se suman a los tuyos, y sus secciones de diseño sustituyen a las tuyas si las trae. No guarda sobre la instantánea.",
+			exportBtnT: "Exportar",
+			exportBtnD:
+				"Escribe esa versión en tu disco como un .yaml real — el que colocas en la carpeta Overview de EVE e importas en el juego.",
+			shareT: "Compartir",
+			shareD:
+				"Copia el YAML de la versión al portapapeles para pegárselo a un compañero. No se sube nada: no hay servidor.",
+			namingT: "Por qué algunas versiones llevan fecha",
+			namingD:
+				"Lo decide la caja del nombre. Si escribes un nombre se usa tal cual. Si la dejas vacía, la herramienta nombra la versión con el perfil base más la fecha y la hora actuales, para que siga siendo identificable. En ambos casos la hora de guardado se registra y se muestra bajo el nombre.",
+			countsT: "El X / Y de las categorías",
+			countsD:
+				"Grupos autorizados por este preset, sobre los que contiene la categoría — la misma comprobación rápida que da el árbol de tipos del cliente. Si coinciden se ponen en verde: el preset cubre la categoría entera. Cuando una expansión añade un grupo, 50/50 pasa a 50/51 y la diferencia salta a la vista. Pasa el ratón para ver los tipos que hay detrás.",
+			entitiesT: "Entidades de prueba",
+			entitiesD:
+				"Pilotos y objetos inventados con los que la vista previa renderiza tu perfil. Su campo de tipo busca en todo el SDE, así que puede entrar cualquier objeto real, y sus estados permiten reproducir cualquier relación que un preset filtre.",
+			groupingsT: "Poblado rápido y agrupaciones",
+			groupingsD:
+				"Conjuntos de entidades de prueba con nombre. Cargar uno cambia la lista; lo que estabas editando se aparca primero y vuelve cuando regresas a ello.",
+			unsavedT: "El punto «Sin guardar»",
+			unsavedD:
+				"Tus entidades de prueba difieren de la agrupación de la que salieron. Mientras tanto no se pierde nada — sobreviven al cambio de agrupación y a una recarga — pero guardar la agrupación es lo que las hace permanentes.",
+			locksT: "Los candados de la vista previa",
+			locksD:
+				"El candado de la tira de pestañas habilita arrastrarlas. El control de columnas alterna bloqueado » esta pestaña » todo el perfil, y decide dónde acaba lo que sueltas. Cada cambio se escribe en el perfil, así que las secciones de ajustes lo reflejan al instante.",
+			layoutT: "Paneles y divisor",
+			layoutD:
+				"Arrastra el divisor para repartir el ancho entre ajustes y vista previa (doble clic lo restablece), y el ojo de cada panel lo pliega a una barra. Ambas cosas se recuerdan en este navegador.",
+			clearT: "Vaciar todo",
+			clearD:
+				"Deja el espacio de trabajo en un perfil en blanco con un preset vacío y una pestaña. Las versiones guardadas y las agrupaciones sobreviven.",
+		},
+		faq: {
+			title: "Preguntas frecuentes",
+			intro: "Sobre todo, dónde vive tu trabajo y qué se comparte.",
+			tabsOpenT: "¿Qué pasa si abro la herramienta en dos pestañas?",
+			tabsOpenD:
+				"Cada pestaña ejecuta su propia copia en memoria, así que lo que edites en una no aparece en la otra: son dos espacios de trabajo, no dos vistas del mismo. El almacenamiento es otra cosa: las pestañas de un mismo sitio comparten a propósito localStorage e IndexedDB, así que ambas guardan el perfil en la misma ranura medio segundo después de cada cambio, y gana la última. Al recargar cualquiera verás la versión que se guardó al final. Edita un perfil en una sola pestaña a la vez; si otra sobrescribe el guardado compartido, ahora aparece un aviso que ofrece cargar su versión.",
+			versionsSharedT:
+				"¿Por qué las versiones guardadas salen en todas las pestañas?",
+			versionsSharedD:
+				"Porque ahí viven: una base de datos para todo el sitio, compartida por todas las pestañas, que es justo lo que hace que una versión guardada en una esté disponible en otra. Es intencionado. La lista se lee al abrir el diálogo, así que uno ya abierto necesita reabrirse para ver lo que otra pestaña acaba de guardar.",
+			onDiskT: "¿Las versiones guardadas son archivos en mi disco?",
+			onDiskD:
+				"No. Son registros en la base de datos que el navegador reserva a este sitio: nada que puedas abrir en el explorador de archivos, y borrar los datos del sitio las elimina. Usa Exportar para escribir un .yaml real en el disco y trata ese archivo como la copia de seguridad.",
+			installT: "¿Cómo llevo un perfil al juego?",
+			installD:
+				"Descarga el .yaml, ponlo en Documentos » EVE » Overview (crea la carpeta o, mejor, exporta antes tu overview actual desde el juego para que exista y tengas copia) y, en el juego: Ajustes del Overview » Misc » Import Overview Settings, elige el archivo, Check All, Import. Acopla y desacopla una vez si parte de la interfaz se ve desactualizada.",
+			expansionT: "¿Cómo mantengo los presets al día tras una expansión?",
+			expansionD:
+				"La base de datos de naves se actualiza sola — la insignia de la cabecera indica cuándo se descargó. Después mira los contadores de las categorías: un preset que lo cubría todo marca X/X, así que una categoría que ganó un grupo baja a X/Y y te dice exactamente dónde mirar.",
+			storageT: "¿Qué se guarda y sale algo de mi equipo?",
+			storageD:
+				"No sale nada: sin cuentas, sin cookies, sin analítica y sin subidas. Tu perfil en curso, el tema, la escala, la disposición, las entidades de prueba y las agrupaciones están en el almacenamiento local de este navegador; las versiones guardadas, en su base de datos. El panel de privacidad enumera cada elemento y puede borrarlo todo.",
+			dataLossT: "¿Es seguro mi trabajo si cierro la pestaña?",
+			dataLossD:
+				"Sí, en el mismo navegador: el perfil se guarda solo, las entidades de prueba persisten y las versiones siguen en la base de datos. Pero todo está atado a este navegador en este dispositivo: otro navegador, una ventana privada o borrar los datos del sitio empiezan de cero. Exporta lo que te dolería perder.",
+		},
+	},
 	privacy: {
 		banner:
 			"Esta herramienta guarda tu trabajo y tus preferencias solo en este navegador: sin cookies, sin analítica, sin rastreo. Ningún dato sale de tu dispositivo.",
@@ -319,6 +503,7 @@ export default {
 		gotIt: "Entendido",
 		title: "Privacidad, datos y licencias",
 		openPanel: "Privacidad, datos y licencias",
+		short: "Privacidad",
 		intro:
 			"Es una herramienta totalmente del lado del cliente: sin cuentas, sin formularios, sin cookies, sin analítica, sin publicidad y sin ningún tipo de rastreo. Todo lo que construyas aquí se guarda en tu propio navegador y nunca se transmite a ninguna parte.",
 		noConsent:

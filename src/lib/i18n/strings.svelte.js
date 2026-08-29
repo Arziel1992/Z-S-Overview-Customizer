@@ -22,10 +22,17 @@ export const LOCALE_NAMES = { en: "English", es: "Español" };
 
 const LOCALE_KEY = "zs-overview-locale";
 
+/** Saved choice, else the browser's language, else English. */
 function initialLocale() {
 	if (typeof localStorage !== "undefined") {
 		const saved = localStorage.getItem(LOCALE_KEY);
 		if (saved && locales[saved]) return saved;
+	}
+	if (typeof navigator !== "undefined") {
+		// "es-AR" and "es" both mean the es bundle; region is not a locale here.
+		const tag = navigator.languages?.[0] || navigator.language || "";
+		const base = tag.toLowerCase().split("-")[0];
+		if (locales[base]) return base;
 	}
 	return "en";
 }

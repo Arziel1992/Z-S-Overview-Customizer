@@ -4,5 +4,8 @@
 	// Prose wraps at ~80 by convention but tables/URLs legitimately exceed it.
 	"MD013": false,
 	// Inline HTML is used for screenshot <img> sizing in the README.
-	"MD033": false
+	"MD033": false,
+	// A changelog repeats "Fixes" / "Internal" under every release heading.
+	// Duplicates still fail within one release, where they would be a mistake.
+	"MD024": { "siblings_only": true }
 }

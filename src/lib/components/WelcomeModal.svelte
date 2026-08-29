@@ -10,7 +10,7 @@ import { t } from "$lib/i18n/strings.svelte.js";
 import { customiser } from "$lib/stores/customiserStore.svelte";
 import Modal from "./Modal.svelte";
 
-let { onclose, onimport } = $props();
+let { onclose, onimport, onglossary } = $props();
 
 function choose(action) {
 	if (action === "zsFull") customiser.loadPreset("zs_full_v10.06.09");
@@ -55,4 +55,10 @@ const OPTIONS = [
       </button>
     {/each}
   </div>
+
+  <!-- First run is exactly when the guide is worth knowing about. -->
+  <button
+    onclick={() => { customiser.dismissWelcome(); onglossary?.(); }}
+    class="mt-3 w-full text-[11px] text-app-muted hover:text-app-accent border border-app-border hover:border-app-accent rounded px-3 py-2 transition-colors"
+  >{t("welcome.glossary")}</button>
 </Modal>

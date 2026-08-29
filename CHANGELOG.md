@@ -1,5 +1,71 @@
 # Changelog
 
+## 2026-08-29 - 11:01
+
+### A guide, coverage counts, and a header that fits a phone
+
+- **Glossary & guide.** A new searchable panel (book icon in the header, and
+  offered on first run) covering a six-step walkthrough, the vocabulary of the
+  tool and the client alike, what every control does, and the questions players
+  keep asking — including what happens with two browser tabs open, where saved
+  versions actually live, and how to get a profile into the game. Fully
+  translated, English and Spanish.
+- **Coverage counts on the category tabs.** The group browser now shows
+  *authorised / total* per category — `Ship 50/50`, `Charge 7/8` — mirroring
+  the numbers the client's own type tree gives, and turning green when a
+  category is fully covered. After an expansion adds a group, the category that
+  fell behind is the one whose numbers stop matching. Counts are over *groups*,
+  which is what a preset whitelists; the tooltip carries the type total behind
+  them.
+- **Groups list in columns.** The list is a responsive grid instead of one long
+  scroll — four columns on a wide panel, one on a phone. Entity's 415 groups
+  are finally browsable.
+- **A header that fits every screen.** The control cluster needs about 500px
+  and the identity block another 500, so below `lg` it moves into a menu sheet
+  behind a hamburger, with a label on every action instead of a bare icon. At
+  tablet widths the two used to compete for one row and shred the title into
+  one word per line. The SDE date badge steps aside on the narrowest screens
+  while the SDE *warning* never does, and both title lines truncate rather than
+  wrap. The cluster is defined once and rendered in both places, so the two
+  cannot drift apart.
+- **Labels beside the icons where there is room.** From `2xl` up, Versions,
+  Guide, Clear all and Privacy carry their name next to the glyph — the four
+  that are worth naming; theme and GitHub stay as icons. They appear only at a
+  width that fits them on one line in every locale, Spanish included.
+
+### Fixes
+
+- **Two tabs no longer overwrite each other in silence.** Every tab of the site
+  shares one autosave slot and the last writer wins. When another tab saves
+  over it, a notice now offers to load that version — or to carry on here,
+  knowing the next edit will win.
+- **Saving a version explains its own naming.** Typing a name uses it verbatim;
+  leaving the box empty stamps the base profile plus the date and time. That
+  rule was invisible, and looked like the tool deciding at random. The dialog
+  now says so, above the field.
+- **The guide's search folds hyphens**, so looking for "always shown" finds
+  "always-shown states" — a search that answers "nothing matches" for a term
+  the guide defines is worse than no search.
+- **The group browser is translatable at last** — its search box, empty state
+  and loading text were hardcoded English.
+- **The interface follows the browser's language** on a first visit, before
+  falling back to English, instead of always starting in English.
+- **Markdownlint's duplicate-heading rule is scoped to siblings**, so a
+  changelog may repeat "Fixes" across releases while a real duplicate inside
+  one release still fails.
+
+### Internal
+
+- The header is verified with a width sweep (320px to 2560px, both locales)
+  rather than at two convenient sizes: at every step the page must not scroll
+  sideways, the identity block must stay one line tall, and exactly one of the
+  two control layouts must be present. The tablet break got through because the
+  previous check only looked at 390px and 1600px.
+- Locale parity is now a `node --test` check: every English key must have a
+  Spanish translation, no locale may carry a key English lacks, and no value
+  may be empty. The glossary gets the same treatment in both directions — an
+  entry the UI asks for with no text, or text nothing renders, fails the build.
+
 ## 2026-08-25 - 10:57
 
 ### Preview entities: nothing is lost, and every state is there

@@ -90,10 +90,12 @@ async function share(rec) {
   <div class="space-y-3 text-sm">
     <!-- Save current + import -->
     <div class="flex flex-wrap items-center gap-2">
-      <input bind:value={newName} placeholder={t('history.saveName')} class="flex-1 min-w-[140px] bg-app-bg border border-app-border rounded px-2.5 py-1.5 text-xs focus:outline-none focus:border-app-accent" />
+      <input bind:value={newName} placeholder={t('history.saveName')} title={t('history.saveNameHelp')} aria-label={t('history.saveName')} class="flex-1 min-w-[140px] bg-app-bg border border-app-border rounded px-2.5 py-1.5 text-xs focus:outline-none focus:border-app-accent" />
       <button onclick={saveCurrent} class="text-xs bg-app-accent hover:bg-app-accentHover text-white font-semibold px-3 py-1.5 rounded transition-colors">💾 {t('app.save')}</button>
       <button onclick={() => onimport?.()} class="text-xs border border-app-border hover:border-app-accent px-3 py-1.5 rounded transition-colors">⬆ {t('app.customShort')}…</button>
     </div>
+
+    <p class="text-[10px] text-app-muted leading-snug">{t('history.saveNameHelp')}</p>
 
     {#if toast}<p class="text-[11px] text-emerald-400 break-all">{toast}</p>{/if}
 
