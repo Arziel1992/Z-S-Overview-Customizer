@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-08-29 - 11:14
+
+### Fixes
+
+- **Dialogs no longer run off the screen at L and XL scale.** The UI-scale
+  wrapper uses CSS `zoom`, which *multiplies* `vh` units instead of dividing
+  them, so an `88vh` dialog cap rendered at 114% of the viewport height at XL —
+  the glossary was cut off at the top and bottom, and the shell's `100vh`
+  height gave the whole page a scrollbar at anything above M. Viewport heights
+  inside the wrapper now divide the scale back out (`.app-shell`,
+  `.max-h-vh` in `tailwind.css`); every scale from S to XL now puts the dialog
+  in the same place with the page not scrolling.
+
 ## 2026-08-29 - 11:01
 
 ### A guide, coverage counts, and a header that fits a phone

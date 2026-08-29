@@ -101,7 +101,7 @@ async function share(rec) {
 
     <!-- List -->
     {#if snapshots.length}
-      <div class="space-y-1.5 max-h-[52vh] overflow-y-auto pr-1">
+      <div class="space-y-1.5 max-h-vh overflow-y-auto pr-1" style="--vh-pct: 52">
         {#each snapshots as rec (rec.id)}
           <div class="bg-app-panel2 border border-app-border rounded p-2.5">
             <div class="flex items-center gap-2">

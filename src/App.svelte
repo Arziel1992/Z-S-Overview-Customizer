@@ -160,9 +160,9 @@ function onBaseChange(e) {
 </script>
 
 <!-- Single zoom wrapper so the UI scale affects the header, workspace and dialogs alike. -->
-<div style="zoom: {customiser.uiScale};" class="contents">
+<div style="zoom: {customiser.uiScale}; --zoom: {customiser.uiScale};" class="contents">
 <main
-  class="lg:h-screen lg:overflow-hidden min-h-screen flex flex-col bg-app-bg text-app-text"
+  class="app-shell lg:overflow-hidden flex flex-col bg-app-bg text-app-text"
 >
   <!-- Header: identity on the left, one control cluster on the right. The
        cluster needs about 500px and the identity block another 500, so below

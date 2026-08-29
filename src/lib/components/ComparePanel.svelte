@@ -340,8 +340,8 @@ let currentSel = $state("");
 					     scrollbar never eats into the fixed table width (which would
 					     spawn a second horizontal scrollbar and break alignment). -->
 					<div
-						class="mt-2 max-h-[50vh] overflow-y-auto"
-						style="width:{tableWidth + 20}px"
+						class="mt-2 max-h-vh overflow-y-auto"
+						style="--vh-pct: 50; width:{tableWidth + 20}px"
 					>
 						<table class="text-[11px] border-collapse table-fixed" style="width:{tableWidth}px">
 							{@render colWidths()}

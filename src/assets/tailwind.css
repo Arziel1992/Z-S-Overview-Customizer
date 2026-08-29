@@ -31,6 +31,29 @@
 /* Map the tokens (and the fixed game chrome) to Tailwind v4 utilities.
    `inline` keeps utilities referencing var(--…) so the value re-resolves
    when [data-theme] changes at runtime. */
+/* ----------------------------------------------------------------- */
+/* Viewport heights inside the UI-scale wrapper.                       */
+/* `zoom` MULTIPLIES vh units instead of dividing them, so a 100vh box */
+/* inside the wrapper renders `--zoom` times taller than the screen:   */
+/* the shell grew a scrollbar at L/XL and dialogs ran off both edges.  */
+/* Divide it back out. Every viewport-relative height inside the       */
+/* wrapper must use one of these, never a raw vh utility.              */
+/* ----------------------------------------------------------------- */
+.app-shell {
+  min-height: calc(100vh / var(--zoom, 1));
+}
+
+@media (min-width: 64rem) {
+  .app-shell {
+    height: calc(100vh / var(--zoom, 1));
+  }
+}
+
+/* Percentage of the viewport, zoom-corrected. Set --vh-pct per use. */
+.max-h-vh {
+  max-height: calc(var(--vh-pct, 88) * 1vh / var(--zoom, 1));
+}
+
 @theme inline {
   --color-app-bg: var(--bg);
   --color-app-panel: var(--panel);
