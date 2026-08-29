@@ -93,8 +93,11 @@ export default {
 		overwrite: "Sobrescribir",
 		overwriteHelp: "Reemplaza toda la configuración actual.",
 		merge: "Aplicar encima",
+		presetsOnly: "Solo presets",
+		presetsOnlyHelp:
+			"Toma únicamente los presets del archivo y nada más: tus pestañas, columnas, colores y etiquetas de nave se mantienen tal cual. Así actualizas los presets desde un pack más reciente sin perder el perfil que construiste a su alrededor.",
 		mergeHelp:
-			"Fusiona presets, pestañas y las secciones incluidas sobre la configuración actual — para piezas de packs (complementos Z-S).",
+			"Fusiona presets, pestañas y las secciones incluidas sobre la configuración actual — para piezas de packs (complementos Z-S). Las secciones de diseño reemplazan las tuyas siempre que el archivo las incluya.",
 		apply: "Importar",
 		cancel: "Cancelar",
 		invalid: "No se pudo interpretar ese YAML.",
@@ -249,6 +252,32 @@ export default {
 		labelSegments: "Segmentos de etiqueta",
 		colorOverrides: "Colores de estado personalizados",
 		blinks: "Estados con parpadeo",
+		guide: "Cómo usar Comparar",
+		hideSection: "Ocultar esta sección",
+		showSection: "Mostrar esta sección",
+		inventory: "Inventario de presets",
+		inventoryHelp:
+			"Todos los presets de ambos lados, emparejados por nombre ignorando el formato de color: los packs recolorean sus nombres entre versiones, así que emparejar por el nombre en bruto convertiría un preset antiguo en uno nuevo. Haz clic en un preset para abrir esa pareja en la tabla de abajo.",
+		inventoryAgainst: "Contra",
+		inventoryMine: "Tuyos",
+		inventoryTheirs: "Suyos",
+		inventoryEmpty: "No hay presets en esta categoría.",
+		status: "Estado",
+		statusFilter: "Filtrar por estado",
+		statusAll: "Todos",
+		statusOnlyB: "Nuevo en el pack",
+		statusDiffers: "Cambiado",
+		statusOnlyA: "Solo tuyo",
+		statusSame: "Idéntico",
+		groupDelta: "Cambio de grupos",
+		addedHelp: "{n} grupos que el suyo autoriza y el tuyo no",
+		removedHelp: "{n} grupos que el tuyo autoriza y el suyo no",
+		statesMovedShort: "estados",
+		statesMovedHelp:
+			"Las listas de estados filtrados o siempre visibles son distintas.",
+		openPair: "Abrir esta pareja abajo",
+		diffOnly: "Solo diferencias",
+		groupsAllSame: "Todos los grupos coinciden entre estos presets.",
 		presetCompare: "Preset contra preset",
 		presetCompareHelp:
 			"Los presets rara vez coinciden 1:1 entre perfiles, así que elige un preset por perfil — la tabla inferior muestra cada grupo seleccionado por cualquiera de ellos.",
@@ -263,6 +292,13 @@ export default {
 		heading: "Exportar perfil",
 		help: "Este es el YAML exacto, importable en el juego, de tu configuración actual.",
 		download: "Descargar .yaml",
+		packMode: "Pack de presets — exportar solo los presets marcados",
+		packHelp:
+			"Un archivo solo con presets. Importarlo con «Solo presets» actualiza esos presets y deja intactas las pestañas, columnas, colores y etiquetas de nave del perfil que lo recibe, que un perfil completo sí reemplazaría.",
+		packAll: "Todos",
+		packNone: "Ninguno",
+		packCount: "{n} de {m} presets",
+		packEmpty: "Marca al menos un preset: un pack vacío no cambia nada.",
 		copy: "Copiar al portapapeles",
 		copied: "¡Copiado!",
 		rosterDirty:
@@ -337,6 +373,7 @@ export default {
 		search: "Buscar en la guía…",
 		hits: "{n} entradas coinciden",
 		noHits: "Nada coincide. Prueba con una palabra más corta.",
+		showAll: "← Ver la guía completa",
 		start: {
 			title: "Primeros pasos",
 			intro:
@@ -359,6 +396,28 @@ export default {
 			exportT: "Exporta y cárgalo en EVE",
 			exportD:
 				"La sección YAML muestra exactamente lo que leerá el cliente, y Descargar .yaml lo guarda. Pon el archivo en Documentos » EVE » Overview y, en el juego: Ajustes del Overview (el ≡ arriba a la izquierda de la ventana) » Misc » Import Overview Settings » elige el archivo » Check All » Import. Acopla y desacopla una vez si algo se ve desactualizado.",
+		},
+		compare: {
+			title: "Usar Comparar",
+			intro:
+				"Seis pasos para responder «si el pack cambió, en qué me he quedado atrás?». Comparar solo lee: nada de lo que hay aquí edita tu perfil.",
+			loadT: "Carga algo con lo que comparar",
+			loadD:
+				"Usa Cargar .yaml para un archivo tuyo, o Añadir base incluida para un pack que viene con la herramienta; también puedes arrastrar archivos a la zona de soltar. Cada uno se convierte en una columna junto a tu perfil actual, y puedes cargar varios a la vez. La X de una etiqueta lo quita.",
+			inventoryT: "Lee primero el inventario de presets",
+			inventoryD:
+				"Empareja todos los presets de ambos lados y los clasifica: nuevo en el pack (lo tienen ellos y tú no), cambiado, solo tuyo, idéntico. El número de cada botón es el recuento, y al pulsarlo filtras por él. Tuyos y Suyos son los recuentos de grupos; Cambio de grupos es cuántos se movieron, así que +40 significa que su versión autoriza cuarenta grupos que la tuya no.",
+			settingsT: "Revisa los ajustes del perfil",
+			settingsD:
+				"Pestañas, columnas, prioridad de colortag y de fondo, segmentos de etiqueta. Las filas en las que los perfiles no coinciden aparecen resaltadas. Aquí ves que un pack reordenó su prioridad de colortag, un cambio que altera lo que percibes en el espacio sin tocar un solo preset.",
+			pairT: "Baja al detalle de una pareja de presets",
+			pairD:
+				"Haz clic en cualquier preset del inventario para abrirlo abajo, o elígelo en los desplegables: al elegir en una columna las demás saltan a su equivalente. Tienes los estados filtrados y siempre visibles lado a lado, y luego todos los grupos que autoriza cualquiera de los dos, con una marca por perfil.",
+			diffOnlyT: "Activa Solo diferencias",
+			diffOnlyD:
+				"Un preset de brackets puede autorizar quinientos grupos, y leer quinientas filas para encontrar las veinte que se movieron no es leer. El interruptor oculta todos los grupos en los que los presets coinciden; el recuento que lleva al lado te dice cuántos quedan antes de pulsarlo.",
+			actT: "Y entonces actúa",
+			actD: "Comparar no cambia nada por sí mismo. Para quedarte con los presets nuevos, importa el mismo archivo con «Solo presets»: actualiza los presets que coinciden, añade los nuevos y deja intactas tus pestañas, columnas y colores. Guarda una versión antes si quieres una vía de vuelta.",
 		},
 		terms: {
 			title: "El vocabulario",
@@ -411,6 +470,9 @@ export default {
 			tabColumnsT: "Columnas por pestaña",
 			tabColumnsD:
 				"Una pestaña puede sustituir el conjunto compartido por el suyo, igual que el menú del juego clic derecho » Columns sobre una pestaña. Las pestañas sin anulación siguen el conjunto del perfil.",
+			compareT: "Comparar",
+			compareD:
+				"La sección que pone tu perfil junto a otros archivos de overview (uno subido o un pack incluido) y dice qué cambia: los ajustes del perfil, un inventario de presets y una matriz grupo por grupo para cualquier pareja de presets. Solo lee: nada de lo que muestra modifica tu perfil.",
 			sdeT: "SDE",
 			sdeD: "El Static Data Export de Fenris: el volcado oficial de todos los objetos, grupos y categorías del juego. Esta herramienta reconstruye su copia automáticamente, y la insignia de la cabecera muestra la fecha de la última descarga.",
 			yamlT: "YAML",
@@ -428,7 +490,16 @@ export default {
 				"Lee un .yaml (archivo o texto pegado) y reemplaza con él todo el espacio de trabajo.",
 			mergeT: "Importar » Aplicar encima",
 			mergeD:
-				"Fusiona un archivo sobre lo que ya tienes, como apilar piezas de un pack en el juego. Los presets son aditivos: uno con el mismo nombre se reemplaza, los nuevos se añaden y ninguno se elimina. Las secciones de diseño — pestañas, columnas, apariencia y etiquetas de nave — se sustituyen por completo cuando el archivo entrante las trae. No es un «guardar como».",
+				"Fusiona un archivo sobre lo que ya tienes, como apilar piezas de un pack en el juego. Los presets son aditivos: uno con el mismo nombre se reemplaza, los nuevos se añaden y ninguno se elimina. Las secciones de diseño — pestañas, columnas, apariencia y etiquetas de nave — se sustituyen por completo cuando el archivo entrante las trae. No es un «guardar como». Si solo quieres los presets del archivo, usa «Solo presets».",
+			presetsOnlyT: "Importar » Solo presets",
+			presetsOnlyD:
+				"Toma los presets del archivo y nada más: tus pestañas, columnas, colores y etiquetas de nave sobreviven tal cual. Es el modo para actualizar presets desde un pack más reciente, porque todo archivo de pack real (Z-S Core, 1BL, 2BL y Full por igual) es un perfil completo, así que aplicarlo encima reemplazaría el diseño que construiste alrededor. Un preset que coincide con uno tuyo se actualiza en su sitio, los nuevos se añaden y ninguno se elimina jamás.",
+			inventoryT: "Inventario de presets (en Comparar)",
+			inventoryD:
+				"Todos los presets de ambos lados a la vez, emparejados y clasificados en nuevos del pack, cambiados, solo tuyos e idénticos, con el número de grupos de cada lado y cuántos se movieron. El número de cada botón de filtro es la respuesta corta a cuánto te has quedado atrás; haz clic en un preset para abrir esa pareja en la tabla de detalle. El emparejado ignora el formato de color, porque los packs recolorean los nombres entre versiones y emparejar por el nombre en bruto convertiría cada preset recoloreado en uno nuevo.",
+			packT: "Exportar » Pack de presets",
+			packD:
+				"Escribe un archivo con solo los presets que marques y nada del diseño. Mándaselo a quien quiera tus filtros pero no tus pestañas, o guárdalo como copia de seguridad de tus presets antes de aplicar una actualización. El cliente nunca escribe uno así — toda exportación del juego es un perfil completo — y por eso mismo merece la pena poder crearlo aquí.",
 			versionsT: "Versiones guardadas",
 			versionsD:
 				"Instantáneas con nombre del perfil completo, guardadas en este navegador. Guarda una antes de cualquier experimento: es el deshacer que esta herramienta no tiene.",
@@ -488,6 +559,10 @@ export default {
 			expansionT: "¿Cómo mantengo los presets al día tras una expansión?",
 			expansionD:
 				"La base de datos de naves se actualiza sola — la insignia de la cabecera indica cuándo se descargó. Después mira los contadores de las categorías: un preset que lo cubría todo marca X/X, así que una categoría que ganó un grupo baja a X/Y y te dice exactamente dónde mirar.",
+			upgradeT:
+				"¿Cómo mantengo al día mis presets personalizados con un pack como Z-S?",
+			upgradeD:
+				"Duplica el preset del pack que quieras tocar y edita la copia, para que el original siga siendo una referencia limpia. Cuando salga una versión nueva del pack, cárgala en Comparar: el inventario de presets te dice qué es nuevo, qué cambió y cuánto. Luego impórtala con «Solo presets», que actualiza los presets y deja intactas tus pestañas, columnas y colores. Dos cosas que conviene saber. Todo archivo de pack es un perfil completo, así que una importación completa reemplaza cada sección de diseño que traiga, y eso es lo que le cuesta a la gente su configuración de pestañas. Y los mantenedores recolorean los nombres entre versiones, por lo que aquí el emparejado ignora el formato de color a propósito: entre Z-S v9 y v10 solo 6 de 68 nombres coincidían byte a byte, mientras que 58 coincidían una vez ignorados los colores.",
 			storageT: "¿Qué se guarda y sale algo de mi equipo?",
 			storageD:
 				"No sale nada: sin cuentas, sin cookies, sin analítica y sin subidas. Tu perfil en curso, el tema, la escala, la disposición, las entidades de prueba y las agrupaciones están en el almacenamiento local de este navegador; las versiones guardadas, en su base de datos. El panel de privacidad enumera cada elemento y puede borrarlo todo.",

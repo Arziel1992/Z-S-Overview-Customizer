@@ -85,10 +85,25 @@ behind a Z-S overview. Fly safe. o7
   opens a picker with the same tick-and-drag editing, and can **copy another
   tab's columns** in one step. Tabs you don't touch stay on the profile
   columns and export without those keys, exactly as the client writes them.
-- **Compare profiles.** Load one or more overview `.yaml` files and diff their
-  settings side by side against your current profile (differing rows are
-  highlighted), then drill into **preset vs preset**: pick one preset per
-  profile and see exactly which groups each of them selects.
+- **Compare profiles.** Load one or more overview `.yaml` files and diff them
+  against your current profile, coarse to fine:
+  - a **preset inventory** pairing every preset on both sides and sorting them
+    into *new upstream · changed · only yours · identical*, with each side's
+    group count and how many groups moved — the counts on the filter buttons
+    are the short answer to "how far behind am I";
+  - the **profile settings**, differing rows highlighted;
+  - **preset vs preset**, with a group-by-group matrix and a **Differences
+    only** filter for the long ones.
+
+  Pairing ignores EVE colour markup, because packs restyle their preset names
+  between releases: between Z-S v9 and v10 only 6 of 68 names match byte for
+  byte, while 58 match once the colours are ignored. Clicking a preset in the
+  inventory opens that pair in the detail table.
+
+  Each of the three sections collapses to its heading via its own eye, and the
+  **?** beside the heading opens a six-step walkthrough in the guide. The
+  tables are fluid — they fill the panel and compress as more files load,
+  scrolling sideways only once a profile column would drop below 150px.
 - **Customisable live preview.** Add your own entities to the roster and watch
   them update live in a game-accurate overview list and a tactical bracket view
   with a twinkling starfield — including fully styled `shipLabels` bracket text.
@@ -110,11 +125,22 @@ behind a Z-S overview. Fly safe. o7
   The roster itself survives a reload too, so cross-checking another grouping,
   or closing the tab, never costs work. The export view repeats the warning,
   since preview entities are workbench data and never part of the YAML.
-- **Import any YAML** (file or paste) with a choice of **Overwrite** or
-  **Apply on top** — multi-part packs (like the Z-S pieces) merge onto a core
-  profile exactly as they do in-game: same-named presets are replaced, new ones
-  appended, and layout sections (tabs, columns, appearance, labels) are
-  overwritten when the pack provides them.
+- **Import any YAML** (file or paste) in one of three modes:
+  - **Presets only** (the default) takes the file's presets and nothing else,
+    so your tabs, columns, colours and ship labels survive. This is how you
+    refresh presets from a newer pack — every real pack file (Z-S Core, 1BL,
+    2BL and Full alike) is a *complete* profile, so applying one on top would
+    replace the layout you built around it;
+  - **Apply on top** merges as the game does: matching presets are updated,
+    new ones appended, and layout sections overwritten when the file has them;
+  - **Overwrite** replaces everything.
+
+  A preset that matches one you already hold is updated in place rather than
+  appended, so upgrading a pack does not leave you holding two of every preset.
+- **Export a preset pack.** The YAML view can narrow the export to just the
+  presets you tick and drop every other section — a file that refreshes
+  someone else's presets without touching their tabs and colours. The client
+  itself only ever writes whole profiles, which is exactly why this is useful.
 - **Version history** saved in your browser (IndexedDB): name, reload, rename,
   delete, re-export, or **share** (copies the YAML to your clipboard — no
   third-party services). Naming is explicit: type a name and it is used as

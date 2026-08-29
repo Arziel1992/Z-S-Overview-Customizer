@@ -15,6 +15,11 @@ export const GLOSSARY_SECTIONS = [
 		keys: ["base", "tabs", "presets", "look", "preview", "export"],
 	},
 	{
+		id: "compare",
+		ordered: true, // a walkthrough reads as steps, not as a dictionary
+		keys: ["load", "inventory", "settings", "pair", "diffOnly", "act"],
+	},
+	{
 		id: "terms",
 		keys: [
 			"profile",
@@ -33,6 +38,7 @@ export const GLOSSARY_SECTIONS = [
 			"shipLabels",
 			"columns",
 			"tabColumns",
+			"compare",
 			"sde",
 			"yaml",
 		],
@@ -43,6 +49,9 @@ export const GLOSSARY_SECTIONS = [
 			"baseSelect",
 			"import",
 			"merge",
+			"presetsOnly",
+			"inventory",
+			"pack",
 			"versions",
 			"load",
 			"applyOnTop",
@@ -66,6 +75,7 @@ export const GLOSSARY_SECTIONS = [
 			"onDisk",
 			"install",
 			"expansion",
+			"upgrade",
 			"storage",
 			"dataLoss",
 		],

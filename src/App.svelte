@@ -55,6 +55,8 @@ let showImport = $state(false);
 let showHistory = $state(false);
 let showPrivacy = $state(false);
 let showGlossary = $state(false);
+/** Section id to open the guide at, or null for the whole guide. */
+let glossarySection = $state(null);
 let menuOpen = $state(false); // header controls sheet, phones only
 // Another tab of this site overwrote the shared session autosave.
 let otherTabWrote = $state(false);
@@ -314,7 +316,12 @@ function onBaseChange(e) {
           {:else if section === "appearance"}<AppearanceConfig />
           {:else if section === "ships"}<ShipLabels />
           {:else if section === "misc"}<MiscConfig />
-          {:else if section === "compare"}<ComparePanel />
+          {:else if section === "compare"}<ComparePanel
+              onguide={() => {
+                glossarySection = "compare";
+                showGlossary = true;
+              }}
+            />
           {:else if section === "yaml"}<YamlExporter />{/if}
         </div>
       </section>
@@ -424,7 +431,7 @@ function onBaseChange(e) {
       customiser.dismissWelcome();
       showImport = true;
     }}
-    onglossary={() => (showGlossary = true)}
+    onglossary={() => { glossarySection = null; showGlossary = true; }}
   />
 {/if}
 {#if showImport}
@@ -440,7 +447,7 @@ function onBaseChange(e) {
   />
 {/if}
 {#if showGlossary}
-  <GlossaryDialog onclose={() => (showGlossary = false)} />
+  <GlossaryDialog section={glossarySection} onclose={() => (showGlossary = false)} />
 {/if}
 <PrivacyPanel bind:open={showPrivacy} />
 </div>
@@ -500,7 +507,7 @@ function onBaseChange(e) {
 
   <!-- Glossary & guide -->
   <button
-    onclick={() => { showGlossary = true; menuOpen = false; }}
+    onclick={() => { glossarySection = null; showGlossary = true; menuOpen = false; }}
     class={btnWide}
     aria-label={t("glossary.title")}
     title={t("glossary.title")}

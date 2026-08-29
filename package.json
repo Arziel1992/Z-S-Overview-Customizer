@@ -1,7 +1,7 @@
 {
 	"name": "z-s-overview-customiser",
 	"private": true,
-	"version": "2026.8.29-1114",
+	"version": "2026.8.29-2240",
 	"type": "module",
 	"packageManager": "pnpm@11.21.0",
 	"scripts": {

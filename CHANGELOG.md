@@ -1,5 +1,119 @@
 # Changelog
 
+## 2026-08-29 - 22:40
+
+### Compare fills the space it is given, and folds away when it does not
+
+- **The tables are fluid.** They were laid out at a fixed 176 + 224px per
+  profile, so with one file loaded the settings and preset tables stopped
+  around 400px and left the rest of the panel empty. Every table is now
+  `w-full` over a shared colgroup — fixed label column, the remainder split
+  evenly — so they fill the panel at any width and compress as more files
+  load. Only when a profile column would fall below 150px does the shared
+  wrapper hand the container a horizontal scrollbar.
+- **Row highlights stay inside their panel.** The tables were set to the same
+  width as their container while the container also carried padding, so every
+  highlighted row painted 10px past the panel on each side, over the border.
+- **Each of the three sections has an eye.** Inventory, overview settings and
+  preset-vs-preset each collapse to their heading, which stays put so bringing
+  one back is one click. The state is stored with the rest of the layout, so it
+  survives a reload. Following a preset from the inventory re-opens the detail
+  section if it was collapsed, rather than looking like the click did nothing.
+- **Differences only reads as a toggle.** On a bracket preset the filter takes
+  500 rows down to 20, which made it the most useful control in the section and
+  the least visible — a small checkbox under a table. It is a pressed-state
+  button now, carrying its own count.
+- **A "?" on the Compare heading opens a walkthrough.** Six steps: load
+  something, read the inventory, check the settings, drill into a pair, turn on
+  Differences only, then act on it with a presets-only import. The guide opens
+  focused on that section with one click back to the whole thing, and typing in
+  the search still reaches every section — a search that could only see one
+  section would be a search that lies.
+
+### Internal
+
+- The three Compare sections join the workspace panels in `hiddenPanels`, so
+  they persist through the same layout key rather than inventing a second
+  mechanism. Existing saved layouts merge forward untouched.
+- Every table sits in a `scrollbar-gutter: stable` box. Only the group matrix
+  and the inventory actually scroll, but reserving the gutter on all of them is
+  what stops the one that scrolls from ending up 9px narrower than the two that
+  do not, which would misalign every column.
+- 18 browser checks over 2, 3 and 4 loaded profiles, measuring panel-versus-
+  table geometry rather than reading screenshots: no dead space, no row
+  painting outside its panel, identical column widths across all three tables,
+  and the page never scrolls sideways at 900px.
+
+## 2026-08-29 - 13:52
+
+### Comparing and upgrading presets without losing your profile
+
+Prompted by a player keeping a customised fork of the Z-S pack: they wanted to
+compare *portions* of an overview — their presets against the newer upstream
+ones — rather than whole files, and to pull in a new Z-S release without it
+flattening the tabs they had built. Both turned out to be broken in ways worth
+writing down.
+
+- **Preset inventory in Compare.** Every preset on both sides at once, paired
+  and sorted into *new upstream · changed · only yours · identical*, with the
+  group count on each side and how many groups moved. The number on each filter
+  button is the short answer to how far behind you are; click a preset to open
+  that pair in the detail table below.
+- **Presets pair by their visible name.** Preset names carry EVE colour markup,
+  and pack maintainers restyle it between releases: between Z-S v9 and v10 only
+  **6 of 68** preset names match byte for byte, while **58** match once the
+  colours are ignored. Both the merge and Compare now pair on the visible name,
+  falling back to appending whenever the visible name is ambiguous — someone
+  may deliberately keep two presets that read alike, and collapsing those would
+  destroy one rather than duplicate one.
+- **Import » Presets only.** A third import mode that takes the file's presets
+  and nothing else. Every real pack file — Z-S Core, 1BL, 2BL and Full alike —
+  is a complete profile carrying `tabSetup`, columns, colours and ship labels,
+  so refreshing your presets from a newer pack used to replace the layout you
+  had built around them. It is now the default mode, being the only one that
+  cannot cost you an evening's work.
+- **Export » Preset pack.** Narrow the export to the presets you tick and drop
+  every other section. Send it to someone who wants your filters but not your
+  tabs, or keep it as a backup of your own presets before applying an update.
+  The client only ever writes whole profiles, which is why this is worth having.
+- **Differences only.** A filter on the group matrix that hides every group the
+  compared presets agree on — on the Z-S v9/v10 pair that is 137 rows down to
+  40.
+- **Compare pairs its dropdowns.** Picking a preset in one column pulls the
+  others onto their counterpart, and a newly loaded file opens paired to what is
+  already on screen, instead of both sides defaulting to whatever happened to be
+  first in each list.
+- **The guide covers all of it.** Compare had no entry in the glossary at all.
+  It now has one, alongside the three new controls and a FAQ answer for keeping
+  a customised profile up to date with a pack. English and Spanish.
+
+### Fixes
+
+- **Upgrading a pack no longer doubles every preset.** Merging Z-S v10 over a
+  v9-based profile produced **120 presets with 52 visible names appearing
+  twice** — one stale, one current, indistinguishable in the client's dropdown.
+  It now produces 68, each updated in place.
+- **A merge can no longer drop a preset.** Two incoming presets pairing to the
+  same existing one overwrote each other; each incoming preset now claims at
+  most one slot and the rest append.
+- **Diff colours are readable in the light theme.** The greens and blues marking
+  additions and ownership were Tailwind's 400 shades, chosen against a
+  near-black panel; on the white one they sat around 1.8:1 and the group
+  matrix's ticks were nearly invisible. They are theme tokens now
+  (`--added`, `--removed`, `--changed`, `--mine`), measured at 4.8–5.7:1 in
+  light and 5.1–9.4:1 in dark — every one clears WCAG AA.
+
+### Internal
+
+- `utils/presets.js` owns preset identity, pairing and diffing, shared by the
+  merge and by Compare, with 10 `node --test` cases covering the truth table in
+  both directions — including a regression that merges the two real bundled Z-S
+  releases and asserts no preset is duplicated and no tab is touched.
+- `serializeOverviewYaml` takes a `presetsOnly` option; its yaml dump settings
+  are now shared between both paths so they cannot drift apart.
+- Verified in a browser across 320–2560px in both locales: 25 behaviour checks
+  and 14 layout checks, no failures.
+
 ## 2026-08-29 - 11:14
 
 ### Fixes

@@ -15,26 +15,37 @@ import { GLOSSARY_SECTIONS, glossaryMatches } from "$lib/data/glossary";
 import { t } from "$lib/i18n/strings.svelte.js";
 import Modal from "./Modal.svelte";
 
-let { onclose } = $props();
+let { onclose, section = null } = $props();
 
 let query = $state("");
+/**
+ * When opened from a "?" beside a feature, show only that feature's section:
+ * dropping someone into the whole guide to answer one question is how a guide
+ * stops being read. Clearing it is one click, and typing in the search clears
+ * it too, since a search that could not see the rest of the guide would be a
+ * search that lies.
+ */
+let focus = $state(section);
 
 // Resolve everything up front: the filter needs the rendered text, and the
 // list is small enough that rebuilding it per keystroke costs nothing.
 const sections = $derived.by(() => {
 	const q = query;
-	return GLOSSARY_SECTIONS.map((s) => ({
-		...s,
-		title: t(`glossary.${s.id}.title`),
-		intro: t(`glossary.${s.id}.intro`),
-		entries: s.keys
-			.map((k) => ({
-				key: k,
-				term: t(`glossary.${s.id}.${k}T`),
-				body: t(`glossary.${s.id}.${k}D`),
-			}))
-			.filter((e) => glossaryMatches(e, q)),
-	})).filter((s) => s.entries.length);
+	const only = q ? null : focus;
+	return GLOSSARY_SECTIONS.filter((s) => !only || s.id === only)
+		.map((s) => ({
+			...s,
+			title: t(`glossary.${s.id}.title`),
+			intro: t(`glossary.${s.id}.intro`),
+			entries: s.keys
+				.map((k) => ({
+					key: k,
+					term: t(`glossary.${s.id}.${k}T`),
+					body: t(`glossary.${s.id}.${k}D`),
+				}))
+				.filter((e) => glossaryMatches(e, q)),
+		}))
+		.filter((s) => s.entries.length);
 });
 
 const hits = $derived(sections.reduce((n, s) => n + s.entries.length, 0));
@@ -54,6 +65,11 @@ const hits = $derived(sections.reduce((n, s) => n + s.entries.length, 0));
       />
       {#if query}
         <p class="text-[10px] text-app-muted mt-1" role="status">{t('glossary.hits', { n: hits })}</p>
+      {:else if focus}
+        <button
+          onclick={() => (focus = null)}
+          class="text-[10px] text-app-accent hover:underline mt-1"
+        >{t('glossary.showAll')}</button>
       {/if}
     </div>
 

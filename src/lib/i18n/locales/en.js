@@ -95,7 +95,10 @@ export default {
 		overwriteHelp: "Replace the entire current configuration.",
 		merge: "Apply on top",
 		mergeHelp:
-			"Merge presets, tabs and any provided sections onto the current config — for pack pieces (Z-S add-ons).",
+			"Merge presets, tabs and any provided sections onto the current config — for pack pieces (Z-S add-ons). Layout sections replace yours whenever the file carries them.",
+		presetsOnly: "Presets only",
+		presetsOnlyHelp:
+			"Take the file's presets and nothing else — your tabs, columns, colours and ship labels are kept exactly as they are. This is how you refresh presets from a newer pack without losing the profile you built around them.",
 		apply: "Import",
 		cancel: "Cancel",
 		invalid: "Could not parse that YAML.",
@@ -249,6 +252,31 @@ export default {
 		labelSegments: "Label segments",
 		colorOverrides: "State colour overrides",
 		blinks: "Blinking states",
+		guide: "How to use Compare",
+		hideSection: "Hide this section",
+		showSection: "Show this section",
+		inventory: "Preset inventory",
+		inventoryHelp:
+			"Every preset on either side, paired by name with the colour markup ignored — packs restyle their names between releases, so matching on the raw name would call an old preset a new one. Click a preset to open that pair in the table below.",
+		inventoryAgainst: "Against",
+		inventoryMine: "Yours",
+		inventoryTheirs: "Theirs",
+		inventoryEmpty: "No presets in this category.",
+		status: "Status",
+		statusFilter: "Filter by status",
+		statusAll: "All",
+		statusOnlyB: "New upstream",
+		statusDiffers: "Changed",
+		statusOnlyA: "Only yours",
+		statusSame: "Identical",
+		groupDelta: "Group change",
+		addedHelp: "{n} groups theirs authorises that yours does not",
+		removedHelp: "{n} groups yours authorises that theirs does not",
+		statesMovedShort: "states",
+		statesMovedHelp: "The filtered or always-shown state lists differ.",
+		openPair: "Open this pair below",
+		diffOnly: "Differences only",
+		groupsAllSame: "Every group matches across these presets.",
 		presetCompare: "Preset vs preset",
 		presetCompareHelp:
 			"Presets rarely map 1:1 across profiles, so pick one preset per profile — the table below shows every group selected by any of them.",
@@ -263,6 +291,13 @@ export default {
 		heading: "Export Profile",
 		help: "This is the exact, in-game-importable YAML for your current configuration.",
 		download: "Download .yaml",
+		packMode: "Preset pack — export only the presets I tick",
+		packHelp:
+			"A presets-only file. Importing it with “Presets only” refreshes those presets and leaves the receiving profile’s tabs, columns, colours and ship labels untouched — which a full profile would replace.",
+		packAll: "All",
+		packNone: "None",
+		packCount: "{n} of {m} presets",
+		packEmpty: "Tick at least one preset — an empty pack changes nothing.",
 		copy: "Copy to clipboard",
 		copied: "Copied!",
 		rosterDirty:
@@ -334,6 +369,7 @@ export default {
 		search: "Search the guide…",
 		hits: "{n} matching entries",
 		noHits: "Nothing matches that. Try a shorter word.",
+		showAll: "← Show the whole guide",
 		start: {
 			title: "Quick start",
 			intro:
@@ -356,6 +392,28 @@ export default {
 			exportT: "Export and load it in EVE",
 			exportD:
 				"The YAML section shows exactly what the client will read, and Download .yaml saves it. Put the file in Documents » EVE » Overview, then in game: Overview Settings (the ≡ at the top left of the Overview window) » Misc » Import Overview Settings » pick the file » Check All » Import. Dock and undock once if something looks stale.",
+		},
+		compare: {
+			title: "Using Compare",
+			intro:
+				"Six steps to answering “what changed upstream, and where am I behind?” Compare only reads — nothing in it edits your profile.",
+			loadT: "Load something to compare against",
+			loadD:
+				"Use Load .yaml for a file you have, or Add bundled base for a pack that ships with the tool — you can also drag files onto the drop zone. Each one becomes a column beside your current profile, and you can load several at once. The X on a chip removes it.",
+			inventoryT: "Read the preset inventory first",
+			inventoryD:
+				"It pairs every preset on both sides and sorts them: new upstream (they have it, you do not), changed, only yours, identical. The number on each button is the count, and clicking one filters to it. Yours and Theirs are the group counts; Group change is how many groups moved, so +40 means their version authorises forty groups yours does not.",
+			settingsT: "Check the profile settings",
+			settingsD:
+				"Tabs, columns, colortag and background priority, label segments. Rows where the profiles disagree are highlighted. This is where you see that a pack reordered its colortag priority — a change that alters what you notice in space without touching a single preset.",
+			pairT: "Drill into one pair of presets",
+			pairD:
+				"Click any preset in the inventory to open it below, or pick from the dropdowns — choosing in one column pulls the others onto their counterpart. You get the filtered and always-shown states side by side, then every group either preset authorises, with a tick per profile.",
+			diffOnlyT: "Turn on Differences only",
+			diffOnlyD:
+				"A bracket preset can authorise five hundred groups, and reading five hundred rows to find the twenty that moved is not reading. The toggle hides every group the presets agree on; the count beside it tells you how many are left before you click.",
+			actT: "Then act on it",
+			actD: "Compare changes nothing by itself. To take the newer presets, import the same file with “Presets only” — that updates matching presets, appends new ones and leaves your tabs, columns and colours alone. Save a version first if you want a way back.",
 		},
 		terms: {
 			title: "The vocabulary",
@@ -408,6 +466,9 @@ export default {
 			tabColumnsT: "Per-tab columns",
 			tabColumnsD:
 				"A tab may override the shared set with its own, exactly like the in-game right-click » Columns menu on a tab. Tabs without an override follow the profile-wide set.",
+			compareT: "Compare",
+			compareD:
+				"The section that puts your profile beside other overview files — an upload, or a bundled pack — and says what differs: the profile settings, a preset inventory, and a group-by-group matrix for any pair of presets. It only reads; nothing it shows changes your profile.",
 			sdeT: "SDE",
 			sdeD: "Fenris' Static Data Export: the official dump of every item, group and category in the game. This tool rebuilds its copy automatically, and the header badge shows the date it was last pulled.",
 			yamlT: "YAML",
@@ -426,7 +487,16 @@ export default {
 				"Reads a .yaml (file or pasted text) and replaces the entire workspace with it.",
 			mergeT: "Import » Apply on top",
 			mergeD:
-				"Merges a file onto what you already have, the way stacking pack pieces works in game. Presets are additive: a same-named preset is replaced, new ones are appended, and none are ever removed. Layout sections — tabs, columns, appearance and ship labels — are replaced wholesale whenever the incoming file provides them. It is not a save-as.",
+				"Merges a file onto what you already have, the way stacking pack pieces works in game. Presets are additive: a same-named preset is replaced, new ones are appended, and none are ever removed. Layout sections — tabs, columns, appearance and ship labels — are replaced wholesale whenever the incoming file provides them. It is not a save-as. If you only want the file’s presets, use “Presets only” instead.",
+			presetsOnlyT: "Import » Presets only",
+			presetsOnlyD:
+				"Takes the file’s presets and nothing else — your tabs, columns, colours and ship labels survive exactly as they are. This is the mode for refreshing presets from a newer pack, because every real pack file (Z-S Core, 1BL, 2BL and Full alike) is a complete profile, so applying one on top would replace the layout you built around it. A preset matching one you already hold is updated in place, new ones are appended, and none are ever removed.",
+			inventoryT: "Preset inventory (in Compare)",
+			inventoryD:
+				"Every preset on both sides at once, paired and sorted into new upstream, changed, only yours and identical, with the group count on each side and how many groups moved. The number on each filter button is the short answer to how far behind you are; click a preset to open that pair in the detail table below. Pairing ignores colour markup, because packs restyle their preset names between releases and matching the raw name would call every recoloured preset a new one.",
+			packT: "Export » Preset pack",
+			packD:
+				"Writes a file holding only the presets you tick and none of the layout. Send it to someone who wants your filters but not your tabs, or keep it as a backup of your own presets before pulling in an update. The client never writes one of these — every in-game export is a whole profile — which is exactly why it is worth being able to make one here.",
 			versionsT: "Saved versions",
 			versionsD:
 				"Named snapshots of the whole profile, kept in this browser. Save one before any experiment: it is the undo this tool otherwise lacks.",
@@ -485,6 +555,10 @@ export default {
 			expansionT: "How do I keep presets current after an expansion?",
 			expansionD:
 				"The ship database refreshes itself — the header badge shows when it was last pulled. Then read the counts on the category tabs: a preset that covered everything reads X/X, so a category that gained a group drops to X/Y and tells you exactly where to look.",
+			upgradeT:
+				"How do I keep my customised presets up to date with a pack like Z-S?",
+			upgradeD:
+				"Duplicate the pack preset you want to change and edit the copy, so the original stays a clean upstream reference. When a new version of the pack lands, load it in Compare: the preset inventory tells you what is new, what changed and by how much. Then import it with “Presets only”, which refreshes the presets and leaves your tabs, columns and colours alone. Two things worth knowing. Every pack file is a complete profile, so a full import replaces every layout section it carries — that is what costs people their tab setup. And maintainers restyle preset names between releases, so pairing here ignores the colour markup on purpose: between Z-S v9 and v10 only 6 of 68 preset names matched byte for byte, while 58 matched once the colours were ignored.",
 			storageT: "What is stored, and does anything leave my machine?",
 			storageD:
 				"Nothing leaves your machine: no accounts, no cookies, no analytics, no uploads. Your working profile, theme, scale, layout, preview entities and groupings sit in this browser's local storage; saved versions sit in its database. The privacy panel lists every item by name and can erase all of it.",

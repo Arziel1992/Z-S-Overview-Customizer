@@ -305,6 +305,16 @@ export function parseOverviewYaml(text) {
 /* Serialize                                                           */
 /* ------------------------------------------------------------------ */
 
+// Dump settings that keep the output byte-comparable with the client's own
+// exports; shared by the full and presets-only paths so they cannot drift.
+const DUMP_OPTIONS = {
+	lineWidth: -1,
+	noRefs: true,
+	sortKeys: false,
+	quotingType: '"',
+	forceQuotes: false,
+};
+
 // Attribute order inside each serialized shipLabels entry. Fixed so exports
 // are deterministic and diff cleanly between versions.
 const LABEL_PAIR_ORDER = [
@@ -328,16 +338,25 @@ const LABEL_PAIR_ORDER = [
  *  - ordered-map sections are rebuilt as lists of [key, value] pairs;
  *  - bold/italic/underline are written as 1/0 (the client's convention),
  *    everything missing as explicit `null`.
+ *
+ * `presetsOnly` emits the presets section and nothing else — a preset pack.
+ * The client never writes one (every in-game export is a whole profile), which
+ * is exactly why it is worth being able to make one: importing a full profile
+ * to refresh presets also replaces the tabs, columns and colours around them.
+ * A file holding only `presets` is still valid for the game and for this
+ * tool's "apply on top", both of which read sections independently.
  */
-export function serializeOverviewYaml(model) {
+export function serializeOverviewYaml(model, { presetsOnly = false } = {}) {
 	const out = {};
 
-	out.backgroundOrder = [...model.backgroundOrder];
-	out.backgroundStates = [...model.backgroundStates];
-	out.columnOrder = [...model.columnOrder];
-	out.flagOrder = [...model.flagOrder];
-	out.flagStates = [...model.flagStates];
-	out.overviewColumns = [...model.overviewColumns];
+	if (!presetsOnly) {
+		out.backgroundOrder = [...model.backgroundOrder];
+		out.backgroundStates = [...model.backgroundStates];
+		out.columnOrder = [...model.columnOrder];
+		out.flagOrder = [...model.flagOrder];
+		out.flagStates = [...model.flagStates];
+		out.overviewColumns = [...model.overviewColumns];
+	}
 
 	out.presets = model.presets.map((p) => [
 		p.name,
@@ -347,6 +366,8 @@ export function serializeOverviewYaml(model) {
 			["groups", [...p.groups]],
 		],
 	]);
+
+	if (presetsOnly) return yaml.dump(out, DUMP_OPTIONS);
 
 	out.shipLabelOrder = [...model.shipLabelOrder];
 
@@ -383,13 +404,7 @@ export function serializeOverviewYaml(model) {
 
 	out.userSettings = model.userSettings ?? [];
 
-	return yaml.dump(out, {
-		lineWidth: -1,
-		noRefs: true,
-		sortKeys: false,
-		quotingType: '"',
-		forceQuotes: false,
-	});
+	return yaml.dump(out, DUMP_OPTIONS);
 }
 
 export { NULL_LABEL_KEY };

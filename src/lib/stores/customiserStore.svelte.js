@@ -579,12 +579,20 @@ class CustomiserStore {
 	uiScale = $state(1); // zoom factor applied to the whole app
 	/** Width of the settings panel, in % of the workspace (wide screens only). */
 	splitPct = $state(58);
-	/** Panels the user has collapsed to a bar; each can be brought back. */
+	/**
+	 * Panels the user has collapsed; each can be brought back. The four
+	 * workspace panels collapse to a bar; the `cmp*` keys are Compare's three
+	 * sections, which keep their heading and hide only their body. They share
+	 * this map (and so the saved layout) because they are the same gesture.
+	 */
 	hiddenPanels = $state({
 		settings: false,
 		brackets: false,
 		overview: false,
 		roster: false,
+		cmpInventory: false,
+		cmpSettings: false,
+		cmpPresets: false,
 	});
 	fontFamily = $state("'Inter', sans-serif");
 	baseProfile = $state("zs_full_v10.06.09");
@@ -871,17 +879,50 @@ class CustomiserStore {
 		};
 	}
 
-	/** Serialize the current model to a genuine, in-game-importable .yaml string. */
-	exportYaml() {
-		return serializeOverviewYaml(this.model);
+	/**
+	 * Serialize the current model to a genuine, in-game-importable .yaml string.
+	 *
+	 * With no options this is the whole profile — what the autosave, the saved
+	 * versions and the download all want. `presetNames` narrows it to those
+	 * presets, and `presetsOnly` drops every section except `presets`, which
+	 * together produce a preset pack: a file that refreshes someone's presets
+	 * without touching the tabs and colours they built around them.
+	 */
+	exportYaml({ presetsOnly = false, presetNames = null } = {}) {
+		const model = presetNames
+			? {
+					...this.model,
+					presets: this.presets.filter((p) => presetNames.includes(p.name)),
+				}
+			: this.model;
+		return serializeOverviewYaml(model, { presetsOnly });
 	}
 
 	/**
-	 * Import a raw YAML profile. `mode` is "overwrite" (replace everything) or
-	 * "merge" (apply on top of the current config, EVE pack-piece style).
+	 * Import a raw YAML profile.
+	 *
+	 * `mode`:
+	 *  - "overwrite" — replace the whole configuration;
+	 *  - "merge"     — apply on top, EVE pack-piece style (presets additive,
+	 *                  layout sections replaced wholesale when provided);
+	 *  - "presets"   — take the file's presets and nothing else.
+	 *
+	 * "presets" exists because every real pack — Z-S Core, 1BL, 2BL and Full
+	 * alike — is a complete profile carrying tabSetup, columns, colours and
+	 * ship labels. Pulling a newer pack in to refresh your presets therefore
+	 * replaced the layout you had built on top of it. Passing a model that
+	 * holds only `presets` sidesteps that: every other section in mergeModel is
+	 * guarded on the incoming value being non-empty.
+	 *
+	 * It also leaves `baseProfile` alone — you took someone's presets, you did
+	 * not become their profile, and that label names your exports.
 	 */
 	importYaml(text, mode = "overwrite", label = "custom") {
 		const incoming = parseOverviewYaml(text);
+		if (mode === "presets") {
+			this.applyModel(mergeModel(this.model, { presets: incoming.presets }));
+			return;
+		}
 		if (mode === "merge") {
 			this.applyModel(mergeModel(this.model, incoming));
 		} else {

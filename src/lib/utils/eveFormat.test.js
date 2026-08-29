@@ -105,3 +105,23 @@ test("an empty column list means inherit, not an empty overview", () => {
 	assert.equal(model.tabs[0].tabColumns, null);
 	assert.match(serializeOverviewYaml(model), /tabColumns/); // tab 1 still has its own
 });
+
+test("a preset pack carries presets and nothing else", () => {
+	const model = parseOverviewYaml(SAMPLE);
+	const pack = serializeOverviewYaml(model, { presetsOnly: true });
+	const raw = yaml.load(pack);
+
+	assert.deepEqual(
+		Object.keys(raw),
+		["presets"],
+		"no layout section may ride along",
+	);
+	// It has to survive the round trip, or it is not an importable file.
+	assert.deepEqual(parseOverviewYaml(pack).presets, model.presets);
+
+	// The other direction: the default export must still be the whole profile,
+	// or every download and autosave silently loses the layout.
+	const full = yaml.load(serializeOverviewYaml(model));
+	for (const key of ["presets", "tabSetup", "overviewColumns", "shipLabels"])
+		assert.ok(key in full, `full export lost ${key}`);
+});

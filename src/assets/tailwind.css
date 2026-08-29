@@ -15,6 +15,15 @@
   --text-muted: #7c8fa6;
   --accent: #3884ff;
   --accent-hover: #60a5fa;
+
+  /* Diff semantics, used by Compare and anywhere else two profiles are set
+     against each other. They are tokens rather than raw Tailwind shades
+     because the shade that reads well on a near-black panel is unreadable on
+     a white one: emerald-400 on #ffffff is roughly 1.8:1. */
+  --added: #34d399;
+  --removed: #f87171;
+  --changed: #f59e0b;
+  --mine: #38bdf8;
 }
 
 [data-theme="light"] {
@@ -26,6 +35,13 @@
   --text-muted: #5a6980;
   --accent: #2563eb;
   --accent-hover: #1d4ed8;
+
+  /* Darker shades of the same hues: every one clears WCAG AA (4.5:1) against
+     the white panel these sit on. */
+  --added: #047857;
+  --removed: #b91c1c;
+  --changed: #b45309;
+  --mine: #0369a1;
 }
 
 /* Map the tokens (and the fixed game chrome) to Tailwind v4 utilities.
@@ -63,6 +79,10 @@
   --color-app-muted: var(--text-muted);
   --color-app-accent: var(--accent);
   --color-app-accentHover: var(--accent-hover);
+  --color-app-added: var(--added);
+  --color-app-removed: var(--removed);
+  --color-app-changed: var(--changed);
+  --color-app-mine: var(--mine);
 
   /* Game-accurate EVE overview chrome (dark in every theme, softened
      space-blue rather than pure black). */

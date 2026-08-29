@@ -3,8 +3,10 @@
   YAML import dialog: multi-file picker / drag-and-drop or pasted text,
   validated through the codec before anything is applied. The mode radio
   mirrors the in-game workflow — "Apply on top" (merge, for pack pieces) vs
-  "Overwrite" (full replace). Multiple files apply in queue order (the
-  in-game multi-piece pack workflow); pasted text applies last.
+  "Overwrite" (full replace) — plus "Presets only", which the client has no
+  equivalent for because the client always exports a whole profile. Multiple
+  files apply in queue order (the in-game multi-piece pack workflow); pasted
+  text applies last.
 -->
 <script>
 import { t } from "$lib/i18n/strings.svelte.js";
@@ -14,8 +16,17 @@ import Modal from "./Modal.svelte";
 
 let { onclose, presetLabel = "custom" } = $props();
 
+// [value, label key, help key] — order is the order they are offered in.
+// "presets" is listed first: it is the safe one, and the only one that cannot
+// cost you a tab layout you spent an evening on.
+const MODES = [
+	["presets", "importer.presetsOnly", "importer.presetsOnlyHelp"],
+	["merge", "importer.merge", "importer.mergeHelp"],
+	["overwrite", "importer.overwrite", "importer.overwriteHelp"],
+];
+
 let text = $state("");
-let mode = $state("merge");
+let mode = $state("presets");
 let error = $state("");
 /** [{ name, text }] — selected/dropped files, applied in this order. */
 let queue = $state([]);
@@ -110,20 +121,15 @@ function apply() {
 
     <fieldset class="space-y-2">
       <legend class="text-[10px] uppercase text-app-muted mb-1">{t('importer.mode')}</legend>
-      <label class="flex items-start gap-2 cursor-pointer bg-app-panel2 border rounded p-2.5 transition-colors {mode === 'merge' ? 'border-app-accent' : 'border-app-border'}">
-        <input type="radio" name="mode" value="merge" bind:group={mode} class="mt-0.5 accent-app-accent" />
-        <div>
-          <div class="text-xs font-semibold text-app-text">{t('importer.merge')}</div>
-          <div class="text-[11px] text-app-muted">{t('importer.mergeHelp')}</div>
-        </div>
-      </label>
-      <label class="flex items-start gap-2 cursor-pointer bg-app-panel2 border rounded p-2.5 transition-colors {mode === 'overwrite' ? 'border-app-accent' : 'border-app-border'}">
-        <input type="radio" name="mode" value="overwrite" bind:group={mode} class="mt-0.5 accent-app-accent" />
-        <div>
-          <div class="text-xs font-semibold text-app-text">{t('importer.overwrite')}</div>
-          <div class="text-[11px] text-app-muted">{t('importer.overwriteHelp')}</div>
-        </div>
-      </label>
+      {#each MODES as [value, labelKey, helpKey]}
+        <label class="flex items-start gap-2 cursor-pointer bg-app-panel2 border rounded p-2.5 transition-colors {mode === value ? 'border-app-accent' : 'border-app-border'}">
+          <input type="radio" name="mode" {value} bind:group={mode} class="mt-0.5 accent-app-accent" />
+          <div>
+            <div class="text-xs font-semibold text-app-text">{t(labelKey)}</div>
+            <div class="text-[11px] text-app-muted">{t(helpKey)}</div>
+          </div>
+        </label>
+      {/each}
     </fieldset>
 
     {#if error}<p class="text-xs text-red-400">{error}</p>{/if}
